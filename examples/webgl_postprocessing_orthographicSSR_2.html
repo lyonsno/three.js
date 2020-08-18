@@ -11,7 +11,8 @@
 <body>
 <div id="info">
   <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
-  OrthographicSSRPass test by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
+  OrthographicSSRPass demo 2 by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
+  based on <a href="https://threejs.org/examples/?q=stl#webgl_loader_stl" target="_blank">this scene</a>
 </div>
 
 <script type="module">
@@ -27,7 +28,7 @@
 		import { OrthographicSSRPass } from './jsm/postprocessing/OrthographicSSRPass.js';
 		import { OrbitControls } from './jsm/controls/OrbitControls.js'
 
-		var initialFrustumSize = 3;
+		var initialFrustumSize = 1200;
 		var params = {
 			enableSSR: true,
 		}
@@ -47,23 +48,24 @@
 			document.body.appendChild(container);
 			
 			var cameraNear = 1
-			var cameraFar = 7
+			var cameraFar = 1800
 			var aspect = window.innerWidth / window.innerHeight;
 			camera = new THREE.OrthographicCamera(initialFrustumSize * aspect / - 2, initialFrustumSize * aspect / 2, initialFrustumSize / 2, initialFrustumSize / - 2, cameraNear, cameraFar);
 			camera.position.set(-3.841971267097966, 1.628450668378282, 2.7545244967964964)
+			camera.position.multiplyScalar(200)
 
 			scene = new THREE.Scene();
-			scene.fog = new THREE.Fog(0x72645b, 2, 15);
+			scene.fog = new THREE.Fog(0x72645b, 2*400, 15*400);
 
 
 			// Ground
 
 			var plane = new THREE.Mesh(
-				new THREE.PlaneBufferGeometry(40, 40),
+				new THREE.PlaneBufferGeometry(40*400, 40*400),
 				new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
 			);
 			plane.rotation.x = - Math.PI / 2;
-			plane.position.y = - 0.5;
+			plane.position.y = - 0.5*400;
 			scene.add(plane);
 
 			plane.receiveShadow = true;
@@ -77,9 +79,9 @@
 				var material = new THREE.MeshPhongMaterial({ color: 0xff5533, specular: 0x111111, shininess: 200 });
 				var mesh = new THREE.Mesh(geometry, material);
 
-				mesh.position.set(0, - 0.25, 0.6);
+				mesh.position.set(0, - 0.25*400, 0.6*400);
 				mesh.rotation.set(0, - Math.PI / 2, 0);
-				mesh.scale.set(0.5, 0.5, 0.5);
+				mesh.scale.set(0.5*400, 0.5*400, 0.5*400);
 
 				mesh.castShadow = true;
 				mesh.receiveShadow = true;
@@ -98,8 +100,10 @@
 				var mesh = new THREE.Mesh(geometry, material);
 
 				mesh.position.set(0, - 0.37, - 0.6);
+				mesh.position.multiplyScalar(400)
 				mesh.rotation.set(- Math.PI / 2, 0, 0);
 				mesh.scale.set(2, 2, 2);
+				mesh.scale.multiplyScalar(400)
 
 				mesh.castShadow = true;
 				mesh.receiveShadow = true;
@@ -113,8 +117,10 @@
 				var mesh = new THREE.Mesh(geometry, material);
 
 				mesh.position.set(0.136, - 0.37, - 0.6);
+				mesh.position.multiplyScalar(400)
 				mesh.rotation.set(- Math.PI / 2, 0.3, 0);
 				mesh.scale.set(2, 2, 2);
+				mesh.scale.multiplyScalar(400)
 
 				mesh.castShadow = true;
 				mesh.receiveShadow = true;
@@ -136,8 +142,10 @@
 				var mesh = new THREE.Mesh(geometry, meshMaterial);
 
 				mesh.position.set(0.5, 0.2, 0);
+				mesh.position.multiplyScalar(400)
 				mesh.rotation.set(- Math.PI / 2, Math.PI / 2, 0);
 				mesh.scale.set(0.3, 0.3, 0.3);
+				mesh.scale.multiplyScalar(400)
 
 				mesh.castShadow = true;
 				mesh.receiveShadow = true;
@@ -172,6 +180,7 @@
 
 			// Init gui
 			var gui = new GUI();
+			orthographicSSRPass.surfDist = 7
 
 			gui.add(orthographicSSRPass, 'output', {
 				'Default': OrthographicSSRPass.OUTPUT.Default,
@@ -190,7 +199,7 @@
 			gui.add(orthographicSSRPass, 'opacity').min(0).max(1);
 			gui.add(orthographicSSRPass, 'maxDistance').min(0).max(2);
 			gui.add(orthographicSSRPass, 'stepStride').min(1).max(10).step(1);
-			gui.add(orthographicSSRPass, 'surfDist').min(.001).max(.05).step(.001);
+			gui.add(orthographicSSRPass, 'surfDist').min(1).max(20).step(.1);
 
 			new OrbitControls(camera, renderer.domElement)
 
@@ -209,6 +218,7 @@
 
 			var directionalLight = new THREE.DirectionalLight(color, intensity);
 			directionalLight.position.set(x, y, z);
+			directionalLight.position.multiplyScalar(400)
 			scene.add(directionalLight);
 
 			directionalLight.castShadow = true;
@@ -219,8 +229,8 @@
 			directionalLight.shadow.camera.top = d;
 			directionalLight.shadow.camera.bottom = - d;
 
-			directionalLight.shadow.camera.near = 1;
-			directionalLight.shadow.camera.far = 4;
+			directionalLight.shadow.camera.near = 1*400;
+			directionalLight.shadow.camera.far = 4*400;
 
 			directionalLight.shadow.bias = - 0.002;
 
