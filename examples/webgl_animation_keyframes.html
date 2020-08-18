@@ -32,13 +32,23 @@
 			import * as THREE from '../build/three.module.js';
 
 			import Stats from './jsm/libs/stats.module.js';
+			import { GUI } from './jsm/libs/dat.gui.module.js';
 
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
 			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 			import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
+			import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
+			import { OrthographicSSRPass } from './jsm/postprocessing/OrthographicSSRPass.js';
+
 			var scene, camera, dirLight, stats;
 			var renderer, mixer, controls;
+			var params = {
+				enableSSR: true,
+			}
+			var composer
+			var orthographicSSRPass
+			var initialFrustumSize = 3;
 
 			var clock = new THREE.Clock();
 			var container = document.getElementById( 'container' );
@@ -55,8 +65,14 @@
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color( 0xbfe3dd );
 
-			camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 100 );
-			camera.position.set( 5, 2, 8 );
+			// camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 100 );
+			// camera.position.set( 5, 2, 8 );
+			
+			var cameraNear = 1
+			var cameraFar = 7
+			var aspect = window.innerWidth / window.innerHeight;
+			camera = new THREE.OrthographicCamera(initialFrustumSize * aspect / - 2, initialFrustumSize * aspect / 2, initialFrustumSize / 2, initialFrustumSize / - 2, cameraNear, cameraFar);
+			camera.position.set(-3.841971267097966, 1.628450668378282, 2.7545244967964964)
 
 			controls = new OrbitControls( camera, renderer.domElement );
 			controls.target.set( 0, 0.5, 0 );
@@ -108,6 +124,33 @@
 
 			} );
 
+			
+			composer = new EffectComposer(renderer);
+			orthographicSSRPass = new OrthographicSSRPass(scene, camera, innerWidth, innerHeight, initialFrustumSize);
+			composer.addPass(orthographicSSRPass);
+
+			// Init gui
+			var gui = new GUI();
+
+			gui.add(orthographicSSRPass, 'output', {
+				'Default': OrthographicSSRPass.OUTPUT.Default,
+				'DefaultBlur': OrthographicSSRPass.OUTPUT.DefaultBlur,
+				'OrthographicSSR Only': OrthographicSSRPass.OUTPUT.OrthographicSSR,
+				'OrthographicSSR Only + Blur': OrthographicSSRPass.OUTPUT.Blur,
+				'Beauty': OrthographicSSRPass.OUTPUT.Beauty,
+				'Depth': OrthographicSSRPass.OUTPUT.Depth,
+				'Normal': OrthographicSSRPass.OUTPUT.Normal
+			}).onChange(function (value) {
+
+				orthographicSSRPass.output = parseInt(value);
+
+			});
+			gui.add(params, 'enableSSR').name( 'Enable SSR' );
+			gui.add(orthographicSSRPass, 'opacity').min(0).max(1);
+			gui.add(orthographicSSRPass, 'maxDistance').min(0).max(2);
+			gui.add(orthographicSSRPass, 'stepStride').min(1).max(10).step(1);
+			gui.add(orthographicSSRPass, 'surfDist').min(.001).max(.05).step(.001);
+
 
 			window.onresize = function () {
 
@@ -131,7 +174,13 @@
 
 				stats.update();
 
-				renderer.render( scene, camera );
+
+				if(params.enableSSR){
+					orthographicSSRPass.setFrustumSize(initialFrustumSize/camera.zoom)
+					composer.render();
+				}else{
+					renderer.render(scene,camera)
+				}
 
 			}
 
