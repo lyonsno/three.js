@@ -40,6 +40,16 @@
 			import { GUI } from './jsm/libs/dat.gui.module.js';
 
 			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+			
+			import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
+			import { OrthographicSSRPass } from './jsm/postprocessing/OrthographicSSRPass.js';
+
+			var initialFrustumSize = 3;
+			var params = {
+				enableSSR: true,
+			}
+			var composer
+			var orthographicSSRPass
 
 			var scene, renderer, camera, stats;
 			var model, skeleton, mixer, clock;
@@ -62,6 +72,12 @@
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
 				camera.position.set( 1, 2, - 3 );
 				camera.lookAt( 0, 1, 0 );
+			
+				// var cameraNear = 1
+				// var cameraFar = 7
+				// var aspect = window.innerWidth / window.innerHeight;
+				// camera = new THREE.OrthographicCamera(initialFrustumSize * aspect / - 2, initialFrustumSize * aspect / 2, initialFrustumSize / 2, initialFrustumSize / - 2, cameraNear, cameraFar);
+				// camera.position.set(-3.841971267097966, 1.628450668378282, 2.7545244967964964)
 
 				clock = new THREE.Clock();
 
@@ -140,6 +156,10 @@
 				renderer.outputEncoding = THREE.sRGBEncoding;
 				renderer.shadowMap.enabled = true;
 				container.appendChild( renderer.domElement );
+
+				composer = new EffectComposer(renderer);
+				orthographicSSRPass = new OrthographicSSRPass(scene, camera, innerWidth, innerHeight, initialFrustumSize);
+				composer.addPass(orthographicSSRPass);
 
 				stats = new Stats();
 				container.appendChild( stats.dom );
@@ -525,7 +545,14 @@
 
 				stats.update();
 
-				renderer.render( scene, camera );
+				// renderer.render(scene,camera)
+
+				if(params.enableSSR){
+					orthographicSSRPass.setFrustumSize(initialFrustumSize/camera.zoom)
+					composer.render();
+				}else{
+					renderer.render(scene,camera)
+				}
 
 			}
 

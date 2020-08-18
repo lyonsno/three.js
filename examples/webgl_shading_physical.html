@@ -20,7 +20,18 @@
 
 			import { GUI } from './jsm/libs/dat.gui.module.js';
 			import { TrackballControls } from './jsm/controls/TrackballControls.js';
+			import { OrbitControls } from './jsm/controls/OrbitControls.js'
 			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+			
+			import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
+			import { OrthographicSSRPass } from './jsm/postprocessing/OrthographicSSRPass.js';
+
+			var initialFrustumSize = 1200;
+			var params = {
+				enableSSR: true,
+			}
+			var composer
+			var orthographicSSRPass
 
 			var container, stats;
 
@@ -30,7 +41,7 @@
 
 			var controls;
 
-			var cubeCamera;
+			// var cubeCamera;
 
 			var sunLight, pointLight, ambientLight;
 
@@ -57,23 +68,29 @@
 
 				// CAMERA
 
-				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 2, 10000 );
-				camera.position.set( 500, 400, 1200 );
+				// camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 2, 10000 );
+				// camera.position.set( 500, 400, 1200 );
+			
+				var cameraNear = 1
+				var cameraFar = 2000
+				var aspect = window.innerWidth / window.innerHeight;
+				camera = new THREE.OrthographicCamera(initialFrustumSize * aspect / - 2, initialFrustumSize * aspect / 2, initialFrustumSize / 2, initialFrustumSize / - 2, cameraNear, cameraFar);
+				camera.position.set(389.49609827427935,  363.060623102517,  846.4512823438353)
 
 				// SCENE
 
 				scene = new THREE.Scene();
 				scene.fog = new THREE.Fog( 0, 1000, 10000 );
 
-				// CUBE CAMERA
+				// // CUBE CAMERA
 
-				var cubeRenderTarget = new THREE.WebGLCubeRenderTarget( 128, {
-					format: THREE.RGBFormat,
-					generateMipmaps: true,
-					minFilter: THREE.LinearMipmapLinearFilter,
-					encoding: THREE.sRGBEncoding
-				} );
-				cubeCamera = new THREE.CubeCamera( 1, 10000, cubeRenderTarget );
+				// var cubeRenderTarget = new THREE.WebGLCubeRenderTarget( 128, {
+				// 	format: THREE.RGBFormat,
+				// 	generateMipmaps: true,
+				// 	minFilter: THREE.LinearMipmapLinearFilter,
+				// 	encoding: THREE.sRGBEncoding
+				// } );
+				// cubeCamera = new THREE.CubeCamera( 1, 10000, cubeRenderTarget );
 
 				// TEXTURES
 				var textureLoader = new THREE.TextureLoader();
@@ -116,7 +133,8 @@
 
 				var materialLambert = new THREE.MeshPhongMaterial( { shininess: 50, color: 0xffffff, map: textureNoiseColor } );
 				var materialPhong = new THREE.MeshPhongMaterial( { shininess: 50, color: 0xffffff, specular: 0x999999, map: textureLava } );
-				var materialPhongCube = new THREE.MeshPhongMaterial( { shininess: 50, color: 0xffffff, specular: 0x999999, envMap: cubeRenderTarget.texture } );
+				// var materialPhongCube = new THREE.MeshPhongMaterial( { shininess: 50, color: 0xffffff, specular: 0x999999, envMap: cubeRenderTarget.texture } );
+				var materialPhongCube = new THREE.MeshPhongMaterial( { shininess: 50, color: 0xffffff, specular: 0x999999, } );
 
 				// OBJECTS
 
@@ -128,7 +146,7 @@
 				addObject( cubeGeometry, materialLambert, 350, 75, 300, 0 );
 
 				mesh = addObject( sphereGeometry, materialPhongCube, 350, 100, - 350, 0 );
-				mesh.add( cubeCamera );
+				// mesh.add( cubeCamera );
 
 				function addObjectColor( geometry, color, x, y, z, ry ) {
 
@@ -243,16 +261,17 @@
 
 				//
 
-				controls = new TrackballControls( camera, renderer.domElement );
-				controls.target.set( 0, 120, 0 );
+				controls = new OrbitControls( camera, renderer.domElement );
+				// controls = new TrackballControls( camera, renderer.domElement );
+				// controls.target.set( 0, 120, 0 );
 
-				controls.rotateSpeed = 1.0;
-				controls.zoomSpeed = 1.2;
-				controls.panSpeed = 0.8;
+				// controls.rotateSpeed = 1.0;
+				// controls.zoomSpeed = 1.2;
+				// controls.panSpeed = 0.8;
 
-				controls.staticMoving = true;
+				// controls.staticMoving = true;
 
-				controls.keys = [ 65, 83, 68 ];
+				// controls.keys = [ 65, 83, 68 ];
 
 
 				// STATS
@@ -268,39 +287,65 @@
 
 				gui = new GUI( { width: 400 } );
 
-				// SHADOW
+				// // SHADOW
 
-				var shadowGUI = gui.addFolder( "Shadow" );
+				// var shadowGUI = gui.addFolder( "Shadow" );
 
-    		shadowGUI.add( shadowConfig, 'shadowCameraVisible' ).onChange( function () {
+    		// shadowGUI.add( shadowConfig, 'shadowCameraVisible' ).onChange( function () {
 
-					shadowCameraHelper.visible = shadowConfig.shadowCameraVisible;
+				// 	shadowCameraHelper.visible = shadowConfig.shadowCameraVisible;
 
-				} );
+				// } );
 
-				shadowGUI.add( shadowConfig, 'shadowCameraNear', 1, 1500 ).onChange( function () {
+				// shadowGUI.add( shadowConfig, 'shadowCameraNear', 1, 1500 ).onChange( function () {
 
-					sunLight.shadow.camera.near = shadowConfig.shadowCameraNear;
-					sunLight.shadow.camera.updateProjectionMatrix();
-					shadowCameraHelper.update();
+				// 	sunLight.shadow.camera.near = shadowConfig.shadowCameraNear;
+				// 	sunLight.shadow.camera.updateProjectionMatrix();
+				// 	shadowCameraHelper.update();
 
-				} );
+				// } );
 
-				shadowGUI.add( shadowConfig, 'shadowCameraFar', 1501, 5000 ).onChange( function () {
+				// shadowGUI.add( shadowConfig, 'shadowCameraFar', 1501, 5000 ).onChange( function () {
 
-					sunLight.shadow.camera.far = shadowConfig.shadowCameraFar;
-					sunLight.shadow.camera.updateProjectionMatrix();
-					shadowCameraHelper.update();
+				// 	sunLight.shadow.camera.far = shadowConfig.shadowCameraFar;
+				// 	sunLight.shadow.camera.updateProjectionMatrix();
+				// 	shadowCameraHelper.update();
 
-				} );
+				// } );
 
-				shadowGUI.add( shadowConfig, 'shadowBias', - 0.01, 0.01 ).onChange( function () {
+				// shadowGUI.add( shadowConfig, 'shadowBias', - 0.01, 0.01 ).onChange( function () {
 
-					sunLight.shadow.bias = shadowConfig.shadowBias;
+				// 	sunLight.shadow.bias = shadowConfig.shadowBias;
 
-				} );
+				// } );
 
-				shadowGUI.open();
+				// shadowGUI.open();
+
+				
+				composer = new EffectComposer(renderer);
+				orthographicSSRPass = new OrthographicSSRPass(scene, camera, innerWidth, innerHeight, initialFrustumSize);
+				composer.addPass(orthographicSSRPass);
+
+
+				orthographicSSRPass.surfDist=4.5
+				gui.add(orthographicSSRPass, 'output', {
+					'Default': OrthographicSSRPass.OUTPUT.Default,
+					'DefaultBlur': OrthographicSSRPass.OUTPUT.DefaultBlur,
+					'OrthographicSSR Only': OrthographicSSRPass.OUTPUT.OrthographicSSR,
+					'OrthographicSSR Only + Blur': OrthographicSSRPass.OUTPUT.Blur,
+					'Beauty': OrthographicSSRPass.OUTPUT.Beauty,
+					'Depth': OrthographicSSRPass.OUTPUT.Depth,
+					'Normal': OrthographicSSRPass.OUTPUT.Normal
+				}).onChange(function (value) {
+
+					orthographicSSRPass.output = parseInt(value);
+
+				});
+				gui.add(params, 'enableSSR').name( 'Enable SSR' );
+				gui.add(orthographicSSRPass, 'opacity').min(0).max(1);
+				gui.add(orthographicSSRPass, 'maxDistance').min(0).max(2);
+				gui.add(orthographicSSRPass, 'stepStride').min(1).max(10).step(1);
+				gui.add(orthographicSSRPass, 'surfDist').min(1).max(5).step(.001);
 
 			}
 
@@ -345,13 +390,20 @@
 
 				// render cube map
 
-				mesh.visible = false;
-				cubeCamera.update( renderer, scene );
-				mesh.visible = true;
+				// mesh.visible = false;
+				// cubeCamera.update( renderer, scene );
+				// mesh.visible = true;
 
 				// render scene
 
-				renderer.render( scene, camera );
+				// renderer.render( scene, camera );
+				
+				if(params.enableSSR){
+					orthographicSSRPass.setFrustumSize(initialFrustumSize/camera.zoom)
+					composer.render();
+				}else{
+					renderer.render(scene,camera)
+				}
 
 			}
 
