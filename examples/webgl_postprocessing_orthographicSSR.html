@@ -273,19 +273,6 @@
 		
 		gui = new GUI( { width: 400 } );
 		orthographicSSRPass.surfDist=4.6
-		gui.add(orthographicSSRPass, 'output', {
-			'Default': OrthographicSSRPass.OUTPUT.Default,
-			'DefaultBlur': OrthographicSSRPass.OUTPUT.DefaultBlur,
-			'OrthographicSSR Only': OrthographicSSRPass.OUTPUT.OrthographicSSR,
-			'OrthographicSSR Only + Blur': OrthographicSSRPass.OUTPUT.Blur,
-			'Beauty': OrthographicSSRPass.OUTPUT.Beauty,
-			'Depth': OrthographicSSRPass.OUTPUT.Depth,
-			'Normal': OrthographicSSRPass.OUTPUT.Normal
-		}).onChange(function (value) {
-
-			orthographicSSRPass.output = parseInt(value);
-
-		});
 		gui.add(params, 'enableSSR').name( 'Enable SSR' );
 		gui.add(orthographicSSRPass, 'opacity').min(0).max(1);
 		gui.add(orthographicSSRPass, 'maxDistance').min(0).max(2);

@@ -18,8 +18,6 @@ var OrthographicSSRShader = {
     "tDiffuse": { value: null },
     "tNormal": { value: null },
     "tDepth": { value: null },
-    "tNoise": { value: null },
-    "kernel": { value: null },
     "cameraNear": { value: null },
     "cameraFar": { value: null },
     "resolution": { value: new Vector2() },
@@ -57,6 +55,7 @@ var OrthographicSSRShader = {
 		uniform sampler2D tDepth;
 		uniform sampler2D tNormal;
 		uniform sampler2D tDiffuse;
+		// uniform sampler2D tPrevDiffuse;
 		uniform float cameraNear;
 		uniform float cameraRange;
 		uniform float frustumSize;

@@ -1,31 +1,23 @@
 import {
   AddEquation,
   Color,
-  CustomBlending,
   AdditiveBlending,
-  DataTexture,
-  DepthTexture,
   DstAlphaFactor,
   DstColorFactor,
-  FloatType,
   LinearFilter,
   MathUtils,
   MeshNormalMaterial,
   NearestFilter,
   NoBlending,
   RGBAFormat,
-  RepeatWrapping,
   ShaderMaterial,
   UniformsUtils,
-  UnsignedShortType,
   Vector3,
   WebGLRenderTarget,
   ZeroFactor,
   MeshDepthMaterial,
-  DoubleSide
 } from "../../../build/three.module.js";
 import { Pass } from "../postprocessing/Pass.js";
-import { SimplexNoise } from "../math/SimplexNoise.js";
 import { OrthographicSSRShader } from "../shaders/OrthographicSSRShader.js";
 import { OrthographicSSRBlurShader } from "../shaders/OrthographicSSRShader.js";
 import { CopyShader } from "../shaders/CopyShader.js";
@@ -44,10 +36,6 @@ var OrthographicSSRPass = function(scene, camera, width, height, frustumSize) {
   this.scene = scene;
 
   this.opacity = .5;
-  this.kernelSize = 32;
-  this.kernel = [];
-  this.noiseTexture = null;
-  this.output = 6;
 
   this.minDistance = 0.005;
   this.maxDistance = 1;
@@ -58,10 +46,13 @@ var OrthographicSSRPass = function(scene, camera, width, height, frustumSize) {
 
   //
 
-  this.generateSampleKernel();
-  this.generateRandomKernelRotations();
-
   this.beautyRenderTarget = new WebGLRenderTarget(this.width, this.height, {
+    minFilter: LinearFilter,
+    magFilter: LinearFilter,
+    format: RGBAFormat,
+  });
+
+  this.prevRenderTarget = new WebGLRenderTarget(this.width, this.height, {
     minFilter: LinearFilter,
     magFilter: LinearFilter,
     format: RGBAFormat,
@@ -113,8 +104,6 @@ var OrthographicSSRPass = function(scene, camera, width, height, frustumSize) {
   this.orthographicSSRMaterial.uniforms['tDiffuse'].value = this.beautyRenderTarget.texture;
   this.orthographicSSRMaterial.uniforms['tNormal'].value = this.normalRenderTarget.texture;
   this.orthographicSSRMaterial.uniforms['tDepth'].value = this.depthRenderTarget.texture;
-  this.orthographicSSRMaterial.uniforms['tNoise'].value = this.noiseTexture;
-  this.orthographicSSRMaterial.uniforms['kernel'].value = this.kernel;
   this.orthographicSSRMaterial.uniforms['cameraNear'].value = this.camera.near;
   this.orthographicSSRMaterial.uniforms['cameraFar'].value = this.camera.far;
   this.orthographicSSRMaterial.uniforms['resolution'].value.set(this.width, this.height);
@@ -199,7 +188,6 @@ OrthographicSSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     // render beauty and depth
 
     renderer.setRenderTarget(this.beautyRenderTarget);
-    renderer.clear();
     renderer.render(this.scene, this.camera);
 
     // render normals
@@ -219,85 +207,26 @@ OrthographicSSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     this.orthographicSSRMaterial.uniforms['surfDist'].value = this.surfDist / this.frustumSize;
     this.orthographicSSRMaterial.uniforms['isFade'].value = this.isFade;
     this.orthographicSSRMaterial.uniforms['fadeIntensity'].value = this.fadeIntensity;
-    this.renderPass(renderer, this.orthographicSSRMaterial, this.orthographicSSRRenderTarget);
+		this.renderPass(renderer, this.orthographicSSRMaterial, this.orthographicSSRRenderTarget);
+
+		this.orthographicSSRMaterial.uniforms['tDiffuse'].value = this.prevRenderTarget.texture;
 
     // render blur
 
     this.blurMaterial.uniforms['opacity'].value = this.opacity;
     this.renderPass(renderer, this.blurMaterial, this.blurRenderTarget);
 
-    // output result to screen
+    // final render
 
-    switch (this.output) {
+    this.copyMaterial.uniforms['tDiffuse'].value = this.beautyRenderTarget.texture;
+    this.copyMaterial.blending = NoBlending;
+    this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
 
-      case OrthographicSSRPass.OUTPUT.OrthographicSSR:
+    this.copyMaterial.uniforms['tDiffuse'].value = this.blurRenderTarget.texture;
+    this.copyMaterial.blending = AdditiveBlending;
+		this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
 
-        this.copyMaterial.uniforms['tDiffuse'].value = this.orthographicSSRRenderTarget.texture;
-        this.copyMaterial.blending = NoBlending;
-        this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
-
-        break;
-
-      case OrthographicSSRPass.OUTPUT.Blur:
-
-        this.copyMaterial.uniforms['tDiffuse'].value = this.blurRenderTarget.texture;
-        this.copyMaterial.blending = NoBlending;
-        this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
-
-        break;
-
-      case OrthographicSSRPass.OUTPUT.Beauty:
-
-        this.copyMaterial.uniforms['tDiffuse'].value = this.beautyRenderTarget.texture;
-        this.copyMaterial.blending = NoBlending;
-        this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
-
-        break;
-
-      case OrthographicSSRPass.OUTPUT.Depth:
-
-        this.copyMaterial.uniforms['tDiffuse'].value = this.depthRenderTarget.texture;
-        this.copyMaterial.blending = NoBlending;
-        this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
-
-        break;
-
-      case OrthographicSSRPass.OUTPUT.Normal:
-
-        this.copyMaterial.uniforms['tDiffuse'].value = this.normalRenderTarget.texture;
-        this.copyMaterial.blending = NoBlending;
-        this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
-
-        break;
-
-      case OrthographicSSRPass.OUTPUT.Default:
-
-        this.copyMaterial.uniforms['tDiffuse'].value = this.beautyRenderTarget.texture;
-        this.copyMaterial.blending = NoBlending;
-        this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
-
-        this.copyMaterial.uniforms['tDiffuse'].value = this.orthographicSSRRenderTarget.texture;
-        this.copyMaterial.blending = AdditiveBlending;
-        this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
-
-        break;
-
-      case OrthographicSSRPass.OUTPUT.DefaultBlur:
-
-        this.copyMaterial.uniforms['tDiffuse'].value = this.beautyRenderTarget.texture;
-        this.copyMaterial.blending = NoBlending;
-        this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
-
-        this.copyMaterial.uniforms['tDiffuse'].value = this.blurRenderTarget.texture;
-        this.copyMaterial.blending = AdditiveBlending;
-        this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
-
-        break;
-
-      default:
-        console.warn('THREE.OrthographicSSRPass: Unknown output type.');
-
-    }
+    this.renderPass(renderer, this.copyMaterial, this.prevRenderTarget);
 
   },
 
@@ -383,84 +312,11 @@ OrthographicSSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
   },
 
-  generateSampleKernel: function() {
-
-    var kernelSize = this.kernelSize;
-    var kernel = this.kernel;
-
-    for (var i = 0; i < kernelSize; i++) {
-
-      var sample = new Vector3();
-      sample.x = (Math.random() * 2) - 1;
-      sample.y = (Math.random() * 2) - 1;
-      sample.z = Math.random();
-
-      sample.normalize();
-
-      var scale = i / kernelSize;
-      scale = MathUtils.lerp(0.1, 1, scale * scale);
-      sample.multiplyScalar(scale);
-
-      kernel.push(sample);
-
-    }
-
-  },
-
-  generateRandomKernelRotations: function() {
-
-    var width = 4,
-      height = 4;
-
-    if (SimplexNoise === undefined) {
-
-      console.error('THREE.OrthographicSSRPass: The pass relies on SimplexNoise.');
-
-    }
-
-    var simplex = new SimplexNoise();
-
-    var size = width * height;
-    var data = new Float32Array(size * 4);
-
-    for (var i = 0; i < size; i++) {
-
-      var stride = i * 4;
-
-      var x = (Math.random() * 2) - 1;
-      var y = (Math.random() * 2) - 1;
-      var z = 0;
-
-      var noise = simplex.noise3d(x, y, z);
-
-      data[stride] = noise;
-      data[stride + 1] = noise;
-      data[stride + 2] = noise;
-      data[stride + 3] = 1;
-
-    }
-
-    this.noiseTexture = new DataTexture(data, width, height, RGBAFormat, FloatType);
-    this.noiseTexture.wrapS = RepeatWrapping;
-    this.noiseTexture.wrapT = RepeatWrapping;
-
-  },
-
   setFrustumSize: function(frustumSize) {
     this.frustumSize = frustumSize
     this.orthographicSSRMaterial.uniforms['frustumSize'].value = this.frustumSize
   }
 
 });
-
-OrthographicSSRPass.OUTPUT = {
-  'Default': 0,
-  'OrthographicSSR': 1,
-  'Blur': 2,
-  'Beauty': 3,
-  'Depth': 4,
-  'Normal': 5,
-  'DefaultBlur': 6
-};
 
 export { OrthographicSSRPass };
