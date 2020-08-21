@@ -11,7 +11,6 @@ var OrthographicSSRShader = {
 
   defines: {
     "PERSPECTIVE_CAMERA": 1,
-    "MAX_STEP": Math.sqrt(window.innerWidth * window.innerWidth + window.innerHeight * window.innerHeight)
   },
 
   uniforms: {
@@ -19,8 +18,6 @@ var OrthographicSSRShader = {
     "tDiffuse": { value: null },
     "tNormal": { value: null },
     "tDepth": { value: null },
-    "tNoise": { value: null },
-    "kernel": { value: null },
     "cameraNear": { value: null },
     "cameraFar": { value: null },
     "resolution": { value: new Vector2() },
@@ -53,6 +50,7 @@ var OrthographicSSRShader = {
   ].join("\n"),
 
   fragmentShader: `
+		#define MAX_STEP TO_BE_REPLACE
 		varying vec2 vUv;
 		uniform sampler2D tDepth;
 		uniform sampler2D tNormal;
@@ -68,7 +66,7 @@ var OrthographicSSRShader = {
 		uniform bool isFade;
 		uniform float fadeIntensity;
 		float depthToDistance(float depth){
-			return (1.-depth)*cameraRange+cameraNear;
+			return depth*cameraRange+cameraNear;
 		}
 		vec3 getPos(vec2 uv,float depth){
 			vec3 pos;
