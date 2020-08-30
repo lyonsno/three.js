@@ -17,6 +17,7 @@ var SSRShader = {
 
     "tDiffuse": { value: null },
     "tNormal": { value: null },
+    "tMetalness": { value: null },
     "tDepth": { value: null },
     "cameraNear": { value: null },
     "cameraFar": { value: null },
@@ -27,6 +28,7 @@ var SSRShader = {
     "maxDistance": { value: 0.05 },
     "cameraRange": { value: 0 },
     "surfDist": { value: 0 },
+    "isSelective": { value: null },
 
   },
 
@@ -51,7 +53,9 @@ var SSRShader = {
 		varying vec2 vUv;
 		uniform sampler2D tDepth;
 		uniform sampler2D tNormal;
+		uniform sampler2D tMetalness;
 		uniform sampler2D tDiffuse;
+		uniform bool isSelective;
 		uniform float cameraRange;
 		uniform vec2 resolution;
 		uniform float opacity;
@@ -109,6 +113,10 @@ var SSRShader = {
 			return length(cross(x0-x1,x0-x2))/length(x2-x1);
 		}
 		void main(){
+			if(isSelective){
+				float metalness=texture2D(tMetalness,vUv).r;
+				if(metalness==0.) return;
+			}
 
 			float depth = getDepth( vUv );
 			float viewZ = getViewZ( depth );
@@ -182,7 +190,7 @@ var SSRShader = {
 var SSRDepthShader = {
 
   defines: {
-    "PERSPECTIVE_CAMERA": 0
+    "PERSPECTIVE_CAMERA": 1
   },
 
   uniforms: {
