@@ -38,6 +38,7 @@
 				scene = new THREE.Scene();
 				scene.background = new THREE.Color( 0xa0a0a0 );
 				scene.fog = new THREE.Fog( 0xa0a0a0, 70, 100 );
+				scene.overrideMaterial = new THREE.MeshNormalMaterial({ skinning: true })
 
 				clock = new THREE.Clock();
 
@@ -82,7 +83,12 @@
 
 					gltf.scene.traverse( function ( child ) {
 
-						if ( child.isSkinnedMesh ) child.castShadow = true;
+						if ( child.isSkinnedMesh ) {
+							child.castShadow = true;
+							child.material=new THREE.MeshNormalMaterial({
+								skinning:true,
+							})
+						}
 
 					} );
 

@@ -33,6 +33,7 @@
 				DoubleSide,
 				Float32BufferAttribute,
 				MeshPhongMaterial,
+				MeshNormalMaterial,
 				PerspectiveCamera,
 				PointLight,
 				Scene,
@@ -162,7 +163,8 @@
 
 			function createMesh( geometry, bones ) {
 
-				var material = new MeshPhongMaterial( {
+				// var material = new MeshPhongMaterial( {
+				var material = new MeshNormalMaterial( {
 					skinning: true,
 					color: 0x156289,
 					emissive: 0x072534,
