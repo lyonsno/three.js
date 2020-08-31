@@ -145,7 +145,12 @@
 				// composer
 
 				composer = new EffectComposer(renderer);
-				ssrPass = new SSRPass({scene, camera, innerWidth, innerHeight});
+				ssrPass = new SSRPass({
+					scene, 
+					camera, 
+					width: innerWidth, 
+					height: innerHeight,
+				});
 				composer.addPass(ssrPass);
 
 				// GUI

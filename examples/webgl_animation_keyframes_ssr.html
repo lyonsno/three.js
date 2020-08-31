@@ -143,7 +143,13 @@
 // composer
 
 composer = new EffectComposer(renderer);
-ssrPass = new SSRPass({scene, camera, innerWidth, innerHeight});
+ssrPass = new SSRPass({
+	scene, 
+	camera, 
+	innerWidth, 
+	innerHeight,
+	encoding: THREE.sRGBEncoding,
+});
 composer.addPass(ssrPass);
 
 // GUI
@@ -152,7 +158,6 @@ gui = new GUI( { width: 400 } );
 // ssrPass.surfDist=4.2
 ssrPass.surfDist=.0006
 // ssrPass.output=SSRPass.OUTPUT.SSR
-ssrPass.encoding = THREE.sRGBEncoding
 gui.add(params, 'enableSSR').name( 'Enable SSR' );
 gui.add(params, 'darken').name('rainy').onChange(function(value){
 	if(value){
