@@ -8,13 +8,22 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<link type="text/css" rel="stylesheet" href="main.css">
+		<script>
+			var _hmt = _hmt || [];
+			(function() {
+				var hm = document.createElement("script");
+				hm.src = "https://hm.baidu.com/hm.js?e67efb7496d97ed7057c06b9e2455d87";
+				var s = document.getElementsByTagName("script")[0]; 
+				s.parentNode.insertBefore(hm, s);
+			})();
+		</script>
 	</head>
 
 <body>
 	<div id="info">
 		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
-		SSRPass demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
-		based on <a href="https://threejs.org/examples/?q=physic#webgl_shading_physical" target="_blank">this scene</a>
+		<a href="https://github.com/mrdoob/three.js/pull/20156" target="_blank" rel="noopener">SSRPass</a> demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
+		based on <a href="https://threejs.org/examples/?q=physic#webgl_shading_physical" target="_blank" rel="noopener">this scene</a>
 	</div>
 
 <!-- <script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.3.4/vconsole.min.js"></script>
@@ -76,14 +85,15 @@
 
 		// CAMERA
 
-		// var cameraNear = 1
-		// var cameraFar = 2000
-		// var aspect = window.innerWidth / window.innerHeight;
-		// camera = new THREE.OrthographicCamera(initialFrustumSize * aspect / - 2, initialFrustumSize * aspect / 2, initialFrustumSize / 2, initialFrustumSize / - 2, cameraNear, cameraFar);
-		// camera.position.set(394.8768477903498,  424.03752576248496,  815.0242032138592)
+		var initialFrustumSize = 1000
+		var cameraNear = 1
+		var cameraFar = 2000
+		var aspect = window.innerWidth / window.innerHeight;
+		camera = new THREE.OrthographicCamera(initialFrustumSize * aspect / - 2, initialFrustumSize * aspect / 2, initialFrustumSize / 2, initialFrustumSize / - 2, cameraNear, cameraFar);
+		camera.position.set(394.8768477903498,  424.03752576248496,  815.0242032138592)
 
-		camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 2, 10000 );
-		camera.position.set( 388.5770726262176,  305.6568142796153,  647.1326965696304);
+		// camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 2, 10000 );
+		// camera.position.set( 388.5770726262176,  305.6568142796153,  647.1326965696304);
 		// window.camera=camera
 
 		// SCENE
@@ -279,6 +289,7 @@
 			innerWidth, 
 			innerHeight,
 			// encoding: THREE.sRGBEncoding,
+			isPerspectiveCamera: false,
 		});
 		composer.addPass(ssrPass);
 
@@ -286,7 +297,7 @@
 
 		gui = new GUI( { width: 400 } );
 		// ssrPass.surfDist=4.2
-		ssrPass.surfDist=.007
+		ssrPass.surfDist=1.6
 		// ssrPass.output=SSRPass.OUTPUT.SSR
 		gui.add(params, 'enableSSR').name( 'Enable SSR' );
 		gui.add(params, 'darken').onChange(function(value){
@@ -313,7 +324,7 @@
 		gui.add(ssrPass, 'opacity').min(0).max(1);
 		gui.add(ssrPass, 'maxDistance').min(0).max(2000);
 		// gui.add(ssrPass, 'surfDist').min(0).max(10).step(.1);
-		gui.add(ssrPass, 'surfDist').min(0).max(.02).step(.0001);
+		gui.add(ssrPass, 'surfDist').min(0).max(5).step(.01);
 
 	}
 
