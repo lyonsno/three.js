@@ -23,7 +23,7 @@
 		<div id="info">
 			Ammo.js physics soft body volume demo<br/>
 			Click to throw a ball<br/>
-			SSRPass add by <a href="https://github.com/gonnavis" target="_blank">Vis</a>
+			<a href="https://github.com/mrdoob/three.js/pull/20156" target="_blank" rel="noopener">SSRPass</a> add by <a href="https://github.com/gonnavis" target="_blank" rel="noopener">Vis</a>
 		</div>
 		<div id="container"></div>
 
@@ -145,7 +145,7 @@
 				// composer
 
 				composer = new EffectComposer(renderer);
-				ssrPass = new SSRPass(scene, camera, innerWidth, innerHeight);
+				ssrPass = new SSRPass({scene, camera, innerWidth, innerHeight});
 				composer.addPass(ssrPass);
 
 				// GUI
