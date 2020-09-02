@@ -85,15 +85,15 @@
 
 		// CAMERA
 
-		// var cameraNear = 1
-		// var cameraFar = 2000
-		// var aspect = window.innerWidth / window.innerHeight;
-		// camera = new THREE.OrthographicCamera(initialFrustumSize * aspect / - 2, initialFrustumSize * aspect / 2, initialFrustumSize / 2, initialFrustumSize / - 2, cameraNear, cameraFar);
-		// camera.position.set(394.8768477903498,  424.03752576248496,  815.0242032138592)
+		var initialFrustumSize = 1000
+		var cameraNear = 1
+		var cameraFar = 2000
+		var aspect = window.innerWidth / window.innerHeight;
+		camera = new THREE.OrthographicCamera(initialFrustumSize * aspect / - 2, initialFrustumSize * aspect / 2, initialFrustumSize / 2, initialFrustumSize / - 2, cameraNear, cameraFar);
+		camera.position.set(394.8768477903498,  424.03752576248496,  815.0242032138592)
 
-		camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 2, 10000 );
-		camera.position.set( 388.5770726262176,  305.6568142796153,  647.1326965696304);
-		// camera.position.set( -612.8787517743004,  518.3480614141735,  137.45500830289768);
+		// camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 2, 10000 );
+		// camera.position.set( 388.5770726262176,  305.6568142796153,  647.1326965696304);
 		// window.camera=camera
 
 		// SCENE
@@ -286,9 +286,10 @@
 		ssrPass = new SSRPass({
 			scene, 
 			camera, 
-			width: innerWidth, 
-			height: innerHeight,
+			innerWidth, 
+			innerHeight,
 			// encoding: THREE.sRGBEncoding,
+			isPerspectiveCamera: false,
 		});
 		composer.addPass(ssrPass);
 
@@ -296,8 +297,7 @@
 
 		gui = new GUI( { width: 400 } );
 		// ssrPass.surfDist=4.2
-		ssrPass.surfDist=.007
-    // ssrPass.opacity=.2
+		ssrPass.surfDist=1.6
 		// ssrPass.output=SSRPass.OUTPUT.SSR
 		gui.add(params, 'enableSSR').name( 'Enable SSR' );
 		gui.add(params, 'darken').onChange(function(value){
@@ -307,7 +307,6 @@
 				ssrPass.encoding = THREE.sRGBEncoding
 			}
 		});
-		gui.add(ssrPass,'isBouncing')
 		gui.add(ssrPass, 'output', {
 			'Default': SSRPass.OUTPUT.Default,
 			'DefaultBlur': SSRPass.OUTPUT.DefaultBlur,
@@ -316,7 +315,7 @@
 			'Beauty': SSRPass.OUTPUT.Beauty,
 			'Depth': SSRPass.OUTPUT.Depth,
 			'Normal': SSRPass.OUTPUT.Normal,
-			// 'Metalness': SSRPass.OUTPUT.Metalness,
+			'Metalness': SSRPass.OUTPUT.Metalness,
 		}).onChange(function (value) {
 
 			ssrPass.output = parseInt(value);
@@ -325,7 +324,7 @@
 		gui.add(ssrPass, 'opacity').min(0).max(1);
 		gui.add(ssrPass, 'maxDistance').min(0).max(2000);
 		// gui.add(ssrPass, 'surfDist').min(0).max(10).step(.1);
-		gui.add(ssrPass, 'surfDist').min(0).max(.02).step(.0001);
+		gui.add(ssrPass, 'surfDist').min(0).max(5).step(.01);
 
 	}
 

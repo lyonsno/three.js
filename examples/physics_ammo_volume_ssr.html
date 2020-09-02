@@ -9,21 +9,21 @@
 				color: #333;
 			}
 		</style>
-<script>
-	var _hmt = _hmt || [];
-	(function() {
-		var hm = document.createElement("script");
-		hm.src = "https://hm.baidu.com/hm.js?e67efb7496d97ed7057c06b9e2455d87";
-		var s = document.getElementsByTagName("script")[0]; 
-		s.parentNode.insertBefore(hm, s);
-	})();
-	</script>
+		<script>
+			var _hmt = _hmt || [];
+			(function() {
+				var hm = document.createElement("script");
+				hm.src = "https://hm.baidu.com/hm.js?e67efb7496d97ed7057c06b9e2455d87";
+				var s = document.getElementsByTagName("script")[0]; 
+				s.parentNode.insertBefore(hm, s);
+			})();
+		</script>
 	</head>
 	<body>
 		<div id="info">
 			Ammo.js physics soft body volume demo<br/>
 			Click to throw a ball<br/>
-			SSRPass add by <a href="https://github.com/gonnavis" target="_blank">Vis</a>
+			<a href="https://github.com/mrdoob/three.js/pull/20156" target="_blank" rel="noopener">SSRPass</a> add by <a href="https://github.com/gonnavis" target="_blank" rel="noopener">Vis</a>
 		</div>
 		<div id="container"></div>
 
@@ -145,7 +145,12 @@
 				// composer
 
 				composer = new EffectComposer(renderer);
-				ssrPass = new SSRPass(scene, camera, innerWidth, innerHeight);
+				ssrPass = new SSRPass({
+					scene, 
+					camera, 
+					width: innerWidth, 
+					height: innerHeight,
+				});
 				composer.addPass(ssrPass);
 
 				// GUI
