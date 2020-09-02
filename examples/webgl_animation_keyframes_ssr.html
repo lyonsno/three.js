@@ -166,6 +166,7 @@ gui.add(params, 'darken').name('rainy').onChange(function(value){
 		ssrPass.encoding = THREE.sRGBEncoding
 	}
 });
+gui.add(ssrPass,'isBouncing')
 gui.add(ssrPass, 'output', {
 	'Default': SSRPass.OUTPUT.Default,
 	'DefaultBlur': SSRPass.OUTPUT.DefaultBlur,
