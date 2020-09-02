@@ -11,6 +11,7 @@ import {
   LinearFilter,
   MathUtils,
   MeshNormalMaterial,
+  MeshBasicMaterial,
   NearestFilter,
   NoBlending,
   RGBAFormat,
@@ -30,7 +31,7 @@ import { SSRBlurShader } from "../shaders/SSRShader.js";
 import { SSRDepthShader } from "../shaders/SSRShader.js";
 import { CopyShader } from "../shaders/CopyShader.js";
 
-var SSRPass = function(scene, camera, width, height) {
+var SSRPass = function({ scene, camera, width, height, selects, encoding, isPerspectiveCamera = true, isBouncing = false }) {
 
   Pass.call(this);
 
@@ -48,6 +49,15 @@ var SSRPass = function(scene, camera, width, height) {
   this.maxDistance = 900;
   this.surfDist = 1.
 
+  this.selects = selects
+  this.isSelective = Array.isArray(this.selects)
+
+  this.encoding = encoding
+
+  this.isBouncing = isBouncing
+  //for bouncing
+  this.isFirstRender = true
+
   // beauty render target with depth buffer
 
   var depthTexture = new DepthTexture();
@@ -63,6 +73,13 @@ var SSRPass = function(scene, camera, width, height) {
     depthBuffer: true
   });
 
+  //for bouncing
+  this.prevRenderTarget = new WebGLRenderTarget(this.width, this.height, {
+    minFilter: LinearFilter,
+    magFilter: LinearFilter,
+    format: RGBAFormat,
+  });
+
   // normal render target
 
   this.normalRenderTarget = new WebGLRenderTarget(this.width, this.height, {
@@ -70,6 +87,16 @@ var SSRPass = function(scene, camera, width, height) {
     magFilter: NearestFilter,
     format: RGBAFormat
   });
+
+  // metalness render target
+
+  if (this.isSelective) {
+    this.metalnessRenderTarget = new WebGLRenderTarget(this.width, this.height, {
+      minFilter: NearestFilter,
+      magFilter: NearestFilter,
+      format: RGBAFormat
+    });
+  }
 
 
 
@@ -102,6 +129,10 @@ var SSRPass = function(scene, camera, width, height) {
 
   this.ssrMaterial.uniforms['tDiffuse'].value = this.beautyRenderTarget.texture;
   this.ssrMaterial.uniforms['tNormal'].value = this.normalRenderTarget.texture;
+  if (this.isSelective) {
+    this.ssrMaterial.uniforms['isSelective'].value = true;
+    this.ssrMaterial.uniforms['tMetalness'].value = this.metalnessRenderTarget.texture;
+  }
   this.ssrMaterial.uniforms['tDepth'].value = this.beautyRenderTarget.depthTexture;
   this.ssrMaterial.uniforms['cameraNear'].value = this.camera.near;
   this.ssrMaterial.uniforms['cameraFar'].value = this.camera.far;
@@ -109,11 +140,26 @@ var SSRPass = function(scene, camera, width, height) {
   this.ssrMaterial.uniforms['resolution'].value.set(this.width, this.height);
   this.ssrMaterial.uniforms['cameraProjectionMatrix'].value.copy(this.camera.projectionMatrix);
   this.ssrMaterial.uniforms['cameraInverseProjectionMatrix'].value.getInverse(this.camera.projectionMatrix);
+  this.ssrMaterial.uniforms['isPerspectiveCamera'].value = isPerspectiveCamera
 
   // normal material
 
   this.normalMaterial = new MeshNormalMaterial();
   this.normalMaterial.blending = NoBlending;
+
+  if (this.isSelective) {
+    // metalnessOn material
+
+    this.metalnessOnMaterial = new MeshBasicMaterial({
+      color: 'white'
+    });
+
+    // metalnessOff material
+
+    this.metalnessOffMaterial = new MeshBasicMaterial({
+      color: 'black'
+    });
+  }
 
 
 
@@ -173,12 +219,17 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
     this.beautyRenderTarget.dispose();
     this.normalRenderTarget.dispose();
+    if (this.isSelective) this.metalnessRenderTarget.dispose();
     this.ssrRenderTarget.dispose();
     this.blurRenderTarget.dispose();
 
     // dispose materials
 
     this.normalMaterial.dispose();
+    if (this.isSelective) {
+      this.metalnessOnMaterial.dispose();
+      this.metalnessOffMaterial.dispose();
+    }
     this.blurMaterial.dispose();
     this.copyMaterial.dispose();
     this.depthRenderMaterial.dispose();
@@ -193,6 +244,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
     // render beauty and depth
 
+    if (this.encoding) this.beautyRenderTarget.texture.encoding = this.encoding
     renderer.setRenderTarget(this.beautyRenderTarget);
     renderer.clear();
     renderer.render(this.scene, this.camera);
@@ -201,12 +253,29 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
     this.renderOverride(renderer, this.normalMaterial, this.normalRenderTarget, 0, 0);
 
+    // render metalnesses
+
+    if (this.isSelective) {
+      this.renderMetalness(renderer, this.metalnessOnMaterial, this.metalnessRenderTarget, 0, 0);
+    }
+
     // render SSR
 
+    if (this.isBouncing) {
+      if (this.isFirstRender) {
+        this.ssrMaterial.uniforms['tDiffuse'].value = this.beautyRenderTarget.texture;
+        this.isFirstRender = false
+      } else {
+        this.ssrMaterial.uniforms['tDiffuse'].value = this.prevRenderTarget.texture;
+      }
+    } else {
+      this.ssrMaterial.uniforms['tDiffuse'].value = this.beautyRenderTarget.texture;
+    }
     this.ssrMaterial.uniforms['opacity'].value = this.opacity;
     this.ssrMaterial.uniforms['maxDistance'].value = this.maxDistance;
     this.ssrMaterial.uniforms['surfDist'].value = this.surfDist;
     this.renderPass(renderer, this.ssrMaterial, this.ssrRenderTarget);
+
 
     // render blur
 
@@ -255,6 +324,14 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
         break;
 
+      case SSRPass.OUTPUT.Metalness:
+
+        this.copyMaterial.uniforms['tDiffuse'].value = this.metalnessRenderTarget.texture;
+        this.copyMaterial.blending = NoBlending;
+        this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
+
+        break;
+
       case SSRPass.OUTPUT.Default:
 
         this.copyMaterial.uniforms['tDiffuse'].value = this.beautyRenderTarget.texture;
@@ -264,6 +341,17 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
         this.copyMaterial.uniforms['tDiffuse'].value = this.ssrRenderTarget.texture;
         this.copyMaterial.blending = AdditiveBlending;
         this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
+
+        if (this.isBouncing) { ///todo: need performance improvement
+          this.copyMaterial.uniforms['tDiffuse'].value = this.beautyRenderTarget.texture;
+          this.copyMaterial.blending = NoBlending;
+          this.renderPass(renderer, this.copyMaterial, this.prevRenderTarget);
+
+          this.copyMaterial.uniforms['tDiffuse'].value = this.ssrRenderTarget.texture;
+          this.copyMaterial.blending = AdditiveBlending;
+          this.renderPass(renderer, this.copyMaterial, this.prevRenderTarget);
+				}
+
         break;
 
       case SSRPass.OUTPUT.DefaultBlur:
@@ -275,6 +363,16 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
         this.copyMaterial.uniforms['tDiffuse'].value = this.blurRenderTarget.texture;
         this.copyMaterial.blending = AdditiveBlending;
         this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
+
+        if (this.isBouncing) { ///todo: need performance improvement
+          this.copyMaterial.uniforms['tDiffuse'].value = this.beautyRenderTarget.texture;
+          this.copyMaterial.blending = NoBlending;
+          this.renderPass(renderer, this.copyMaterial, this.prevRenderTarget);
+
+          this.copyMaterial.uniforms['tDiffuse'].value = this.blurRenderTarget.texture;
+          this.copyMaterial.blending = AdditiveBlending;
+          this.renderPass(renderer, this.copyMaterial, this.prevRenderTarget);
+        }
 
         break;
 
@@ -346,6 +444,47 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
   },
 
+  renderMetalness: function(renderer, overrideMaterial, renderTarget, clearColor, clearAlpha) {
+
+    this.originalClearColor.copy(renderer.getClearColor());
+    var originalClearAlpha = renderer.getClearAlpha();
+    var originalAutoClear = renderer.autoClear;
+
+    renderer.setRenderTarget(renderTarget);
+    renderer.autoClear = false;
+
+    clearColor = overrideMaterial.clearColor || clearColor;
+    clearAlpha = overrideMaterial.clearAlpha || clearAlpha;
+
+    if ((clearColor !== undefined) && (clearColor !== null)) {
+
+      renderer.setClearColor(clearColor);
+      renderer.setClearAlpha(clearAlpha || 0.0);
+      renderer.clear();
+
+    }
+
+    this.scene.traverseVisible(child => {
+      child._SSRPassMaterialBack = child.material
+      if (this.selects.includes(child)) {
+        child.material = this.metalnessOnMaterial
+      } else {
+        child.material = this.metalnessOffMaterial
+      }
+    })
+    renderer.render(this.scene, this.camera);
+    this.scene.traverseVisible(child => {
+      child.material = child._SSRPassMaterialBack
+    })
+
+    // restore original state
+
+    renderer.autoClear = originalAutoClear;
+    renderer.setClearColor(this.originalClearColor);
+    renderer.setClearAlpha(originalClearAlpha);
+
+  },
+
   setSize: function(width, height) {
 
     this.width = width;
@@ -356,6 +495,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     this.beautyRenderTarget.setSize(width, height);
     this.ssrRenderTarget.setSize(width, height);
     this.normalRenderTarget.setSize(width, height);
+    if (this.isSelective) this.metalnessRenderTarget.setSize(width, height);
     this.blurRenderTarget.setSize(width, height);
 
     this.ssrMaterial.uniforms['resolution'].value.set(width, height);
@@ -376,6 +516,7 @@ SSRPass.OUTPUT = {
   'Beauty': 3,
   'Depth': 4,
   'Normal': 5,
+  'Metalness': 7,
 };
 
 export { SSRPass };

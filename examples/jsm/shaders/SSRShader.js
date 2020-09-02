@@ -10,13 +10,13 @@ import {
 var SSRShader = {
 
   defines: {
-    "PERSPECTIVE_CAMERA": 1,
   },
 
   uniforms: {
 
     "tDiffuse": { value: null },
     "tNormal": { value: null },
+    "tMetalness": { value: null },
     "tDepth": { value: null },
     "cameraNear": { value: null },
     "cameraFar": { value: null },
@@ -27,6 +27,8 @@ var SSRShader = {
     "maxDistance": { value: 0.05 },
     "cameraRange": { value: 0 },
     "surfDist": { value: 0 },
+    "isSelective": { value: null },
+    "isPerspectiveCamera": { value: null },
 
   },
 
@@ -51,7 +53,9 @@ var SSRShader = {
 		varying vec2 vUv;
 		uniform sampler2D tDepth;
 		uniform sampler2D tNormal;
+		uniform sampler2D tMetalness;
 		uniform sampler2D tDiffuse;
+		uniform bool isSelective;
 		uniform float cameraRange;
 		uniform vec2 resolution;
 		uniform float opacity;
@@ -61,25 +65,18 @@ var SSRShader = {
 		uniform float surfDist;
 		uniform mat4 cameraProjectionMatrix;
 		uniform mat4 cameraInverseProjectionMatrix;
+		uniform bool isPerspectiveCamera;
 		#include <packing>
 		float getDepth( const in vec2 screenPosition ) {
 			return texture2D( tDepth, screenPosition ).x;
 		}
 		float getLinearDepth( const in vec2 screenPosition ) {
-			#if PERSPECTIVE_CAMERA == 1
-				float fragCoordZ = texture2D( tDepth, screenPosition ).x;
-				float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
-				return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
-			#else
-				return texture2D( tDepth, screenPosition ).x;
-			#endif
+			float fragCoordZ = texture2D( tDepth, screenPosition ).x;
+			float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
+			return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
 		}
 		float getViewZ( const in float depth ) {
-			#if PERSPECTIVE_CAMERA == 1
-				return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
-			#else
-				return orthographicDepthToViewZ( depth, cameraNear, cameraFar );
-			#endif
+			return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
 		}
 		vec3 getViewPosition( const in vec2 screenPosition, const in float depth, const in float viewZ, const in float clipW ) {
 			vec4 clipPosition = vec4( ( vec3( screenPosition, depth ) - 0.5 ) * 2.0, 1.0 );
@@ -109,6 +106,10 @@ var SSRShader = {
 			return length(cross(x0-x1,x0-x2))/length(x2-x1);
 		}
 		void main(){
+			if(isSelective){
+				float metalness=texture2D(tMetalness,vUv).r;
+				if(metalness==0.) return;
+			}
 
 			float depth = getDepth( vUv );
 			float viewZ = getViewZ( depth );
@@ -120,8 +121,13 @@ var SSRShader = {
 			vec2 d0=gl_FragCoord.xy;
 			vec2 d1;
 
-			vec3 viewNormal=getViewNormal( vUv );;
-			vec3 viewReflectDir=reflect(normalize(viewPosition),viewNormal);
+			vec3 viewNormal=getViewNormal( vUv );
+			vec3 viewReflectDir;
+			if(isPerspectiveCamera){
+				viewReflectDir=reflect(normalize(viewPosition),viewNormal);
+			}else{
+				viewReflectDir=reflect(vec3(0,0,-1),viewNormal);
+			}
 			vec3 d1viewPosition=viewPosition+viewReflectDir*maxDistance;
 			// if(d1viewPosition.z>=.0) return;
 			if(d1viewPosition.z>-cameraNear){
@@ -182,7 +188,7 @@ var SSRShader = {
 var SSRDepthShader = {
 
   defines: {
-    "PERSPECTIVE_CAMERA": 0
+    "PERSPECTIVE_CAMERA": 1
   },
 
   uniforms: {

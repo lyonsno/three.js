@@ -3,19 +3,19 @@
 
 <head>
 
-  <head>
-    <title>three.js webgl - postprocessing - Screen Space Reflection</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link type="text/css" rel="stylesheet" href="main.css">
-  </head>
+	<head>
+		<title>three.js webgl - postprocessing - Screen Space Reflection</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+	</head>
 
 <body>
-<div id="info">
-  <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
-  SSRPass demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
-  based on <a href="https://threejs.org/examples/?q=physic#webgl_shading_physical" target="_blank">this scene</a>
-</div>
+	<div id="info">
+		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
+		<a href="https://github.com/mrdoob/three.js/pull/20156" target="_blank" rel="noopener">SSRPass</a> demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
+		based on <a href="https://threejs.org/examples/?q=physic#webgl_shading_physical" target="_blank" rel="noopener">this scene</a>
+	</div>
 
 <!-- <script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.3.4/vconsole.min.js"></script>
 <script>
@@ -23,23 +23,25 @@
 </script> -->
 <script type="module">
 
-  import * as THREE from '../build/three.module.js';
+	import * as THREE from '../build/three.module.js';
 
 	import Stats from './jsm/libs/stats.module.js';
 
-	import { GUI } from './jsm/libs/dat.gui.module.js';
-	import { OrbitControls } from './jsm/controls/OrbitControls.js'
 	import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-
+	
+	import { OrbitControls } from './jsm/controls/OrbitControls.js'
+	
+	import { GUI } from './jsm/libs/dat.gui.module.js';
 	import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
 	import { SSRPass } from './jsm/postprocessing/SSRPass.js';
 
-	// var initialFrustumSize = 1200;
 	var params = {
 		enableSSR: true,
+		darken: true,
 	}
 	var composer
 	var ssrPass
+	var gui
 
 	var container, stats;
 
@@ -55,7 +57,7 @@
 
 	var clock = new THREE.Clock();
 
-	var gui, shadowCameraHelper, shadowConfig = {
+	var shadowCameraHelper, shadowConfig = {
 
 		shadowCameraVisible: false,
 		shadowCameraNear: 750,
@@ -82,11 +84,13 @@
 
 		camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 2, 10000 );
 		camera.position.set( 388.5770726262176,  305.6568142796153,  647.1326965696304);
+		// camera.position.set( -612.8787517743004,  518.3480614141735,  137.45500830289768);
 		// window.camera=camera
 
 		// SCENE
 
 		scene = new THREE.Scene();
+		window.scene=scene
 		scene.fog = new THREE.Fog( 0, 1000, 10000 );
 
 		// TEXTURES
@@ -270,7 +274,13 @@
 		// composer
 
 		composer = new EffectComposer(renderer);
-		ssrPass = new SSRPass(scene, camera, innerWidth, innerHeight);
+		ssrPass = new SSRPass({
+			scene, 
+			camera, 
+			width: innerWidth, 
+			height: innerHeight,
+			// encoding: THREE.sRGBEncoding,
+		});
 		composer.addPass(ssrPass);
 
 		// GUI
@@ -278,7 +288,17 @@
 		gui = new GUI( { width: 400 } );
 		// ssrPass.surfDist=4.2
 		ssrPass.surfDist=.007
+    // ssrPass.opacity=.2
 		// ssrPass.output=SSRPass.OUTPUT.SSR
+		gui.add(params, 'enableSSR').name( 'Enable SSR' );
+		gui.add(params, 'darken').onChange(function(value){
+			if(value){
+				ssrPass.encoding = THREE.LinearEncoding
+			}else{
+				ssrPass.encoding = THREE.sRGBEncoding
+			}
+		});
+		gui.add(ssrPass,'isBouncing')
 		gui.add(ssrPass, 'output', {
 			'Default': SSRPass.OUTPUT.Default,
 			'DefaultBlur': SSRPass.OUTPUT.DefaultBlur,
@@ -286,13 +306,13 @@
 			'SSR Only + Blur': SSRPass.OUTPUT.Blur,
 			'Beauty': SSRPass.OUTPUT.Beauty,
 			'Depth': SSRPass.OUTPUT.Depth,
-			'Normal': SSRPass.OUTPUT.Normal
+			'Normal': SSRPass.OUTPUT.Normal,
+			// 'Metalness': SSRPass.OUTPUT.Metalness,
 		}).onChange(function (value) {
 
 			ssrPass.output = parseInt(value);
 
 		});
-		gui.add(params, 'enableSSR').name( 'Enable SSR' );
 		gui.add(ssrPass, 'opacity').min(0).max(1);
 		gui.add(ssrPass, 'maxDistance').min(0).max(2000);
 		// gui.add(ssrPass, 'surfDist').min(0).max(10).step(.1);
@@ -339,7 +359,6 @@
 		}
 
 		if(params.enableSSR){
-			// ssrPass.setFrustumSize(initialFrustumSize/camera.zoom)
 			composer.render();
 		}else{
 			renderer.render(scene,camera)
