@@ -3,28 +3,28 @@
 
 <head>
 
-	<head>
-		<title>three.js webgl - postprocessing - Screen Space Reflection</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<link type="text/css" rel="stylesheet" href="main.css">
-		<script>
-			var _hmt = _hmt || [];
-			(function() {
-				var hm = document.createElement("script");
-				hm.src = "https://hm.baidu.com/hm.js?e67efb7496d97ed7057c06b9e2455d87";
-				var s = document.getElementsByTagName("script")[0]; 
-				s.parentNode.insertBefore(hm, s);
-			})();
-		</script>
-	</head>
+  <head>
+    <title>three.js webgl - postprocessing - Screen Space Reflection</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link type="text/css" rel="stylesheet" href="main.css">
+    <script>
+      var _hmt = _hmt || [];
+      (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?e67efb7496d97ed7057c06b9e2455d87";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  </head>
 
 <body>
-	<div id="info">
-		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
-		<a href="https://github.com/mrdoob/three.js/pull/20156" target="_blank" rel="noopener">SSRPass</a> demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
-		based on <a href="https://threejs.org/examples/?q=physic#webgl_shading_physical" target="_blank" rel="noopener">this scene</a>
-	</div>
+<div id="info">
+  <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
+  <a href="https://github.com/mrdoob/three.js/pull/20156" target="_blank" rel="noopener">SSRPass</a> demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
+  based on <a href="https://threejs.org/examples/?q=physic#webgl_shading_physical" target="_blank" rel="noopener">this scene</a>
+</div>
 
 <!-- <script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.3.4/vconsole.min.js"></script>
 <script>
@@ -32,7 +32,7 @@
 </script> -->
 <script type="module">
 
-	import * as THREE from '../build/three.module.js';
+  import * as THREE from '../build/three.module.js';
 
 	import Stats from './jsm/libs/stats.module.js';
 
@@ -326,6 +326,9 @@
 		gui.add(ssrPass, 'maxDistance').min(0).max(2000);
 		// gui.add(ssrPass, 'surfDist').min(0).max(10).step(.1);
 		gui.add(ssrPass, 'surfDist').min(0).max(.02).step(.0001);
+		gui.add(ssrPass, 'isDistanceAttenuation');
+		gui.add(ssrPass, 'isDAGreedyBreak');
+		gui.add(ssrPass, 'attenuationDistance').min(0).max(2000);
 
 	}
 

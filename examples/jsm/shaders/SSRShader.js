@@ -9,8 +9,7 @@ import {
 
 var SSRShader = {
 
-  defines: {
-  },
+  defines: {},
 
   uniforms: {
 
@@ -29,6 +28,9 @@ var SSRShader = {
     "surfDist": { value: 0 },
     "isSelective": { value: null },
     "isPerspectiveCamera": { value: null },
+    "isDistanceAttenuation": { value: null },
+    "isDAGreedyBreak": { value: null },
+    "attenuationDistacne": { value: null },
 
   },
 
@@ -66,6 +68,9 @@ var SSRShader = {
 		uniform mat4 cameraProjectionMatrix;
 		uniform mat4 cameraInverseProjectionMatrix;
 		uniform bool isPerspectiveCamera;
+		uniform bool isDistanceAttenuation;
+		uniform bool isDAGreedyBreak;
+		uniform float attenuationDistacne;
 		#include <packing>
 		float getDepth( const in vec2 screenPosition ) {
 			return texture2D( tDepth, screenPosition ).x;
@@ -169,6 +174,22 @@ var SSRShader = {
 				float vZ = getViewZ( d );
 				float clipW = cameraProjectionMatrix[2][3] * vZ + cameraProjectionMatrix[3][3];
 				vec3 vP=getViewPosition( uv, d, vZ, clipW );
+
+				float op=opacity;
+				if(isDistanceAttenuation){
+					float rayLen=length(vP-viewPosition);
+					if(rayLen>=attenuationDistacne){
+						if(isDAGreedyBreak){
+							break;
+						}else{
+							continue;
+						}
+					}
+					float attenuation=(1.-rayLen/attenuationDistacne);
+					attenuation=attenuation*attenuation;
+					op=opacity*attenuation;
+				}
+
 				float away=pointToLineDistance(vP,viewPosition,d1viewPosition);
 				float sD=surfDist*clipW;
 				if(away<sD){
@@ -176,7 +197,7 @@ var SSRShader = {
 					if(dot(viewReflectDir,vN)>=0.) continue;
 					vec4 reflectColor=texture2D(tDiffuse,uv);
 					gl_FragColor=reflectColor;
-					gl_FragColor.a=opacity;
+					gl_FragColor.a=op;
 					break;
 				}
 			}
