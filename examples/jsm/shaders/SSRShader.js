@@ -177,7 +177,7 @@ var SSRShader = {
 
 				float op=opacity;
 				if(isDistanceAttenuation){
-					float rayLen=length(vP-viewPosition);
+					float rayLen=length(vP-viewPosition);///todo: wrong, not ray length
 					if(rayLen>=attenuationDistacne){
 						if(isDAGreedyBreak){
 							break;
