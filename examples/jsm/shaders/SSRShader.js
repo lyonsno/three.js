@@ -120,7 +120,13 @@ var SSRShader = {
 			float viewZ = getViewZ( depth );
 			// gl_FragColor=vec4(vec3(-viewZ/cameraFar),1);return;
 			if(-viewZ>=cameraFar) return;
-			vec3 viewPosition = getViewPosition( vUv, depth, viewZ );
+
+			float clipW = cameraProjectionMatrix[2][3] * viewZ + cameraProjectionMatrix[3][3];
+			gl_FragColor=vec4(vec3(clipW/cameraFar),1);return;
+			vec3 viewPosition=getViewPosition( vUv, depth, viewZ, clipW );
+
+			// vec3 viewPosition=getViewPosition( vUv, depth, viewZ );
+
 			// gl_FragColor=vec4(viewPosition/100.*vec3(1,1,-1),1);return;
 			// gl_FragColor=vec4(-viewPosition.z/1000.,0,0,1);return;
 			vec2 d0=gl_FragCoord.xy;
@@ -189,6 +195,8 @@ var SSRShader = {
 					attenuation=attenuation*attenuation;
 					op=opacity*attenuation;
 				}
+
+				// if(length(vP-viewPosition)>maxDistance) continue;
 
 				float away=pointToLineDistance(vP,viewPosition,d1viewPosition);
 				float sD=surfDist*clipW;
