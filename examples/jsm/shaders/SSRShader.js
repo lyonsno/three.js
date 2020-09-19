@@ -163,6 +163,12 @@ var SSRShader = {
 			d1=viewPositionToXY(d1viewPosition);
 			// gl_FragColor=vec4(d1/resolution,0,1);return;
 
+			// vec3 d0projectedPosition=vec3(d0,viewZ);
+			// vec3 d1projectedPosition=vec3(d1,d1viewPosition.z);
+			// float dx=d1projectedPosition.x-d0projectedPosition.x;
+			// float dy=d1projectedPosition.y-d0projectedPosition.y;
+			// float angle=atan(dx,dy);
+
 			float totalLen=length(d1-d0);
 			float xLen=d1.x-d0.x;
 			float yLen=d1.y-d0.y;
@@ -180,17 +186,13 @@ var SSRShader = {
 				float vZ = getViewZ( d );
 				float clipW = cameraProjectionMatrix[2][3] * vZ + cameraProjectionMatrix[3][3];
 				vec3 vP=getViewPosition( uv, d, vZ, clipW );
+				float away=pointToLineDistance(vP,viewPosition,d1viewPosition);
 
 				float op=opacity;
 				if(isDistanceAttenuation){
-					float rayLen=length(vP-viewPosition);///todo: wrong, not ray length
-					if(rayLen>=attenuationDistacne){
-						if(isDAGreedyBreak){
-							break;
-						}else{
-							continue;
-						}
-					}
+					float hypotenuse=length(vP-viewPosition);
+					float rayLen=sqrt(hypotenuse*hypotenuse-away*away);
+					if(rayLen>=attenuationDistacne) break;
 					float attenuation=(1.-rayLen/attenuationDistacne);
 					attenuation=attenuation*attenuation;
 					op=opacity*attenuation;
@@ -198,7 +200,6 @@ var SSRShader = {
 
 				// if(length(vP-viewPosition)>maxDistance) continue;
 
-				float away=pointToLineDistance(vP,viewPosition,d1viewPosition);
 				float sD=surfDist*clipW;
 				if(away<sD){
 					vec3 vN=getViewNormal( uv );
