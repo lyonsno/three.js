@@ -17,6 +17,8 @@
 		based on <a href="https://threejs.org/examples/?q=physic#webgl_shading_physical" target="_blank" rel="noopener">this scene</a>
 	</div>
 
+	<div class="center" style="position:fixed;left:0;right:0;top:0;bottom:0;width:2px;height:2px;background:red;z-index:999999;margin:auto;pointer-events: none;"></div>
+
 <!-- <script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.3.4/vconsole.min.js"></script>
 <script>
   var vConsole = new VConsole();
@@ -289,7 +291,7 @@
 		// ssrPass.surfDist=4.2
 		ssrPass.surfDist=.007
     // ssrPass.opacity=.2
-		// ssrPass.output=SSRPass.OUTPUT.SSR
+		ssrPass.output=SSRPass.OUTPUT.SSR
 		gui.add(params, 'enableSSR').name( 'Enable SSR' );
 		gui.add(params, 'darken').onChange(function(value){
 			if(value){

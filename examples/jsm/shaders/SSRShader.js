@@ -9,8 +9,7 @@ import {
 
 var SSRShader = {
 
-  defines: {
-  },
+  defines: {},
 
   uniforms: {
 
@@ -106,80 +105,101 @@ var SSRShader = {
 			return length(cross(x0-x1,x0-x2))/length(x2-x1);
 		}
 		void main(){
-			if(isSelective){
-				float metalness=texture2D(tMetalness,vUv).r;
-				if(metalness==0.) return;
-			}
 
 			float depth = getDepth( vUv );
 			float viewZ = getViewZ( depth );
-			// gl_FragColor=vec4(vec3(-viewZ/cameraFar),1);return;
-			if(-viewZ>=cameraFar) return;
 			vec3 viewPosition = getViewPosition( vUv, depth, viewZ );
-			// gl_FragColor=vec4(viewPosition/100.*vec3(1,1,-1),1);return;
-			// gl_FragColor=vec4(-viewPosition.z/1000.,0,0,1);return;
-			vec2 d0=gl_FragCoord.xy;
-			vec2 d1;
 
-			vec3 viewNormal=getViewNormal( vUv );
-			vec3 viewReflectDir;
-			if(isPerspectiveCamera){
-				viewReflectDir=reflect(normalize(viewPosition),viewNormal);
-			}else{
-				viewReflectDir=reflect(vec3(0,0,-1),viewNormal);
-			}
-			vec3 d1viewPosition=viewPosition+viewReflectDir*maxDistance;
-			// if(d1viewPosition.z>=.0) return;
-			if(d1viewPosition.z>-cameraNear){
-				vec2 tempXY=viewPosition.xy;
-				viewPosition.x=0.;
-				viewPosition.y=0.;
-				d1viewPosition.xy-=tempXY;
+		  vec2 uv=vec2(.5,.5);
+			float d = getDepth(uv);
+			float vZ = getViewZ( d );
+			float clipW = cameraProjectionMatrix[2][3] * vZ + cameraProjectionMatrix[3][3];
+			vec3 vP=getViewPosition( uv, d, vZ, clipW );
 
-				float ratio=(viewPosition.z+cameraNear)/(viewPosition.z-d1viewPosition.z);
-				d1viewPosition.xy*=ratio;
-				d1viewPosition.z=-cameraNear;
+			float hypotenuse=length(viewPosition-vP);
+			float away=pointToLineDistance(viewPosition,vP,vP+vec3(0,1,0));
 
-				viewPosition.xy=tempXY;
-				d1viewPosition.xy+=tempXY;
-			}
-			// if(d1viewPosition.z>0.){
-			// 	float ratio=viewPosition.z/(viewPosition.z-d1viewPosition.z);
-			// 	d1viewPosition.xy*=ratio;
-			// 	d1viewPosition.z=0.;
+			float rayLen=sqrt(hypotenuse*hypotenuse-away*away);
+			gl_FragColor.xyz=vec3(rayLen/250.);
+			// gl_FragColor.xyz=vec3(length(viewPosition)/cameraFar);
+			gl_FragColor.a=1.;
+
+			return;
+
+			// if(isSelective){
+			// 	float metalness=texture2D(tMetalness,vUv).r;
+			// 	if(metalness==0.) return;
 			// }
-			// gl_FragColor=vec4(d1viewPosition/100.,1);return;
-			d1=viewPositionToXY(d1viewPosition);
-			// gl_FragColor=vec4(d1/resolution,0,1);return;
 
-			float totalLen=length(d1-d0);
-			float xLen=d1.x-d0.x;
-			float yLen=d1.y-d0.y;
-			float totalStep=max(abs(xLen),abs(yLen));
-			float xSpan=xLen/totalStep;
-			float ySpan=yLen/totalStep;
-			for(float i=0.;i<MAX_STEP;i++){
-				if(i>=totalStep) break;
-				vec2 xy=vec2(d0.x+i*xSpan,d0.y+i*ySpan);
-				if(xy.x<0.||xy.x>resolution.x) break;
-				if(xy.y<0.||xy.y>resolution.y) break;
-				vec2 uv=xy/resolution;
+			// float depth = getDepth( vUv );
+			// float viewZ = getViewZ( depth );
+			// // gl_FragColor=vec4(vec3(-viewZ/cameraFar),1);return;
+			// if(-viewZ>=cameraFar) return;
+			// vec3 viewPosition = getViewPosition( vUv, depth, viewZ );
+			// // gl_FragColor=vec4(viewPosition/100.*vec3(1,1,-1),1);return;
+			// // gl_FragColor=vec4(-viewPosition.z/1000.,0,0,1);return;
+			// vec2 d0=gl_FragCoord.xy;
+			// vec2 d1;
 
-				float d = getDepth(uv);
-				float vZ = getViewZ( d );
-				float clipW = cameraProjectionMatrix[2][3] * vZ + cameraProjectionMatrix[3][3];
-				vec3 vP=getViewPosition( uv, d, vZ, clipW );
-				float away=pointToLineDistance(vP,viewPosition,d1viewPosition);
-				float sD=surfDist*clipW;
-				if(away<sD){
-					vec3 vN=getViewNormal( uv );
-					if(dot(viewReflectDir,vN)>=0.) continue;
-					vec4 reflectColor=texture2D(tDiffuse,uv);
-					gl_FragColor=reflectColor;
-					gl_FragColor.a=opacity;
-					break;
-				}
-			}
+			// vec3 viewNormal=getViewNormal( vUv );
+			// vec3 viewReflectDir;
+			// if(isPerspectiveCamera){
+			// 	viewReflectDir=reflect(normalize(viewPosition),viewNormal);
+			// }else{
+			// 	viewReflectDir=reflect(vec3(0,0,-1),viewNormal);
+			// }
+			// vec3 d1viewPosition=viewPosition+viewReflectDir*maxDistance;
+			// // if(d1viewPosition.z>=.0) return;
+			// if(d1viewPosition.z>-cameraNear){
+			// 	vec2 tempXY=viewPosition.xy;
+			// 	viewPosition.x=0.;
+			// 	viewPosition.y=0.;
+			// 	d1viewPosition.xy-=tempXY;
+
+			// 	float ratio=(viewPosition.z+cameraNear)/(viewPosition.z-d1viewPosition.z);
+			// 	d1viewPosition.xy*=ratio;
+			// 	d1viewPosition.z=-cameraNear;
+
+			// 	viewPosition.xy=tempXY;
+			// 	d1viewPosition.xy+=tempXY;
+			// }
+			// // if(d1viewPosition.z>0.){
+			// // 	float ratio=viewPosition.z/(viewPosition.z-d1viewPosition.z);
+			// // 	d1viewPosition.xy*=ratio;
+			// // 	d1viewPosition.z=0.;
+			// // }
+			// // gl_FragColor=vec4(d1viewPosition/100.,1);return;
+			// d1=viewPositionToXY(d1viewPosition);
+			// // gl_FragColor=vec4(d1/resolution,0,1);return;
+
+			// float totalLen=length(d1-d0);
+			// float xLen=d1.x-d0.x;
+			// float yLen=d1.y-d0.y;
+			// float totalStep=max(abs(xLen),abs(yLen));
+			// float xSpan=xLen/totalStep;
+			// float ySpan=yLen/totalStep;
+			// for(float i=0.;i<MAX_STEP;i++){
+			// 	if(i>=totalStep) break;
+			// 	vec2 xy=vec2(d0.x+i*xSpan,d0.y+i*ySpan);
+			// 	if(xy.x<0.||xy.x>resolution.x) break;
+			// 	if(xy.y<0.||xy.y>resolution.y) break;
+			// 	vec2 uv=xy/resolution;
+
+			// 	float d = getDepth(uv);
+			// 	float vZ = getViewZ( d );
+			// 	float clipW = cameraProjectionMatrix[2][3] * vZ + cameraProjectionMatrix[3][3];
+			// 	vec3 vP=getViewPosition( uv, d, vZ, clipW );
+			// 	float away=pointToLineDistance(vP,viewPosition,d1viewPosition);
+			// 	float sD=surfDist*clipW;
+			// 	if(away<sD){
+			// 		vec3 vN=getViewNormal( uv );
+			// 		if(dot(viewReflectDir,vN)>=0.) continue;
+			// 		vec4 reflectColor=texture2D(tDiffuse,uv);
+			// 		gl_FragColor=reflectColor;
+			// 		gl_FragColor.a=opacity;
+			// 		break;
+			// 	}
+			// }
 		}
 	`
 
