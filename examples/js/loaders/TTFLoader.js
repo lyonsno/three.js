@@ -1,7 +1,5 @@
+console.warn( "THREE.TTFLoader: As part of the transition to ES6 Modules, the files in 'examples/js' were deprecated in May 2020 (r117) and will be deleted in December 2020 (r124). You can find more information about developing using ES6 Modules in https://threejs.org/docs/#manual/en/introduction/Installation." );
 /**
- * @author gero3 / https://github.com/gero3
- * @author tentone / https://github.com/tentone
- *
  * Requires opentype.js to be included in the project.
  * Loads TTF files and converts them into typeface JSON that can be used directly
  * to create THREE.Font objects.
@@ -9,12 +7,14 @@
 
 THREE.TTFLoader = function ( manager ) {
 
-	this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
+	THREE.Loader.call( this, manager );
+
 	this.reversed = false;
 
 };
 
-THREE.TTFLoader.prototype = {
+
+THREE.TTFLoader.prototype = Object.assign( Object.create( THREE.Loader.prototype ), {
 
 	constructor: THREE.TTFLoader,
 
@@ -23,10 +23,31 @@ THREE.TTFLoader.prototype = {
 		var scope = this;
 
 		var loader = new THREE.FileLoader( this.manager );
+		loader.setPath( this.path );
 		loader.setResponseType( 'arraybuffer' );
+		loader.setRequestHeader( this.requestHeader );
+		loader.setWithCredentials( this.withCredentials );
 		loader.load( url, function ( buffer ) {
 
-			onLoad( scope.parse( buffer ) );
+			try {
+
+				onLoad( scope.parse( buffer ) );
+
+			} catch ( e ) {
+
+				if ( onError ) {
+
+					onError( e );
+
+				} else {
+
+					console.error( e );
+
+				}
+
+				scope.manager.itemError( url );
+
+			}
 
 		}, onProgress, onError );
 
@@ -41,11 +62,15 @@ THREE.TTFLoader.prototype = {
 			var glyphs = {};
 			var scale = ( 100000 ) / ( ( font.unitsPerEm || 2048 ) * 72 );
 
-			for ( var i = 0; i < font.glyphs.length; i ++ ) {
+			var glyphIndexMap = font.encoding.cmap.glyphIndexMap;
+			var unicodes = Object.keys( glyphIndexMap );
 
-				var glyph = font.glyphs.glyphs[ i ];
+			for ( var i = 0; i < unicodes.length; i ++ ) {
 
-				if ( glyph.unicode !== undefined ) {
+				var unicode = unicodes[ i ];
+				var glyph = font.glyphs.glyphs[ glyphIndexMap[ unicode ] ];
+
+				if ( unicode !== undefined ) {
 
 					var token = {
 						ha: round( glyph.advanceWidth * scale ),
@@ -60,7 +85,7 @@ THREE.TTFLoader.prototype = {
 
 					}
 
-					glyph.path.commands.forEach( function ( command, i ) {
+					glyph.path.commands.forEach( function ( command ) {
 
 						if ( command.type.toLowerCase() === 'c' ) {
 
@@ -90,7 +115,7 @@ THREE.TTFLoader.prototype = {
 
 					} );
 
-					glyphs[ String.fromCharCode( glyph.unicode ) ] = token;
+					glyphs[ String.fromCodePoint( glyph.unicode ) ] = token;
 
 				}
 
@@ -98,7 +123,7 @@ THREE.TTFLoader.prototype = {
 
 			return {
 				glyphs: glyphs,
-				familyName: font.familyName,
+				familyName: font.getEnglishName( 'fullName' ),
 				ascender: round( font.ascender * scale ),
 				descender: round( font.descender * scale ),
 				underlinePosition: font.tables.post.underlinePosition,
@@ -185,8 +210,8 @@ THREE.TTFLoader.prototype = {
 
 		}
 
-		return convert( opentype.parse( arraybuffer ), this.reversed );
+		return convert( opentype.parse( arraybuffer ), this.reversed ); // eslint-disable-line no-undef
 
 	}
 
-};
+} );

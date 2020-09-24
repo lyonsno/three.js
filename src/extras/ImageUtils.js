@@ -1,14 +1,22 @@
-/**
- * @author mrdoob / http://mrdoob.com/
- * @author alteredq / http://alteredqualia.com/
- * @author szimek / https://github.com/szimek/
- */
+let _canvas;
 
-var ImageUtils = {
+const ImageUtils = {
 
 	getDataURL: function ( image ) {
 
-		var canvas;
+		if ( /^data:/i.test( image.src ) ) {
+
+			return image.src;
+
+		}
+
+		if ( typeof HTMLCanvasElement == 'undefined' ) {
+
+			return image.src;
+
+		}
+
+		let canvas;
 
 		if ( image instanceof HTMLCanvasElement ) {
 
@@ -16,11 +24,12 @@ var ImageUtils = {
 
 		} else {
 
-			canvas = document.createElementNS( 'http://www.w3.org/1999/xhtml', 'canvas' );
-			canvas.width = image.width;
-			canvas.height = image.height;
+			if ( _canvas === undefined ) _canvas = document.createElementNS( 'http://www.w3.org/1999/xhtml', 'canvas' );
 
-			var context = canvas.getContext( '2d' );
+			_canvas.width = image.width;
+			_canvas.height = image.height;
+
+			const context = _canvas.getContext( '2d' );
 
 			if ( image instanceof ImageData ) {
 
@@ -31,6 +40,8 @@ var ImageUtils = {
 				context.drawImage( image, 0, 0, image.width, image.height );
 
 			}
+
+			canvas = _canvas;
 
 		}
 

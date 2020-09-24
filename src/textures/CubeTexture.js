@@ -1,18 +1,17 @@
-/**
- * @author mrdoob / http://mrdoob.com/
- */
-
 import { Texture } from './Texture.js';
-import { CubeReflectionMapping } from '../constants.js';
+import { CubeReflectionMapping, RGBFormat } from '../constants.js';
 
 function CubeTexture( images, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding ) {
 
 	images = images !== undefined ? images : [];
 	mapping = mapping !== undefined ? mapping : CubeReflectionMapping;
+	format = format !== undefined ? format : RGBFormat;
 
 	Texture.call( this, images, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy, encoding );
 
 	this.flipY = false;
+
+	this._needsFlipEnvMap = true;
 
 }
 
