@@ -122,7 +122,7 @@ var SSRShader = {
 			if(-viewZ>=cameraFar) return;
 
 			float clipW = cameraProjectionMatrix[2][3] * viewZ + cameraProjectionMatrix[3][3];
-			gl_FragColor=vec4(vec3(clipW/cameraFar),1);return;
+			// gl_FragColor=vec4(vec3(clipW/cameraFar),1);return;
 			vec3 viewPosition=getViewPosition( vUv, depth, viewZ, clipW );
 
 			// vec3 viewPosition=getViewPosition( vUv, depth, viewZ );
