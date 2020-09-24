@@ -105,6 +105,12 @@ var SSRShader = {
 			xy*=resolution;
 			return xy;
 		}
+		vec4 ndcPositionToViewPosition(vec3 ndcPosition){
+			float clipW = cameraProjectionMatrix[2][3] * viewZ + cameraProjectionMatrix[3][3];
+			vec4 clipPosition=vec4(ndcPosition*clipW,clipW);
+			vec4 viewPosition=cameraInverseProjectionMatrix*clipPosition;
+			return viewPosition;
+		}
 		float pointToLineDistance(vec3 x0, vec3 x1, vec3 x2) {
 			//x0: point, x1: linePointA, x2: linePointB
 			//https://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
@@ -163,6 +169,12 @@ var SSRShader = {
 			d1=viewPositionToXY(d1viewPosition);
 			// gl_FragColor=vec4(d1/resolution,0,1);return;
 
+			vec4 d0clipPosition=cameraProjectionMatrix*vec4(viewPosition,1);
+			vec3 d0ndcPosition=d0clipPosition.xyz/d0clipPosition.w;
+
+			vec4 d1clipPosition=cameraProjectionMatrix*vec4(d1viewPosition,1);
+			vec3 d1ndcPosition=d1clipPosition.xyz/d1clipPosition.w;
+
 			// vec3 d0projectedPosition=vec3(d0,viewZ);
 			// vec3 d1projectedPosition=vec3(d1,d1viewPosition.z);
 			// float dx=d1projectedPosition.x-d0projectedPosition.x;
@@ -186,6 +198,14 @@ var SSRShader = {
 				float vZ = getViewZ( d );
 				float clipW = cameraProjectionMatrix[2][3] * vZ + cameraProjectionMatrix[3][3];
 				vec3 vP=getViewPosition( uv, d, vZ, clipW );
+
+				vec2 rayNdcXY=uv*2.-1.;
+				float rayNdcX=rayNdcXY.x;
+				float rayNdcZ=(rayNdcX-d0ndcPosition.x)/(d1ndcPosition.x-d0ndcPosition.x)*(d1ndcPosition.z-d0ndcPosition.z)+d0ndcPosition.z;
+				rayNdcPosition=vec3(rayNdcXY,rayNdcZ);
+				vec4 rayViewPosition=ndcPositionToViewPosition(rayNdcPosition);
+
+
 				float away=pointToLineDistance(vP,viewPosition,d1viewPosition);
 
 				float op=opacity;
