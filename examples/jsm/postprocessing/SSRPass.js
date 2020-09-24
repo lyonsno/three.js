@@ -280,7 +280,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     this.ssrMaterial.uniforms['surfDist'].value = this.surfDist;
     this.ssrMaterial.uniforms['isDistanceAttenuation'].value = this.isDistanceAttenuation
     this.ssrMaterial.uniforms['isDAGreedyBreak'].value = this.isDAGreedyBreak
-    this.ssrMaterial.uniforms['attenuationDistacne'].value = this.attenuationDistacne
+    this.ssrMaterial.uniforms['attenuationDistance'].value = this.attenuationDistance
     this.renderPass(renderer, this.ssrMaterial, this.ssrRenderTarget);
 
 

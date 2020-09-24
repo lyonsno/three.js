@@ -30,7 +30,7 @@ var SSRShader = {
     "isPerspectiveCamera": { value: null },
     "isDistanceAttenuation": { value: null },
     "isDAGreedyBreak": { value: null },
-    "attenuationDistacne": { value: null },
+    "attenuationDistance": { value: null },
 
   },
 
@@ -70,7 +70,7 @@ var SSRShader = {
 		uniform bool isPerspectiveCamera;
 		uniform bool isDistanceAttenuation;
 		uniform bool isDAGreedyBreak;
-		uniform float attenuationDistacne;
+		uniform float attenuationDistance;
 		#include <packing>
 		float getDepth( const in vec2 screenPosition ) {
 			return texture2D( tDepth, screenPosition ).x;
@@ -190,10 +190,11 @@ var SSRShader = {
 
 				float op=opacity;
 				if(isDistanceAttenuation){
-					float hypotenuse=length(vP-viewPosition);
-					float rayLen=sqrt(hypotenuse*hypotenuse-away*away);
-					if(rayLen>=attenuationDistacne) break;
-					float attenuation=(1.-rayLen/attenuationDistacne);
+					float xyLen=length(xy-d0);
+					// xyLen*=clipW;
+					// xyLen*=.005;
+					if(xyLen>=attenuationDistance) break;
+					float attenuation=(1.-xyLen/attenuationDistance);
 					attenuation=attenuation*attenuation;
 					op=opacity*attenuation;
 				}
