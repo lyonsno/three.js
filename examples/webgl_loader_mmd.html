@@ -4,23 +4,15 @@
 		<title>three.js webgl - loaders - MMD loader</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
 		<style>
 			body {
-				font-family: Monospace;
 				background-color: #fff;
-				color: #000;
-				margin: 0px;
-				overflow: hidden;
+				color: #444;
 			}
-			#info {
-				color: #000;
-				position: absolute;
-				top: 10px;
-				width: 100%;
-				text-align: center;
-				display:block;
+			a {
+				color: #08f;
 			}
-			#info a, .button { color: #f00; font-weight: bold; text-decoration: underline; cursor: pointer }
 		</style>
 	</head>
 
@@ -47,7 +39,6 @@
 
 		<script src="js/controls/OrbitControls.js"></script>
 
-		<script src="js/Detector.js"></script>
 		<script src="js/libs/stats.min.js"></script>
 		<script src="js/libs/dat.gui.min.js"></script>
 
@@ -58,15 +49,17 @@
 			var mesh, camera, scene, renderer, effect;
 			var helper, ikHelper, physicsHelper;
 
-			var mouseX = 0, mouseY = 0;
-
-			var windowHalfX = window.innerWidth / 2;
-			var windowHalfY = window.innerHeight / 2;
-
 			var clock = new THREE.Clock();
 
-			init();
-			animate();
+			Ammo().then( function( AmmoLib ) {
+
+				Ammo = AmmoLib;
+
+				init();
+				animate();
+
+			} );
+
 
 			function init() {
 
@@ -117,10 +110,8 @@
 
 					}
 
-				};
+				}
 
-				function onError( xhr ) {
-				};
 
 				var modelFile = 'models/mmd/miku/miku_v2.pmd';
 				var vmdFiles = [ 'models/mmd/vmds/wavefile_v2.vmd' ];
@@ -152,7 +143,7 @@
 
 					initGui();
 
-				}, onProgress, onError );
+				}, onProgress, null );
 
 				var controls = new THREE.OrbitControls( camera, renderer.domElement );
 
@@ -194,7 +185,9 @@
 					var gui = new dat.GUI();
 
 					gui.add( api, 'animation' ).onChange( function () {
+
 						helper.enable( 'animation', api[ 'animation' ] );
+
 					} );
 
 					gui.add( api, 'gradient mapping' ).onChange( function () {
@@ -215,23 +208,33 @@
 					} );
 
 					gui.add( api, 'ik' ).onChange( function () {
+
 						helper.enable( 'ik', api[ 'ik' ] );
+
 					} );
 
 					gui.add( api, 'outline' ).onChange( function () {
+
 						effect.enabled = api[ 'outline' ];
+
 					} );
 
 					gui.add( api, 'physics' ).onChange( function () {
+
 						helper.enable( 'physics', api[ 'physics' ] );
+
 					} );
 
 					gui.add( api, 'show IK bones' ).onChange( function () {
+
 						ikHelper.visible = api[ 'show IK bones' ];
+
 					} );
 
 					gui.add( api, 'show rigid bodies' ).onChange( function () {
+
 						if ( physicsHelper !== undefined ) physicsHelper.visible = api[ 'show rigid bodies' ];
+
 					} );
 
 				}
@@ -239,9 +242,6 @@
 			}
 
 			function onWindowResize() {
-
-				windowHalfX = window.innerWidth / 2;
-				windowHalfY = window.innerHeight / 2;
 
 				camera.aspect = window.innerWidth / window.innerHeight;
 				camera.updateProjectionMatrix();

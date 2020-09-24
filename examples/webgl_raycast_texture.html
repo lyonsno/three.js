@@ -4,39 +4,28 @@
 		<title>three.js raycast - texture</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
 		<style>
 			body {
-				color: #808080;
-				font-family: Monospace;
-				font-size: 13px;
-				text-align: center;
-
-				background-color: #ffffff;
-				margin: 0px;
-				overflow: hidden;
+				background-color: #fff;
+				color: #444;
 			}
 
-			#info {
-				position: absolute;
-				top: 0px; width: 100%;
-				padding: 5px;
+			a {
+				color: #08f;
 			}
 
 			#controls {
 				position: absolute;
 				text-align:left;
-				top: 40px;
+				top: 60px;
 				left: 5px;
 				padding: 5px;
 			}
 
-			.control {
-				margin-bottom: 3px;
-			}
+			.control { margin-bottom: 3px; }
 
-			input {
-				width: 50px;
-			}
+			input { width: 50px; }
 		</style>
 	</head>
 	<body>
@@ -88,7 +77,7 @@
 
 				var that = this;
 				this._background = document.createElement( "img" );
-				this._background.addEventListener( "load", function ( event ) {
+				this._background.addEventListener( "load", function () {
 
 					that._canvas.width = that._background.naturalWidth;
 					that._canvas.height = that._background.naturalHeight;
@@ -181,7 +170,7 @@
 
 				}
 
-			}
+			};
 
 			var width = window.innerWidth;
 			var height = window.innerHeight;

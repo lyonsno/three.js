@@ -4,23 +4,15 @@
 		<title>three.js webgl - loaders - MMD loader</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
 		<style>
 			body {
-				font-family: Monospace;
 				background-color: #fff;
-				color: #000;
-				margin: 0px;
-				overflow: hidden;
+				color: #444;
 			}
-			#info {
-				color: #000;
-				position: absolute;
-				top: 10px;
-				width: 100%;
-				text-align: center;
-				display:block;
+			a {
+				color: #08f;
 			}
-			#info a, .button { color: #f00; font-weight: bold; text-decoration: underline; cursor: pointer }
 		</style>
 	</head>
 
@@ -45,23 +37,26 @@
 		<script src="js/animation/MMDPhysics.js"></script>
 		<script src="js/animation/MMDAnimationHelper.js"></script>
 
-		<script src="js/Detector.js"></script>
 		<script src="js/libs/stats.min.js"></script>
 		<script src="js/libs/dat.gui.min.js"></script>
 
 		<script>
 
-			var container, stats;
+			var container;
 
 			var camera, scene, renderer, effect;
 			var mesh, helper;
 
 			var vpds = [];
 
-			var clock = new THREE.Clock();
+			Ammo().then( function( AmmoLib ) {
 
-			init();
-			animate();
+				Ammo = AmmoLib;
+
+				init();
+				animate();
+
+			} );
 
 			function init() {
 
@@ -103,10 +98,7 @@
 
 					}
 
-				};
-
-				function onError( xhr ) {
-				};
+				}
 
 				var modelFile = 'models/mmd/miku/miku_v2.pmd';
 				var vpdFiles = [
@@ -156,13 +148,13 @@
 
 							}
 
-						}, onProgress, onError );
+						}, onProgress, null );
 
 					}
 
 					loadVpd();
 
-				}, onProgress, onError );
+				}, onProgress, null );
 
 				//
 
@@ -196,7 +188,7 @@
 
 						controls.pose = - 1;
 
-						for ( var i = 0; i < vpdFiles.length; i++ ) {
+						for ( var i = 0; i < vpdFiles.length; i ++ ) {
 
 							controls[ getBaseName( vpdFiles[ i ] ) ] = false;
 
@@ -218,7 +210,7 @@
 
 						var files = { default: - 1 };
 
-						for ( var i = 0; i < vpdFiles.length; i++ ) {
+						for ( var i = 0; i < vpdFiles.length; i ++ ) {
 
 							files[ getBaseName( vpdFiles[ i ] ) ] = i;
 
@@ -240,7 +232,7 @@
 
 					function onChangeMorph() {
 
-						for ( var i = 0; i < keys.length; i++ ) {
+						for ( var i = 0; i < keys.length; i ++ ) {
 
 							var key = keys[ i ];
 							var value = controls[ key ];

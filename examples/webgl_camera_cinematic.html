@@ -1,21 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>three.js webgl-camera cinematic</title>
+		<title>three.js webgl - camera cinematic</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
 		<style>
 			body {
-				font-family: Monospace;
-				background-color: #f0f0f0;
-				margin: 0px;
-				overflow: hidden;
+				background-color: #fff;
+				color: #000;
 			}
-			#info {
-				position: absolute;
-				top: 10px;
-				width: 100%;
-				text-align: center;
+			a {
+				color: #08f;
 			}
 		</style>
 	</head>
@@ -86,7 +82,7 @@
 
 				window.addEventListener( 'resize', onWindowResize, false );
 
-				var effectController  = {
+				var effectController = {
 
 					focalLength: 15,
 					// jsDepthCalculation: true,
@@ -114,7 +110,7 @@
 
 				};
 
-				var matChanger = function( ) {
+				var matChanger = function ( ) {
 
 					for ( var e in effectController ) {
 
@@ -197,7 +193,7 @@
 
 					var targetDistance = intersects[ 0 ].distance;
 
-					camera.focusAt( targetDistance );  // using Cinematic camera focusAt method
+					camera.focusAt( targetDistance ); // using Cinematic camera focusAt method
 
 					if ( INTERSECTED != intersects[ 0 ].object ) {
 
@@ -206,6 +202,7 @@
 						INTERSECTED = intersects[ 0 ].object;
 						INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
 						INTERSECTED.material.emissive.setHex( 0xff0000 );
+
 					}
 
 				} else {

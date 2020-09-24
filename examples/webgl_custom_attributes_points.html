@@ -4,27 +4,7 @@
 		<title>three.js webgl - custom attributes [particles]</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<style>
-			body {
-				color: #ffffff;
-				font-family:Monospace;
-				font-size:13px;
-				text-align:center;
-				font-weight: bold;
-
-				background-color: #000000;
-				margin: 0px;
-				overflow: hidden;
-			}
-			#info {
-				color: #fff;
-				position: absolute;
-				top: 0px; width: 100%;
-				padding: 5px;
-				z-index:100;
-			}
-			a { color: #ff0000 }
-		</style>
+		<link type="text/css" rel="stylesheet" href="main.css">
 	</head>
 
 	<body>
@@ -33,12 +13,11 @@
 
 		<script src="../build/three.js"></script>
 
-		<script src="js/Detector.js"></script>
+		<script src="js/WebGL.js"></script>
 		<script src="js/libs/stats.min.js"></script>
 
 		<script type="x-shader/x-vertex" id="vertexshader">
 
-			uniform float amplitude;
 			attribute float size;
 			attribute vec3 customColor;
 
@@ -77,13 +56,15 @@
 
 		<script>
 
-		if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+		if ( WEBGL.isWebGLAvailable() === false ) {
+
+			document.body.appendChild( WEBGL.getWebGLErrorMessage() );
+
+		}
 
 		var renderer, scene, camera, stats;
 
 		var sphere;
-
-		var noise = [];
 
 		var WIDTH = window.innerWidth;
 		var HEIGHT = window.innerHeight;
@@ -141,18 +122,17 @@
 			var material = new THREE.ShaderMaterial( {
 
 				uniforms: {
-					amplitude: { value: 1.0 },
-					color:     { value: new THREE.Color( 0xffffff ) },
-					texture:   { value: new THREE.TextureLoader().load( "textures/sprites/spark1.png" ) }
+					color: { value: new THREE.Color( 0xffffff ) },
+					texture: { value: new THREE.TextureLoader().load( "textures/sprites/spark1.png" ) }
 				},
-				vertexShader:   document.getElementById( 'vertexshader' ).textContent,
+				vertexShader: document.getElementById( 'vertexshader' ).textContent,
 				fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
 
-				blending:       THREE.AdditiveBlending,
-				depthTest:      false,
-				transparent:    true
+				blending: THREE.AdditiveBlending,
+				depthTest: false,
+				transparent: true
 
-			});
+			} );
 
 			//
 
@@ -204,7 +184,7 @@
 			var geometry = sphere.geometry;
 			var attributes = geometry.attributes;
 
-			for ( var i = 0; i < attributes.size.array.length; i++ ) {
+			for ( var i = 0; i < attributes.size.array.length; i ++ ) {
 
 				attributes.size.array[ i ] = 14 + 13 * Math.sin( 0.1 * i + time );
 

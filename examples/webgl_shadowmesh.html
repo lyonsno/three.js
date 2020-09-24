@@ -4,14 +4,8 @@
 		<title> three.js webgl - ShadowMesh </title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
 		<style>
-			body {
-				background-color: rgb(0, 0, 0);
-				margin: 0;
-				padding: 0;
-				overflow: hidden;
-			}
-
 			#lightButton {
 				position: absolute;
 				right: 20px;
@@ -47,7 +41,6 @@
 			var lightSphere, lightHolder;
 			var pyramid, pyramidShadow;
 			var sphere, sphereShadow;
-			var box, boxShadow;
 			var cube, cubeShadow;
 			var cylinder, cylinderShadow;
 			var torus, torusShadow;
@@ -70,7 +63,7 @@
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
 				document.getElementById( "container" ).appendChild( renderer.domElement );
-				window.addEventListener( 'resize' , onWindowResize, false );
+				window.addEventListener( 'resize', onWindowResize, false );
 
 				camera.position.set( 0, 2.5, 10 );
 				scene.add( camera );
@@ -215,7 +208,6 @@
 
 				renderer.render( scene, camera );
 
-
 			}
 
 			function onWindowResize() {
@@ -232,7 +224,7 @@
 
 			function lightButtonHandler() {
 
-				useDirectionalLight = !useDirectionalLight;
+				useDirectionalLight = ! useDirectionalLight;
 
 				if ( useDirectionalLight ) {
 
@@ -254,7 +246,7 @@
 					lightSphere.visible = false;
 					lightHolder.visible = false;
 
-					document.getElementById( 'lightButton' ).value = "Switch to PointLight" ;
+					document.getElementById( 'lightButton' ).value = "Switch to PointLight";
 
 				} else {
 
@@ -280,7 +272,7 @@
 					lightSphere.visible = true;
 					lightHolder.visible = true;
 
-					document.getElementById( 'lightButton' ).value = "Switch to DirectionalLight" ;
+					document.getElementById( 'lightButton' ).value = "Switch to DirectionalLight";
 
 				}
 
