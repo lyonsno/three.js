@@ -110,6 +110,12 @@ var SSRShader = {
 			//https://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
 			return length(cross(x0-x1,x0-x2))/length(x2-x1);
 		}
+		vec2 lineLineIntersectPoint(float x1,float y1,float x2,float y2,float x3,float y3,float x4,float y4){
+			//https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
+			float x=((x1*y2-y1*x2)*(x3-x4)-(x1-x2)*(x3*y4-y3*x4))/((x1-x2)*(y3-y4)-(y1-y2)*(x3-x4));
+			float y=((x1*y2-y1*x2)*(y3-y4)-(y1-y2)*(x3*y4-y3*x4))/((x1-x2)*(y3-y4)-(y1-y2)*(x3-x4));
+			return vec2(x,y);
+		}
 		void main(){
 			if(isSelective){
 				float metalness=texture2D(tMetalness,vUv).r;
@@ -190,11 +196,38 @@ var SSRShader = {
 
 				float op=opacity;
 				if(isDistanceAttenuation){
-					float xyLen=length(xy-d0);
+
+					// float xyLen=length(xy-d0);
 					// xyLen*=clipW;
 					// xyLen*=.005;
-					if(xyLen>=attenuationDistance) break;
-					float attenuation=(1.-xyLen/attenuationDistance);
+					// if(xyLen>=attenuationDistance) break;
+					// float attenuation=(1.-xyLen/attenuationDistance);
+
+					float x1=viewPosition.x;
+					float y1=viewPosition.z;
+					float x2=d1viewPosition.x;
+					float y2=d1viewPosition.z;
+					float x3=0.;
+					float y3=0.;
+					float x4;
+					float y4=-cameraNear;
+
+					float cw=cameraNear;
+					x4=(uv.x*2.-1.);//ndc
+					x4*=cw;//clip
+					x4=(cameraInverseProjectionMatrix*vec4(x4,0,0,cw)).x;//view
+
+					vec2 viewIntersect=lineLineIntersectPoint(x1,y1,x2,y2,x3,y3,x4,y4);
+
+					float rayPointY=(uv.y*2.-1.);//ndc
+					rayPointY*=cw;//clip
+					rayPointY=(cameraInverseProjectionMatrix*vec4(0,rayPointY,0,cw)).y;//view
+					vec3 rayPoint=vec3(viewIntersect.x,rayPointY,viewIntersect.y);
+
+					float rayLen=length(rayPoint-viewPosition);
+					if(rayLen>=attenuationDistance) break;
+					float attenuation=(1.-rayLen/attenuationDistance);
+
 					attenuation=attenuation*attenuation;
 					op=opacity*attenuation;
 				}
