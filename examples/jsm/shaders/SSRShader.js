@@ -197,63 +197,23 @@ var SSRShader = {
 				float op=opacity;
 				if(isDistanceAttenuation){
 
-					// float xyLen=length(xy-d0);
-					// xyLen*=clipW;
-					// xyLen*=.005;
-					// if(xyLen>=attenuationDistance) break;
-					// float attenuation=(1.-xyLen/attenuationDistance);
+					vec3 viewNearPlanePoint;
 
-					vec3 rayPoint;
-					if(d1viewPosition.x>d1viewPosition.y){
-						float x1=viewPosition.x;
-						float y1=viewPosition.z;
-						float x2=d1viewPosition.x;
-						float y2=d1viewPosition.z;
-						float x3=0.;
-						float y3=0.;
-						float x4;
-						float y4=-cameraNear;
+					vec2 viewNearPlanePointXY=uv;//uv
+					viewNearPlanePointXY*=2.;
+					viewNearPlanePointXY-=1.;//ndc
+					float cw=cameraNear;
+					viewNearPlanePointXY*=cw;//clip
+					viewNearPlanePointXY=(cameraInverseProjectionMatrix*vec4(viewNearPlanePointXY,0,cw)).xy;//view
 
-						float cw=cameraNear;
-						x4=(uv.x*2.-1.);//ndc
-						x4*=cw;//clip
-						x4=(cameraInverseProjectionMatrix*vec4(x4,0,0,cw)).x;//view
+					viewNearPlanePoint=vec3(viewNearPlanePointXY,-cameraNear);
 
-						vec2 viewIntersect=lineLineIntersectPoint(x1,y1,x2,y2,x3,y3,x4,y4);
+					// float rayLen=length(viewNearPlanePoint-viewPosition);
+					// if(rayLen>=attenuationDistance) break;
+					// float attenuation=(1.-rayLen/attenuationDistance);
 
-						float rayPointY=(uv.y*2.-1.);//ndc
-						rayPointY*=cw;//clip
-						rayPointY=(cameraInverseProjectionMatrix*vec4(0,rayPointY,0,cw)).y;//view
-						rayPoint=vec3(viewIntersect.x,rayPointY,viewIntersect.y);
-					}else{
-						float x1=viewPosition.y;
-						float y1=viewPosition.z;
-						float x2=d1viewPosition.y;
-						float y2=d1viewPosition.z;
-						float x3=0.;
-						float y3=0.;
-						float x4;
-						float y4=-cameraNear;
-
-						float cw=cameraNear;
-						x4=(uv.y*2.-1.);//ndc
-						x4*=cw;//clip
-						x4=(cameraInverseProjectionMatrix*vec4(0,x4,0,cw)).y;//view
-
-						vec2 viewIntersect=lineLineIntersectPoint(x1,y1,x2,y2,x3,y3,x4,y4);
-
-						float rayPointX=(uv.x*2.-1.);//ndc
-						rayPointX*=cw;//clip
-						rayPointX=(cameraInverseProjectionMatrix*vec4(rayPointX,0,0,cw)).x;//view
-						rayPoint=vec3(rayPointX,viewIntersect.x,viewIntersect.y);
-					}
-
-					float rayLen=length(rayPoint-viewPosition);
-					if(rayLen>=attenuationDistance) break;
-					float attenuation=(1.-rayLen/attenuationDistance);
-
-					attenuation=attenuation*attenuation;
-					op=opacity*attenuation;
+					// attenuation=attenuation*attenuation;
+					// op=opacity*attenuation;
 				}
 
 				// if(length(vP-viewPosition)>maxDistance) continue;
