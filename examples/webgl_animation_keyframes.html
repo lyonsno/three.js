@@ -15,6 +15,15 @@
 				color: #2983ff;
 			}
 		</style>
+		<script>
+			var _hmt = _hmt || [];
+			(function() {
+				var hm = document.createElement("script");
+				hm.src = "https://hm.baidu.com/hm.js?e67efb7496d97ed7057c06b9e2455d87";
+				var s = document.getElementsByTagName("script")[0]; 
+				s.parentNode.insertBefore(hm, s);
+			})();
+			</script>
 	</head>
 
 	<body>
@@ -24,7 +33,8 @@
 		<div id="info">
 			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - animation - keyframes<br/>
 			Model: <a href="https://www.artstation.com/artwork/1AGwX" target="_blank" rel="noopener">Littlest Tokyo</a> by
-			<a href="https://www.artstation.com/glenatron" target="_blank" rel="noopener">Glen Fox</a>, CC Attribution.
+			<a href="https://www.artstation.com/glenatron" target="_blank" rel="noopener">Glen Fox</a>, CC Attribution.<br/>
+			<a href="https://github.com/mrdoob/three.js/pull/20156" target="_blank" rel="noopener">SSRPass</a> add by <a href="https://github.com/gonnavis" target="_blank" rel="noopener">Vis</a>
 		</div>
 
 		<script type="module">
@@ -36,6 +46,18 @@
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
 			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 			import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
+	
+	import { GUI } from './jsm/libs/dat.gui.module.js';
+	import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
+	import { SSRPass } from './jsm/postprocessing/SSRPass.js';
+
+	var params = {
+		enableSSR: true,
+		darken: false,
+	}
+	var composer
+	var ssrPass
+	var gui
 
 			var scene, camera, dirLight, stats;
 			var renderer, mixer, controls;
@@ -46,8 +68,8 @@
 			stats = new Stats();
 			container.appendChild( stats.dom );
 
-			renderer = new THREE.WebGLRenderer( { antialias: true } );
-			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer = new THREE.WebGLRenderer( { antialias: false } );
+			// renderer.setPixelRatio( window.devicePixelRatio );
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			renderer.outputEncoding = THREE.sRGBEncoding;
 			container.appendChild( renderer.domElement );
@@ -118,6 +140,52 @@
 
 			};
 
+// composer
+
+composer = new EffectComposer(renderer);
+ssrPass = new SSRPass({
+	scene, 
+	camera, 
+	innerWidth, 
+	innerHeight,
+	encoding: THREE.sRGBEncoding,
+});
+composer.addPass(ssrPass);
+
+// GUI
+
+gui = new GUI( { width: 400 } );
+// ssrPass.surfDist=4.2
+ssrPass.maxDistance=4.5
+ssrPass.surfDist=.001
+// ssrPass.output=SSRPass.OUTPUT.SSR
+gui.add(params, 'enableSSR').name( 'Enable SSR' );
+gui.add(params, 'darken').name('rainy').onChange(function(value){
+	if(value){
+		ssrPass.encoding = THREE.LinearEncoding
+	}else{
+		ssrPass.encoding = THREE.sRGBEncoding
+	}
+});
+gui.add(ssrPass,'isBouncing')
+gui.add(ssrPass, 'output', {
+	'Default': SSRPass.OUTPUT.Default,
+	'DefaultBlur': SSRPass.OUTPUT.DefaultBlur,
+	'SSR Only': SSRPass.OUTPUT.SSR,
+	'SSR Only + Blur': SSRPass.OUTPUT.Blur,
+	'Beauty': SSRPass.OUTPUT.Beauty,
+	'Depth': SSRPass.OUTPUT.Depth,
+	'Normal': SSRPass.OUTPUT.Normal
+}).onChange(function (value) {
+
+	ssrPass.output = parseInt(value);
+
+});
+gui.add(ssrPass, 'opacity').min(0).max(1);
+gui.add(ssrPass, 'maxDistance').min(0).max(10).step(.001);
+// gui.add(ssrPass, 'surfDist').min(0).max(10).step(.1);
+gui.add(ssrPass, 'surfDist').min(0).max(.002).step(.0001);
+
 
 			function animate() {
 
@@ -131,7 +199,12 @@
 
 				stats.update();
 
-				renderer.render( scene, camera );
+
+				if(params.enableSSR){
+			composer.render();
+		}else{
+			renderer.render(scene,camera)
+		}
 
 			}
 
