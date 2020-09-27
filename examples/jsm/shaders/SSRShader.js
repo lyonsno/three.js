@@ -204,7 +204,7 @@ var SSRShader = {
 					// float attenuation=(1.-xyLen/attenuationDistance);
 
 					vec3 rayPoint;
-					if(d1viewPosition.x>d1viewPosition.y){
+					if(abs(d1viewPosition.x)>abs(d1viewPosition.y)){
 						float x1=viewPosition.x;
 						float y1=viewPosition.z;
 						float x2=d1viewPosition.x;
