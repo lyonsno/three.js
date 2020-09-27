@@ -116,6 +116,33 @@ var SSRShader = {
 			float y=((x1*y2-y1*x2)*(y3-y4)-(y1-y2)*(x3*y4-y3*x4))/((x1-x2)*(y3-y4)-(y1-y2)*(x3-x4));
 			return vec2(x,y);
 		}
+		vec3 lineLineIntersectPoint(vec3 viewRayPointB,vec3 reflectRayPointA,vec3 reflectRayPointB){
+			vec3 viewRayPointA=vec3(0,0,0);
+
+			vec3 intersect;
+
+			vec2 intersectYPlane=lineLineIntersectPoint(viewRayPointA.x,viewRayPointA.z,viewRayPointB.x,viewRayPointB.z,reflectRayPointA.x,reflectRayPointA.z,reflectRayPointB.x,reflectRayPointB.z);
+			vec2 intersectXPlane=lineLineIntersectPoint(viewRayPointA.y,viewRayPointA.z,viewRayPointB.y,viewRayPointB.z,reflectRayPointA.y,reflectRayPointA.z,reflectRayPointB.y,reflectRayPointB.z);
+
+			vec3 viewRay=viewRayPointB-viewRayPointA;
+			vec3 reflectRay=reflectRayPointB-reflectRayPointA;
+
+			vec2 viewRayYPlane=vec2(viewRay.x,viewRay.z);
+			vec2 reflectRayYPlane=vec2(reflectRay.x,reflectRay.z);
+
+			vec2 viewRayXPlane=vec2(viewRay.y,viewRay.z);
+			vec2 reflectRayXPlane=vec2(reflectRay.y,reflectRay.z);
+
+			intersect.x=intersectYPlane.x;
+			intersect.y=intersectXPlane.y;
+			if(dot(viewRayYPlane,reflectRayYPlane)>dot(viewRayXPlane,reflectRayXPlane)){
+				intersect.z=intersectYPlane.y;
+			}else{
+				intersect.z=intersectXPlane.y;
+			}
+
+			return intersect;
+		}
 		void main(){
 			if(isSelective){
 				float metalness=texture2D(tMetalness,vUv).r;
@@ -206,14 +233,17 @@ var SSRShader = {
 					viewNearPlanePointXY*=cw;//clip
 					viewNearPlanePointXY=(cameraInverseProjectionMatrix*vec4(viewNearPlanePointXY,0,cw)).xy;//view
 
-					viewNearPlanePoint=vec3(viewNearPlanePointXY,-cameraNear);
+					viewNearPlanePoint=vec3(viewNearPlanePointXY,-cameraNear);//view
 
-					// float rayLen=length(viewNearPlanePoint-viewPosition);
-					// if(rayLen>=attenuationDistance) break;
-					// float attenuation=(1.-rayLen/attenuationDistance);
+					vec3 viewIntersect=lineLineIntersectPoint(viewNearPlanePoint,viewPosition,d1viewPosition);
 
-					// attenuation=attenuation*attenuation;
-					// op=opacity*attenuation;
+					// // float rayLen=length(viewNearPlanePoint-viewPosition);
+					float rayLen=length(viewIntersect-viewPosition);
+					if(rayLen>=attenuationDistance) break;
+					float attenuation=(1.-rayLen/attenuationDistance);
+
+					attenuation=attenuation*attenuation;
+					op=opacity*attenuation;
 				}
 
 				// if(length(vP-viewPosition)>maxDistance) continue;
