@@ -156,7 +156,8 @@ composer.addPass(ssrPass);
 
 gui = new GUI( { width: 400 } );
 // ssrPass.surfDist=4.2
-ssrPass.surfDist=.0006
+ssrPass.maxDistance=4.5
+ssrPass.surfDist=.001
 // ssrPass.output=SSRPass.OUTPUT.SSR
 gui.add(params, 'enableSSR').name( 'Enable SSR' );
 gui.add(params, 'darken').name('rainy').onChange(function(value){
@@ -181,9 +182,9 @@ gui.add(ssrPass, 'output', {
 
 });
 gui.add(ssrPass, 'opacity').min(0).max(1);
-gui.add(ssrPass, 'maxDistance').min(0).max(2000);
+gui.add(ssrPass, 'maxDistance').min(0).max(10).step(.001);
 // gui.add(ssrPass, 'surfDist').min(0).max(10).step(.1);
-gui.add(ssrPass, 'surfDist').min(0).max(.002).step(.00001);
+gui.add(ssrPass, 'surfDist').min(0).max(.002).step(.0001);
 
 
 			function animate() {
