@@ -29,7 +29,6 @@ var SSRShader = {
     "isSelective": { value: null },
     "isPerspectiveCamera": { value: null },
     "isDistanceAttenuation": { value: null },
-    "isDAGreedyBreak": { value: null },
     "attenuationDistance": { value: null },
 
   },
@@ -69,7 +68,6 @@ var SSRShader = {
 		uniform mat4 cameraInverseProjectionMatrix;
 		uniform bool isPerspectiveCamera;
 		uniform bool isDistanceAttenuation;
-		uniform bool isDAGreedyBreak;
 		uniform float attenuationDistance;
 		#include <packing>
 		float getDepth( const in vec2 screenPosition ) {
@@ -104,44 +102,6 @@ var SSRShader = {
 			xy/=2.;
 			xy*=resolution;
 			return xy;
-		}
-		float pointToLineDistance(vec3 x0, vec3 x1, vec3 x2) {
-			//x0: point, x1: linePointA, x2: linePointB
-			//https://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
-			return length(cross(x0-x1,x0-x2))/length(x2-x1);
-		}
-		vec2 lineLineIntersectPoint(float x1,float y1,float x2,float y2,float x3,float y3,float x4,float y4){
-			//https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
-			float x=((x1*y2-y1*x2)*(x3-x4)-(x1-x2)*(x3*y4-y3*x4))/((x1-x2)*(y3-y4)-(y1-y2)*(x3-x4));
-			float y=((x1*y2-y1*x2)*(y3-y4)-(y1-y2)*(x3*y4-y3*x4))/((x1-x2)*(y3-y4)-(y1-y2)*(x3-x4));
-			return vec2(x,y);
-		}
-		vec3 lineLineIntersectPoint(vec3 viewRayPointB,vec3 reflectRayPointA,vec3 reflectRayPointB){
-			vec3 viewRayPointA=vec3(0,0,0);
-
-			vec3 intersect;
-
-			vec2 intersectYPlane=lineLineIntersectPoint(viewRayPointA.x,viewRayPointA.z,viewRayPointB.x,viewRayPointB.z,reflectRayPointA.x,reflectRayPointA.z,reflectRayPointB.x,reflectRayPointB.z);
-			vec2 intersectXPlane=lineLineIntersectPoint(viewRayPointA.y,viewRayPointA.z,viewRayPointB.y,viewRayPointB.z,reflectRayPointA.y,reflectRayPointA.z,reflectRayPointB.y,reflectRayPointB.z);
-
-			vec3 viewRay=viewRayPointB-viewRayPointA;
-			vec3 reflectRay=reflectRayPointB-reflectRayPointA;
-
-			vec2 viewRayYPlane=vec2(viewRay.x,viewRay.z);
-			vec2 reflectRayYPlane=vec2(reflectRay.x,reflectRay.z);
-
-			vec2 viewRayXPlane=vec2(viewRay.y,viewRay.z);
-			vec2 reflectRayXPlane=vec2(reflectRay.y,reflectRay.z);
-
-			intersect.x=intersectYPlane.x;
-			intersect.y=intersectXPlane.y;
-			if(dot(viewRayYPlane,reflectRayYPlane)>dot(viewRayXPlane,reflectRayXPlane)){
-				intersect.z=intersectYPlane.y;
-			}else{
-				intersect.z=intersectXPlane.y;
-			}
-
-			return intersect;
 		}
 		vec3 lineLineIntersection(vec3 line1Point1, vec3 line1Point2,
 			vec3 line2Point1, vec3 line2Point2)
@@ -195,17 +155,11 @@ var SSRShader = {
 
 			float depth = getDepth( vUv );
 			float viewZ = getViewZ( depth );
-			// gl_FragColor=vec4(vec3(-viewZ/cameraFar),1);return;
 			if(-viewZ>=cameraFar) return;
 
 			float clipW = cameraProjectionMatrix[2][3] * viewZ + cameraProjectionMatrix[3][3];
-			// gl_FragColor=vec4(vec3(clipW/cameraFar),1);return;
 			vec3 viewPosition=getViewPosition( vUv, depth, viewZ, clipW );
 
-			// vec3 viewPosition=getViewPosition( vUv, depth, viewZ );
-
-			// gl_FragColor=vec4(viewPosition/100.*vec3(1,1,-1),1);return;
-			// gl_FragColor=vec4(-viewPosition.z/1000.,0,0,1);return;
 			vec2 d0=gl_FragCoord.xy;
 			vec2 d1;
 
@@ -217,7 +171,6 @@ var SSRShader = {
 				viewReflectDir=reflect(vec3(0,0,-1),viewNormal);
 			}
 			vec3 d1viewPosition=viewPosition+viewReflectDir*maxDistance;
-			// if(d1viewPosition.z>=.0) return;
 			if(d1viewPosition.z>-cameraNear){
 				vec2 tempXY=viewPosition.xy;
 				viewPosition.x=0.;
@@ -231,20 +184,7 @@ var SSRShader = {
 				viewPosition.xy=tempXY;
 				d1viewPosition.xy+=tempXY;
 			}
-			// if(d1viewPosition.z>0.){
-			// 	float ratio=viewPosition.z/(viewPosition.z-d1viewPosition.z);
-			// 	d1viewPosition.xy*=ratio;
-			// 	d1viewPosition.z=0.;
-			// }
-			// gl_FragColor=vec4(d1viewPosition/100.,1);return;
 			d1=viewPositionToXY(d1viewPosition);
-			// gl_FragColor=vec4(d1/resolution,0,1);return;
-
-			// vec3 d0projectedPosition=vec3(d0,viewZ);
-			// vec3 d1projectedPosition=vec3(d1,d1viewPosition.z);
-			// float dx=d1projectedPosition.x-d0projectedPosition.x;
-			// float dy=d1projectedPosition.y-d0projectedPosition.y;
-			// float angle=atan(dx,dy);
 
 			float totalLen=length(d1-d0);
 			float xLen=d1.x-d0.x;
@@ -263,34 +203,33 @@ var SSRShader = {
 				float vZ = getViewZ( d );
 				float clipW = cameraProjectionMatrix[2][3] * vZ + cameraProjectionMatrix[3][3];
 				vec3 vP=getViewPosition( uv, d, vZ, clipW );
-				float away=pointToLineDistance(vP,viewPosition,d1viewPosition);
+
+				vec3 viewNearPlanePoint;
+
+				vec2 viewNearPlanePointXY=uv;//uv
+				viewNearPlanePointXY*=2.;
+				viewNearPlanePointXY-=1.;//ndc
+				float cw=cameraNear;
+				viewNearPlanePointXY*=cw;//clip
+				viewNearPlanePointXY=(cameraInverseProjectionMatrix*vec4(viewNearPlanePointXY,0,cw)).xy;//view
+
+				viewNearPlanePoint=vec3(viewNearPlanePointXY,-cameraNear);//view
+
+				vec3 viewRayPoint=lineLineIntersection(viewPosition,d1viewPosition,vec3(0,0,0),viewNearPlanePoint);
+
+				float away=length(vP-viewRayPoint);
 
 				float op=opacity;
 				if(isDistanceAttenuation){
 
-					vec3 viewNearPlanePoint;
-
-					vec2 viewNearPlanePointXY=uv;//uv
-					viewNearPlanePointXY*=2.;
-					viewNearPlanePointXY-=1.;//ndc
-					float cw=cameraNear;
-					viewNearPlanePointXY*=cw;//clip
-					viewNearPlanePointXY=(cameraInverseProjectionMatrix*vec4(viewNearPlanePointXY,0,cw)).xy;//view
-
-					viewNearPlanePoint=vec3(viewNearPlanePointXY,-cameraNear);//view
-
-					vec3 viewIntersect=lineLineIntersection(viewPosition,d1viewPosition,vec3(0,0,0),viewNearPlanePoint);
-
-					// // float rayLen=length(viewNearPlanePoint-viewPosition);
-					float rayLen=length(viewIntersect-viewPosition);
+					vec3 viewRay=viewRayPoint-viewPosition;
+					float rayLen=length(viewRay);
 					if(rayLen>=attenuationDistance) break;
 					float attenuation=(1.-rayLen/attenuationDistance);
 
 					attenuation=attenuation*attenuation;
 					op=opacity*attenuation;
 				}
-
-				// if(length(vP-viewPosition)>maxDistance) continue;
 
 				float sD=surfDist*clipW;
 				if(away<sD){
