@@ -194,6 +194,7 @@ var SSRShader = {
 			float totalStep=max(abs(xLen),abs(yLen));
 			float xSpan=xLen/totalStep;
 			float ySpan=yLen/totalStep;
+			vec3 vec3_0=vec3(0,0,0);
 			for(float i=0.;i<MAX_STEP;i++){
 				if(i>=totalStep) break;
 				vec2 xy=vec2(d0.x+i*xSpan,d0.y+i*ySpan);
@@ -218,17 +219,18 @@ var SSRShader = {
 
 				viewNearPlanePoint=vec3(viewNearPlanePointXY,-cameraNear);//view
 
-				vec3 viewRayPoint=lineLineIntersection(viewPosition,d1viewPosition,vec3(0,0,0),viewNearPlanePoint);
+				vec3 viewRayPoint=lineLineIntersection(viewPosition,d1viewPosition,vec3_0,viewNearPlanePoint);
 
 				float away=length(vP-viewRayPoint);
 
 				float op=opacity;
+				float reflectRayLen;
 				if(isDistanceAttenuation){
 
 					vec3 viewRay=viewRayPoint-viewPosition;
-					float rayLen=length(viewRay);
-					if(rayLen>=attenuationDistance) break;
-					float attenuation=(1.-rayLen/attenuationDistance);
+					reflectRayLen=length(viewRay);
+					if(reflectRayLen>=attenuationDistance) break;
+					float attenuation=(1.-reflectRayLen/attenuationDistance);
 
 					attenuation=attenuation*attenuation;
 					op=opacity*attenuation;
@@ -237,7 +239,10 @@ var SSRShader = {
 				float sD=surfDist*clipW;
 				if(away<sD){
 					vec3 vN=getViewNormal( uv );
-					if(dot(viewReflectDir,vN)>=0.) continue;
+					if(dot(viewReflectDir,vN)>=0.){
+						if(reflectRayLen-10.<=sD) continue;
+						else break;
+					}
 					vec4 reflectColor=texture2D(tDiffuse,uv);
 					gl_FragColor=reflectColor;
 					gl_FragColor.a=op;
