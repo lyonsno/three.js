@@ -178,6 +178,9 @@
 				gui.add(ssrPass, 'maxDistance').min(0).max(2000);
 				// gui.add(ssrPass, 'surfDist').min(0).max(10).step(.1);
 				gui.add(ssrPass, 'surfDist').min(0).max(.02).step(.0001);
+				gui.add(ssrPass, 'isDistanceAttenuation');
+				ssrPass.attenuationDistance=10;
+				gui.add(ssrPass, 'attenuationDistance').min(0).max(50).step(.1);
 
 			}
 
