@@ -143,6 +143,50 @@ var SSRShader = {
 
 			return intersect;
 		}
+		vec3 lineLineIntersection(vec3 line1Point1, vec3 line1Point2,
+			vec3 line2Point1, vec3 line2Point2)
+		{
+			// http://paulbourke.net/geometry/pointlineplane/calclineline.cs
+			// http://paulbourke.net/geometry/pointlineplane/
+			// https://stackoverflow.com/a/2316934/3596736
+
+			/////////////////////////////////////////////////////////////////////////////////////
+
+		  // Algorithm is ported from the C algorithm of
+		  // Paul Bourke at http://local.wasp.uwa.edu.au/~pbourke/geometry/lineline3d/
+		  vec3 resultSegmentPoint1 = vec3(0,0,0);
+		  // resultSegmentPoint2 = vec3(0,0,0);
+
+		  vec3 p1 = line1Point1;
+		  vec3 p2 = line1Point2;
+		  vec3 p3 = line2Point1;
+		  vec3 p4 = line2Point2;
+		  vec3 p13 = p1 - p3;
+		  vec3 p43 = p4 - p3;
+
+		  vec3 p21 = p2 - p1;
+
+		  float d1343 = p13.x * p43.x + p13.y * p43.y + p13.z * p43.z;
+		  float d4321 = p43.x * p21.x + p43.y * p21.y + p43.z * p21.z;
+		  float d1321 = p13.x * p21.x + p13.y * p21.y + p13.z * p21.z;
+		  float d4343 = p43.x * p43.x + p43.y * p43.y + p43.z * p43.z;
+		  float d2121 = p21.x * p21.x + p21.y * p21.y + p21.z * p21.z;
+
+		  float denom = d2121 * d4343 - d4321 * d4321;
+		  float numer = d1343 * d4321 - d1321 * d4343;
+
+		  float mua = numer / denom;
+		  // float mub = (d1343 + d4321 * (mua)) / d4343;
+
+		  resultSegmentPoint1.x = p1.x + mua * p21.x;
+		  resultSegmentPoint1.y = p1.y + mua * p21.y;
+		  resultSegmentPoint1.z = p1.z + mua * p21.z;
+		  // resultSegmentPoint2.x = p3.x + mub * p43.x;
+		  // resultSegmentPoint2.y = p3.y + mub * p43.y;
+		  // resultSegmentPoint2.z = p3.z + mub * p43.z;
+
+			return resultSegmentPoint1;
+		}
 		void main(){
 			if(isSelective){
 				float metalness=texture2D(tMetalness,vUv).r;
@@ -235,7 +279,7 @@ var SSRShader = {
 
 					viewNearPlanePoint=vec3(viewNearPlanePointXY,-cameraNear);//view
 
-					vec3 viewIntersect=lineLineIntersectPoint(viewNearPlanePoint,viewPosition,d1viewPosition);
+					vec3 viewIntersect=lineLineIntersection(viewPosition,d1viewPosition,vec3(0,0,0),viewNearPlanePoint);
 
 					// // float rayLen=length(viewNearPlanePoint-viewPosition);
 					float rayLen=length(viewIntersect-viewPosition);
