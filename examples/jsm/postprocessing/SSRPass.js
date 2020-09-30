@@ -64,7 +64,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
 
   this.isBlur = true
 
-  this._isDistanceAttenuation = true
+  this._isDistanceAttenuation = SSRShader.defines.isDistanceAttenuation
   Object.defineProperty(this, 'isDistanceAttenuation', {
     get() {
       return this._isDistanceAttenuation
@@ -78,7 +78,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   })
   this.attenuationDistance = 200
 
-  this._isInfiniteThick = true
+  this._isInfiniteThick = SSRShader.defines.isInfiniteThick
   Object.defineProperty(this, 'isInfiniteThick', {
     get() {
       return this._isInfiniteThick
@@ -92,7 +92,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   })
   this.thickTolerance = .03
 
-  this._isNoise = false
+  this._isNoise = SSRShader.defines.isNoise
   Object.defineProperty(this, 'isNoise', {
     get() {
       return this._isNoise
@@ -105,6 +105,19 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
     }
   })
   this.noiseIntensity = .1
+
+  this._isMorphTargets = morphTargets
+  Object.defineProperty(this, 'isMorphTargets', {
+    get() {
+      return this._isMorphTargets
+    },
+    set(val) {
+      if (this._isMorphTargets === val) return
+      this._isMorphTargets = val
+      this.normalMaterial.morphTargets = val
+      this.normalMaterial.needsUpdate = true
+    }
+  })
 
   // beauty render target with depth buffer
 
@@ -175,6 +188,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
     fragmentShader: SSRShader.fragmentShader,
     blending: NoBlending
   });
+  window.ssrMaterial = this.ssrMaterial
   if (!isPerspectiveCamera) {
     this.ssrMaterial.defines.isPerspectiveCamera = isPerspectiveCamera
     this.ssrMaterial.needsUpdate = true
@@ -197,7 +211,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
 
   // normal material
 
-  this.normalMaterial = new MeshNormalMaterial({ morphTargets });
+  this.normalMaterial = new MeshNormalMaterial({});
   this.normalMaterial.blending = NoBlending;
 
   if (this.isSelective) {

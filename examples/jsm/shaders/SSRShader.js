@@ -13,7 +13,7 @@ var SSRShader = {
     MAX_STEP: 0,
     isPerspectiveCamera: true,
     isDistanceAttenuation: true,
-    isInfiniteThick: true,
+    isInfiniteThick: false,
     isNoise: false,
     isSelective: false,
   },
