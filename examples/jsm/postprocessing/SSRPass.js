@@ -21,6 +21,7 @@ import { Pass } from "../postprocessing/Pass.js";
 import { SSRShader } from "../shaders/SSRShader.js";
 import { SSRBlurShader } from "../shaders/SSRShader.js";
 import { SSRDepthShader } from "../shaders/SSRShader.js";
+import { SSRViewNearPlanePointShader } from "../shaders/SSRShader.js";
 import { CopyShader } from "../shaders/CopyShader.js";
 
 var SSRPass = function({ scene, camera, width, height, selects, encoding, isPerspectiveCamera = true, isBouncing = false, morphTargets = false }) {
@@ -30,13 +31,15 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   this.width = (width !== undefined) ? width : 512;
   this.height = (height !== undefined) ? height : 512;
 
+  this.isFirstRender = true
+
   this.clear = true;
 
   this.camera = camera;
   this.scene = scene;
 
   this.opacity = .5;
-  this.output = 0;
+  this.output = 1;
 
   this.maxDistance = 900;
   this.surfDist = 1.
@@ -136,6 +139,14 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
     format: RGBAFormat
   });
 
+  // viewNearPlanePoint render target
+
+  this.viewNearPlanePointRenderTarget = new WebGLRenderTarget(this.width, this.height, {
+    minFilter: NearestFilter,
+    magFilter: NearestFilter,
+    format: RGBAFormat
+  });
+
   // metalness render target
 
   if (this.isSelective) {
@@ -182,6 +193,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
 
   this.ssrMaterial.uniforms['tDiffuse'].value = this.beautyRenderTarget.texture;
   this.ssrMaterial.uniforms['tNormal'].value = this.normalRenderTarget.texture;
+  this.ssrMaterial.uniforms['tViewNearPlanePoint'].value = this.viewNearPlanePointRenderTarget.texture;
   if (this.isSelective) {
     this.ssrMaterial.defines.isSelective = this.isSelective
     this.ssrMaterial.needsUpdate = true
@@ -190,6 +202,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   this.ssrMaterial.uniforms['tDepth'].value = this.beautyRenderTarget.depthTexture;
   this.ssrMaterial.uniforms['cameraNear'].value = this.camera.near;
   this.ssrMaterial.uniforms['cameraFar'].value = this.camera.far;
+  this.ssrMaterial.uniforms['cameraFilmGauge'].value = this.camera.filmGauge;
   this.ssrMaterial.uniforms['surfDist'].value = this.surfDist;
   this.ssrMaterial.uniforms['resolution'].value.set(this.width, this.height);
   this.ssrMaterial.uniforms['cameraProjectionMatrix'].value.copy(this.camera.projectionMatrix);
@@ -238,6 +251,20 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   this.depthRenderMaterial.uniforms['cameraNear'].value = this.camera.near;
   this.depthRenderMaterial.uniforms['cameraFar'].value = this.camera.far;
 
+  // material for rendering the ViewNearPlanePoint
+
+  this.viewNearPlanePointMaterial = new ShaderMaterial({
+    defines: Object.assign({}, SSRViewNearPlanePointShader.defines),
+    uniforms: UniformsUtils.clone(SSRViewNearPlanePointShader.uniforms),
+    vertexShader: SSRViewNearPlanePointShader.vertexShader,
+    fragmentShader: SSRViewNearPlanePointShader.fragmentShader,
+    blending: NoBlending
+  });
+  this.viewNearPlanePointMaterial.uniforms['cameraNear'].value = this.camera.near;
+  this.viewNearPlanePointMaterial.uniforms['cameraFar'].value = this.camera.far;
+  this.viewNearPlanePointMaterial.uniforms['cameraFilmGauge'].value = this.camera.filmGauge;
+  this.viewNearPlanePointMaterial.uniforms['cameraInverseProjectionMatrix'].value.copy(this.camera.projectionMatrixInverse);
+
   // material for rendering the content of a render target
 
   this.copyMaterial = new ShaderMaterial({
@@ -271,6 +298,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
     this.beautyRenderTarget.dispose();
     this.normalRenderTarget.dispose();
+    this.viewNearPlanePointRenderTarget.dispose();
     if (this.isSelective) this.metalnessRenderTarget.dispose();
     this.ssrRenderTarget.dispose();
     this.blurRenderTarget.dispose();
@@ -283,6 +311,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
       this.metalnessOffMaterial.dispose();
     }
     this.blurMaterial.dispose();
+    this.viewNearPlanePointMaterial.dispose();
     this.copyMaterial.dispose();
     this.depthRenderMaterial.dispose();
 
@@ -304,6 +333,13 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     // render normals
 
     this.renderOverride(renderer, this.normalMaterial, this.normalRenderTarget, 0, 0);
+
+    // render viewNearPlanePoint
+
+    // if (this.isFirstRender) {
+      this.renderPass(renderer, this.viewNearPlanePointMaterial, this.viewNearPlanePointRenderTarget,0,0);
+      // this.isFirstRender = false
+    // }
 
     // render metalnesses
 
@@ -537,6 +573,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     this.beautyRenderTarget.setSize(width, height);
     this.ssrRenderTarget.setSize(width, height);
     this.normalRenderTarget.setSize(width, height);
+    this.viewNearPlanePointRenderTarget.setSize(width, height);
     if (this.isSelective) this.metalnessRenderTarget.setSize(width, height);
     this.blurRenderTarget.setSize(width, height);
 

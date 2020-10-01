@@ -22,10 +22,12 @@ var SSRShader = {
 
     "tDiffuse": { value: null },
     "tNormal": { value: null },
+    "tViewNearPlanePoint": { value: null },
     "tMetalness": { value: null },
     "tDepth": { value: null },
     "cameraNear": { value: null },
     "cameraFar": { value: null },
+    "cameraFilmGauge": { value: null },
     "resolution": { value: new Vector2() },
     "cameraProjectionMatrix": { value: new Matrix4() },
     "cameraInverseProjectionMatrix": { value: new Matrix4() },
@@ -59,6 +61,7 @@ var SSRShader = {
 		varying vec2 vUv;
 		uniform sampler2D tDepth;
 		uniform sampler2D tNormal;
+		uniform sampler2D tViewNearPlanePoint;
 		uniform sampler2D tMetalness;
 		uniform sampler2D tDiffuse;
 		uniform float cameraRange;
@@ -66,6 +69,7 @@ var SSRShader = {
 		uniform float opacity;
 		uniform float cameraNear;
 		uniform float cameraFar;
+		uniform float cameraFilmGauge;
 		uniform float maxDistance;
 		uniform float surfDist;
 		uniform mat4 cameraProjectionMatrix;
@@ -157,6 +161,10 @@ var SSRShader = {
 			return fract(sin(vec3(n,n+1.0,n+2.0))*vec3(43758.5453123,22578.1459123,19642.3490423));
 		}
 		void main(){
+
+			// gl_FragColor=abs(vec4(-1,0,0,1));return;
+			gl_FragColor=abs(texture2D(tViewNearPlanePoint,vUv));return;
+
 			#ifdef isSelective
 				float metalness=texture2D(tMetalness,vUv).r;
 				if(metalness==0.) return;
@@ -221,16 +229,7 @@ var SSRShader = {
 				float clipW = cameraProjectionMatrix[2][3] * vZ + cameraProjectionMatrix[3][3];
 				vec3 vP=getViewPosition( uv, d, vZ, clipW );
 
-				vec3 viewNearPlanePoint;
-
-				vec2 viewNearPlanePointXY=uv;//uv
-				viewNearPlanePointXY*=2.;
-				viewNearPlanePointXY-=1.;//ndc
-				float cw=cameraNear;
-				viewNearPlanePointXY*=cw;//clip
-				viewNearPlanePointXY=(cameraInverseProjectionMatrix*vec4(viewNearPlanePointXY,0,cw)).xy;//view
-
-				viewNearPlanePoint=vec3(viewNearPlanePointXY,-cameraNear);//view
+				vec3 viewNearPlanePoint=(texture2D(tViewNearPlanePoint,uv).xyz)*cameraFilmGauge;
 
 				vec3 viewRayPoint;
 				#ifdef isPerspectiveCamera
@@ -392,4 +391,49 @@ var SSRBlurShader = {
 
 };
 
-export { SSRShader, SSRDepthShader, SSRBlurShader };
+var SSRViewNearPlanePointShader = {
+
+  uniforms: {
+    "cameraNear": { value: null },
+    "cameraFar": { value: null },
+    "cameraFilmGauge": { value: null },
+    "cameraInverseProjectionMatrix": { value: new Matrix4() },
+  },
+
+  vertexShader: [
+
+    "varying vec2 vUv;",
+
+    "void main() {",
+
+    "	vUv = uv;",
+    "	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+
+    "}"
+
+  ].join("\n"),
+
+	fragmentShader: `
+		precision highp float;
+		precision highp sampler2D;
+		varying vec2 vUv;
+		uniform float cameraNear;
+		uniform float cameraFar;
+		uniform float cameraFilmGauge;
+		uniform mat4 cameraInverseProjectionMatrix;
+		void main(){
+			vec2 viewNearPlanePointXY=vUv;//uv
+			viewNearPlanePointXY*=2.;
+			viewNearPlanePointXY-=1.;//ndc
+			float cw=cameraNear;
+			viewNearPlanePointXY*=cw;//clip
+			viewNearPlanePointXY=(cameraInverseProjectionMatrix*vec4(viewNearPlanePointXY,0,cw)).xy;//view
+
+			vec3 viewNearPlanePoint=vec3(viewNearPlanePointXY,-cameraNear);//view
+			gl_FragColor=vec4(viewNearPlanePoint/2.,1);
+		}
+	`
+
+};
+
+export { SSRShader, SSRDepthShader, SSRBlurShader, SSRViewNearPlanePointShader };
