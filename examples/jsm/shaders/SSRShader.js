@@ -232,7 +232,7 @@ var SSRShader = {
 				vec4 viewNearPlanePointTemp=texture2D(tViewNearPlanePoint,uv);
 				vec3 viewNearPlanePoint;
 				viewNearPlanePoint.x=viewNearPlanePointTemp.x*2.-1.;
-				viewNearPlanePoint.x*=1.2335526315789471;
+				viewNearPlanePoint.x*=3.0517423442449836;
 				viewNearPlanePoint.y=viewNearPlanePointTemp.y*2.-1.;
 				viewNearPlanePoint.y*=1.9999999999999998;
 				viewNearPlanePoint.z=-cameraNear;
@@ -436,7 +436,7 @@ var SSRViewNearPlanePointShader = {
 			viewNearPlanePointXY=(cameraInverseProjectionMatrix*vec4(viewNearPlanePointXY,0,cw)).xy;//view
 
 			// vec3 viewNearPlanePoint=vec3(viewNearPlanePointXY,-cameraNear);//view
-			float x=viewNearPlanePointXY.x/1.2335526315789471;
+			float x=viewNearPlanePointXY.x/3.0517423442449836;
 			x=(x+1.)/2.;
 			float y=viewNearPlanePointXY.y/1.9999999999999998;
 			y=(y+1.)/2.;
