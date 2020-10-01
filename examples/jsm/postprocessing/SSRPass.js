@@ -39,7 +39,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   this.scene = scene;
 
   this.opacity = .5;
-  this.output = 1;
+  this.output = 0;
 
   this.maxDistance = 900;
   this.surfDist = 1.

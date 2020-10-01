@@ -13603,6 +13603,7 @@ PerspectiveCamera.prototype = Object.assign( Object.create( Camera.prototype ), 
 		let height = 2 * top;
 		let width = this.aspect * height;
 		let left = - 0.5 * width;
+		console.log(-left,top)
 		const view = this.view;
 
 		if ( this.view !== null && this.view.enabled ) {

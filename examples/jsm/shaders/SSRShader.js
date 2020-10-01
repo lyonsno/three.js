@@ -163,7 +163,7 @@ var SSRShader = {
 		void main(){
 
 			// gl_FragColor=abs(vec4(-1,0,0,1));return;
-			gl_FragColor=abs(texture2D(tViewNearPlanePoint,vUv));return;
+			// gl_FragColor=texture2D(tViewNearPlanePoint,vUv);return;
 
 			#ifdef isSelective
 				float metalness=texture2D(tMetalness,vUv).r;
@@ -229,7 +229,13 @@ var SSRShader = {
 				float clipW = cameraProjectionMatrix[2][3] * vZ + cameraProjectionMatrix[3][3];
 				vec3 vP=getViewPosition( uv, d, vZ, clipW );
 
-				vec3 viewNearPlanePoint=(texture2D(tViewNearPlanePoint,uv).xyz)*cameraFilmGauge;
+				vec4 viewNearPlanePointTemp=texture2D(tViewNearPlanePoint,uv);
+				vec3 viewNearPlanePoint;
+				viewNearPlanePoint.x=viewNearPlanePointTemp.x*2.-1.;
+				viewNearPlanePoint.x*=1.2335526315789471;
+				viewNearPlanePoint.y=viewNearPlanePointTemp.y*2.-1.;
+				viewNearPlanePoint.y*=1.9999999999999998;
+				viewNearPlanePoint.z=-cameraNear;
 
 				vec3 viewRayPoint;
 				#ifdef isPerspectiveCamera
@@ -429,8 +435,12 @@ var SSRViewNearPlanePointShader = {
 			viewNearPlanePointXY*=cw;//clip
 			viewNearPlanePointXY=(cameraInverseProjectionMatrix*vec4(viewNearPlanePointXY,0,cw)).xy;//view
 
-			vec3 viewNearPlanePoint=vec3(viewNearPlanePointXY,-cameraNear);//view
-			gl_FragColor=vec4(viewNearPlanePoint/2.,1);
+			// vec3 viewNearPlanePoint=vec3(viewNearPlanePointXY,-cameraNear);//view
+			float x=viewNearPlanePointXY.x/1.2335526315789471;
+			x=(x+1.)/2.;
+			float y=viewNearPlanePointXY.y/1.9999999999999998;
+			y=(y+1.)/2.;
+			gl_FragColor=vec4(x,y,0,0);
 		}
 	`
 
