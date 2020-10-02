@@ -64,7 +64,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
 
   this.isBlur = true
 
-  this._isDistanceAttenuation = true
+  this._isDistanceAttenuation = SSRShader.defines.isDistanceAttenuation
   Object.defineProperty(this, 'isDistanceAttenuation', {
     get() {
       return this._isDistanceAttenuation
@@ -78,7 +78,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   })
   this.attenuationDistance = 200
 
-  this._isInfiniteThick = true
+  this._isInfiniteThick = SSRShader.defines.isInfiniteThick
   Object.defineProperty(this, 'isInfiniteThick', {
     get() {
       return this._isInfiniteThick
@@ -92,7 +92,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   })
   this.thickTolerance = .03
 
-  this._isNoise = false
+  this._isNoise = SSRShader.defines.isNoise
   Object.defineProperty(this, 'isNoise', {
     get() {
       return this._isNoise
