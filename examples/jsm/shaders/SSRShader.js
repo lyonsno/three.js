@@ -13,7 +13,7 @@ var SSRShader = {
     MAX_STEP: 0,
     isPerspectiveCamera: true,
     isDistanceAttenuation: true,
-    isInfiniteThick: true,
+    isInfiniteThick: false,
     isNoise: false,
     isSelective: false,
   },
@@ -85,12 +85,17 @@ var SSRShader = {
 		float getViewZ( const in float depth ) {
 			return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
 		}
-		vec3 getViewPosition( const in vec2 screenPosition, const in float depth, const in float viewZ, const in float clipW ) {
+		vec2 getViewPosition( const in vec2 screenPosition, const in float clipW ) {
+			vec4 clipPosition = vec4( ( vec2( screenPosition ) - 0.5 ) * 2.0, .0, 1.0 );
+			clipPosition *= clipW; // unprojection.
+			return ( cameraInverseProjectionMatrix * clipPosition ).xy;
+		}
+		vec3 getViewPosition( const in vec2 screenPosition, const in float depth/*clip space*/, const in float viewZ, const in float clipW ) {
 			vec4 clipPosition = vec4( ( vec3( screenPosition, depth ) - 0.5 ) * 2.0, 1.0 );
 			clipPosition *= clipW; // unprojection.
 			return ( cameraInverseProjectionMatrix * clipPosition ).xyz;
 		}
-		vec3 getViewPosition( const in vec2 screenPosition, const in float depth, const in float viewZ ) {
+		vec3 getViewPosition( const in vec2 screenPosition, const in float depth/*clip space*/, const in float viewZ ) {
 			float clipW = cameraProjectionMatrix[2][3] * viewZ + cameraProjectionMatrix[3][3];
 			return getViewPosition(screenPosition, depth, viewZ, clipW);
 		}
@@ -107,50 +112,6 @@ var SSRShader = {
 			xy/=2.;
 			xy*=resolution;
 			return xy;
-		}
-		vec3 lineLineIntersection(vec3 line1Point1, vec3 line1Point2,
-			vec3 line2Point1, vec3 line2Point2)
-		{
-			// http://paulbourke.net/geometry/pointlineplane/calclineline.cs
-			// http://paulbourke.net/geometry/pointlineplane/
-			// https://stackoverflow.com/a/2316934/3596736
-
-			/////////////////////////////////////////////////////////////////////////////////////
-
-		  // Algorithm is ported from the C algorithm of
-		  // Paul Bourke at http://local.wasp.uwa.edu.au/~pbourke/geometry/lineline3d/
-		  vec3 resultSegmentPoint1 = vec3(0,0,0);
-		  // resultSegmentPoint2 = vec3(0,0,0);
-
-		  vec3 p1 = line1Point1;
-		  vec3 p2 = line1Point2;
-		  vec3 p3 = line2Point1;
-		  vec3 p4 = line2Point2;
-		  vec3 p13 = p1 - p3;
-		  vec3 p43 = p4 - p3;
-
-		  vec3 p21 = p2 - p1;
-
-		  float d1343 = p13.x * p43.x + p13.y * p43.y + p13.z * p43.z;
-		  float d4321 = p43.x * p21.x + p43.y * p21.y + p43.z * p21.z;
-		  float d1321 = p13.x * p21.x + p13.y * p21.y + p13.z * p21.z;
-		  float d4343 = p43.x * p43.x + p43.y * p43.y + p43.z * p43.z;
-		  float d2121 = p21.x * p21.x + p21.y * p21.y + p21.z * p21.z;
-
-		  float denom = d2121 * d4343 - d4321 * d4321;
-		  float numer = d1343 * d4321 - d1321 * d4343;
-
-		  float mua = numer / denom;
-		  // float mub = (d1343 + d4321 * (mua)) / d4343;
-
-		  resultSegmentPoint1.x = p1.x + mua * p21.x;
-		  resultSegmentPoint1.y = p1.y + mua * p21.y;
-		  resultSegmentPoint1.z = p1.z + mua * p21.z;
-		  // resultSegmentPoint2.x = p3.x + mub * p43.x;
-		  // resultSegmentPoint2.y = p3.y + mub * p43.y;
-		  // resultSegmentPoint2.z = p3.z + mub * p43.z;
-
-			return resultSegmentPoint1;
 		}
 		vec3 hash3( float n ){
 			// http://glslsandbox.com/e#61476.1
@@ -192,6 +153,8 @@ var SSRShader = {
 				float t=(-cameraNear-viewPosition.z)/n.z;
 				d1viewPosition=viewPosition+n*t;
 			}
+			// float nearPlaneClipW=cameraProjectionMatrix[2][3] * -cameraNear + cameraProjectionMatrix[3][3];
+			// vec3 a=getViewPosition(vUv,nearPlaneClipW);
 			d1=viewPositionToXY(d1viewPosition);
 
 			float totalLen=length(d1-d0);
@@ -204,8 +167,10 @@ var SSRShader = {
 			for(float i=0.;i<MAX_STEP;i++){
 				if(i>=totalStep) break;
 				vec2 xy=vec2(d0.x+i*xSpan,d0.y+i*ySpan);
-				if(xy.x<0.||xy.x>resolution.x) break;
-				if(xy.y<0.||xy.y>resolution.y) break;
+				// if(xy.x<0.||xy.x>resolution.x) break;
+				// if(xy.y<0.||xy.y>resolution.y) break;
+				float s=length(xy-d0)/totalLen;
+				// if(s>=1.) break;
 				vec2 uv=xy/resolution;
 
 				float d = getDepth(uv);
@@ -213,41 +178,17 @@ var SSRShader = {
 				if(-vZ>=cameraFar) continue;
 				float clipW = cameraProjectionMatrix[2][3] * vZ + cameraProjectionMatrix[3][3];
 				vec3 vP=getViewPosition( uv, d, vZ, clipW );
-
-				vec3 viewNearPlanePoint;
-
-				vec2 viewNearPlanePointXY=uv;//uv
-				viewNearPlanePointXY*=2.;
-				viewNearPlanePointXY-=1.;//ndc
-				float cw=cameraNear;
-				viewNearPlanePointXY*=cw;//clip
-				viewNearPlanePointXY=(cameraInverseProjectionMatrix*vec4(viewNearPlanePointXY,0,cw)).xy;//view
-
-				viewNearPlanePoint=vec3(viewNearPlanePointXY,-cameraNear);//view
-
-				vec3 viewRayPoint;
-				#ifdef isPerspectiveCamera
-					viewRayPoint=lineLineIntersection(viewPosition,d1viewPosition,vec3_0,viewNearPlanePoint);
-				#else
-					viewRayPoint=lineLineIntersection(viewPosition,d1viewPosition,vec3(viewNearPlanePoint.x,viewNearPlanePoint.y,0),viewNearPlanePoint);
-				#endif
+				float viewRayZ=1./((1./viewPosition.z)+s*(1./d1viewPosition.z-1./viewPosition.z));
 
 				float sD=surfDist*clipW;
+				// float sD=surfDist;
 
-				vec3 viewRay=viewRayPoint-viewPosition;
-				float rayLen=length(viewRay);
-
-				#ifdef isInfiniteThick
-					if(viewRayPoint.z+thickTolerance*clipW<vP.z) break;
-				#endif
-
-				float away=length(vP-viewRayPoint);
+				float away=abs(viewRayZ-vZ);
 
 				float op=opacity;
 				#ifdef isDistanceAttenuation
-					if(rayLen>=attenuationDistance) break;
-					float attenuation=(1.-rayLen/attenuationDistance);
-					attenuation=attenuation*attenuation;
+					float one_minus_s=1.-s;
+					float attenuation=one_minus_s*one_minus_s;
 					op=opacity*attenuation;
 				#endif
 
@@ -255,7 +196,7 @@ var SSRShader = {
 					vec3 vN=getViewNormal( uv );
 					if(dot(viewReflectDir,vN)>=0.) continue;
 					vec4 reflectColor=texture2D(tDiffuse,uv);
-					gl_FragColor=reflectColor;
+					gl_FragColor.xyz=reflectColor.xyz;
 					gl_FragColor.a=op;
 					break;
 				}
