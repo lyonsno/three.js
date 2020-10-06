@@ -178,6 +178,9 @@ var SSRShader = {
 				if(-vZ>=cameraFar) continue;
 				float clipW = cameraProjectionMatrix[2][3] * vZ + cameraProjectionMatrix[3][3];
 				vec3 vP=getViewPosition( uv, d, vZ, clipW );
+
+				// https://www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
+				// https://lettier.github.io/3d-game-shaders-for-beginners/screen-space-reflection.html
 				float viewRayZ=1./((1./viewPosition.z)+s*(1./d1viewPosition.z-1./viewPosition.z));
 
 				float sD=surfDist*clipW;
