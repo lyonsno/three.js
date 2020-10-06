@@ -45,39 +45,70 @@
 				document.body.appendChild( container );
 
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 50 );
-				camera.position.set(  -2.5164585178227235, 2.1567002191660913,  2.4424705475447324);
+				camera.position.set(  -10.521824790371916, 9.01760218605, 10.21246604102372);
 				window.camera=camera///test
 
 				scene = new THREE.Scene();
 
-				//mesh
-				{
-					{
-						let geo=new THREE.PlaneBufferGeometry(4,4)
-						let mtl=new THREE.MeshBasicMaterial({
-							color:'rgb(0,0,80)'
-						})
-						let mesh=new THREE.Mesh(geo,mtl)
-						scene.add(mesh)
-						geo.rotateX(Math.PI/-2)
-					}
-					{
-						let geo=new THREE.BoxBufferGeometry(1,1,1)
-						let mtl=new THREE.MeshBasicMaterial({
-							color:'rgb(255,0,0)'
-						})
-						let mesh=new THREE.Mesh(geo,mtl)
-						scene.add(mesh)
-						geo.translate(0,.5,0)
-					}
-				}
+				new RGBELoader()
+					.setDataType( THREE.UnsignedByteType )
+					.setPath( 'textures/equirectangular/' )
+					.load( 'royal_esplanade_1k.hdr', function ( texture ) {
 
-				renderer = new THREE.WebGLRenderer( { antialias: false } );
-				// renderer.setPixelRatio( window.devicePixelRatio );
+						var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+
+						scene.background = envMap;
+						scene.environment = envMap;
+
+						texture.dispose();
+						pmremGenerator.dispose();
+
+
+						// model
+
+						// use of RoughnessMipmapper is optional
+						var roughnessMipmapper = new RoughnessMipmapper( renderer );
+
+						var loader = new GLTFLoader().setPath( '/_3d_model/ssr/' );
+						loader.load( 'ssr.glb', function ( gltf ) {
+
+							gltf.scene.traverse( function ( child ) {
+
+								if ( child.isMesh ) {
+
+									// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
+									// roughnessMipmapper.generateMipmaps( child.material );
+
+								}
+
+							} );
+
+							scene.add( gltf.scene );
+
+							roughnessMipmapper.dispose();
+
+
+						} );
+
+					} );
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.toneMapping = THREE.ACESFilmicToneMapping;
+				renderer.toneMappingExposure = 1;
+				renderer.outputEncoding = THREE.sRGBEncoding;
 				container.appendChild( renderer.domElement );
 
+				var pmremGenerator = new THREE.PMREMGenerator( renderer );
+				pmremGenerator.compileEquirectangularShader();
+
 				controls = new OrbitControls( camera, renderer.domElement );
+				// controls.addEventListener( 'change', render ); // use if there is no animation loop
+				controls.minDistance = 2;
+				// controls.maxDistance = 10;
+				controls.target.set( 0, 2,0 );
+				controls.update();
 
 				window.addEventListener( 'resize', onWindowResize, false );
 
@@ -89,7 +120,7 @@
 					camera, 
 					width: innerWidth, 
 					height: innerHeight,
-					// encoding: THREE.sRGBEncoding,
+					encoding: THREE.sRGBEncoding,
 				});
 				composer.addPass(ssrPass);
 
