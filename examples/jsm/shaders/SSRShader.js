@@ -12,7 +12,7 @@ var SSRShader = {
   defines: {
     MAX_STEP: 0,
     isPerspectiveCamera: true,
-    isDistanceAttenuation: false,
+    isDistanceAttenuation: true,
     isInfiniteThick: false,
     isNoise: false,
     isSelective: false,
@@ -30,7 +30,7 @@ var SSRShader = {
     "cameraProjectionMatrix": { value: new Matrix4() },
     "cameraInverseProjectionMatrix": { value: new Matrix4() },
     "opacity": { value: .5 },
-    "maxDistance": { value: 2000 },
+    "maxDistance": { value: 200 },
     "cameraRange": { value: 0 },
     "surfDist": { value: 1 },
     "thickTolerance": { value: .03 },
@@ -84,9 +84,9 @@ var SSRShader = {
 			return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
 		}
 		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
-			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );
-			clipPosition *= clipW; // unprojection.
-			return ( cameraInverseProjectionMatrix * clipPosition ).xyz;
+			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
+			clipPosition *= clipW; //clip
+			return ( cameraInverseProjectionMatrix * clipPosition ).xyz;//view
 		}
 		vec3 getViewNormal( const in vec2 uv ) {
 			return unpackRGBToNormal( texture2D( tNormal, uv ).xyz );
@@ -97,9 +97,8 @@ var SSRShader = {
 			xy=clip.xy;//clip
 			float clipW=clip.w;
 			xy/=clipW;//NDC
-			xy+=1.;
-			xy/=2.;
-			xy*=resolution;
+			xy=(xy+1.)/2.;//uv
+			xy*=resolution;//screen
 			return xy;
 		}
 		vec3 hash3( float n ){
@@ -150,14 +149,11 @@ var SSRShader = {
 			float totalStep=max(abs(xLen),abs(yLen));
 			float xSpan=xLen/totalStep;
 			float ySpan=yLen/totalStep;
-			vec3 vec3_0=vec3(0,0,0);
 			for(float i=0.;i<MAX_STEP;i++){
 				if(i>=totalStep) break;
 				vec2 xy=vec2(d0.x+i*xSpan,d0.y+i*ySpan);
-				// if(xy.x<0.||xy.x>resolution.x) break;
-				// if(xy.y<0.||xy.y>resolution.y) break;
+				if(xy.x<0.||xy.x>resolution.x||xy.y<0.||xy.y>resolution.y) break;
 				float s=length(xy-d0)/totalLen;
-				// if(s>=1.) break;
 				vec2 uv=xy/resolution;
 
 				float d = getDepth(uv);
@@ -166,14 +162,19 @@ var SSRShader = {
 				float cW = cameraProjectionMatrix[2][3] * vZ;
 				vec3 vP=getViewPosition( uv, d, cW );
 
-				// https://www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
-				// https://lettier.github.io/3d-game-shaders-for-beginners/screen-space-reflection.html
-				float viewRayZ=1./((1./viewPosition.z)+s*(1./d1viewPosition.z-1./viewPosition.z));
+				#ifdef isPerspectiveCamera
+					// https://www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
+					float recipVPZ=1./viewPosition.z;
+					float viewReflectRayZ=1./(recipVPZ+s*(1./d1viewPosition.z-recipVPZ));
+					float sD=surfDist*cW;
+				#else
+				float viewReflectRayZ=viewPosition.z+s*(d1viewPosition.z-viewPosition.z);
+					float sD=surfDist*1000.;
+				#endif
 
-				float sD=surfDist*cW;
-				// float sD=surfDist;
 
-				float away=abs(viewRayZ-vZ);
+
+				float away=abs(viewReflectRayZ-vZ);
 
 				float op=opacity;
 				#ifdef isDistanceAttenuation
