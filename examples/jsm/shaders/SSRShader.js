@@ -32,9 +32,9 @@ var SSRShader = {
     "opacity": { value: .5 },
     "maxDistance": { value: 2000 },
     "cameraRange": { value: 0 },
-    "surfDist": { value: 0 },
-    "thickTolerance": { value: null },
-    "noiseIntensity": { value: null },
+    "surfDist": { value: 1 },
+    "thickTolerance": { value: .03 },
+    "noiseIntensity": { value: .1 },
 
   },
 

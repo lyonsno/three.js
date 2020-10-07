@@ -39,7 +39,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   this.output = 0;
 
   this.maxDistance = SSRShader.uniforms.maxDistance.value;
-  this.surfDist = 1.
+  this.surfDist = SSRShader.uniforms.maxDistance.value;
 
   this.selects = selects
   this.isSelective = Array.isArray(this.selects)
@@ -89,7 +89,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
       this.ssrMaterial.needsUpdate = true
     }
   })
-  this.thickTolerance = .03
+  this.thickTolerance = SSRShader.uniforms.thickTolerance.value;
 
   this._isNoise = SSRShader.defines.isNoise
   Object.defineProperty(this, 'isNoise', {
@@ -103,7 +103,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
       this.ssrMaterial.needsUpdate = true
     }
   })
-  this.noiseIntensity = .1
+  this.noiseIntensity = SSRShader.uniforms.noiseIntensity.value;
 
   // beauty render target with depth buffer
 
