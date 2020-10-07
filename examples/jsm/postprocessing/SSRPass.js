@@ -76,7 +76,6 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
       this.ssrMaterial.needsUpdate = true
     }
   })
-  this.attenuationDistance = 200
 
   this._isInfiniteThick = true
   Object.defineProperty(this, 'isInfiniteThick', {
@@ -316,7 +315,6 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     this.ssrMaterial.uniforms['opacity'].value = this.opacity;
     this.ssrMaterial.uniforms['maxDistance'].value = this.maxDistance;
     this.ssrMaterial.uniforms['surfDist'].value = this.surfDist;
-    this.ssrMaterial.uniforms['attenuationDistance'].value = this.attenuationDistance
     this.ssrMaterial.uniforms['thickTolerance'].value = this.thickTolerance
     this.ssrMaterial.uniforms['noiseIntensity'].value = this.noiseIntensity
     this.renderPass(renderer, this.ssrMaterial, this.ssrRenderTarget);

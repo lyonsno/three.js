@@ -33,7 +33,6 @@ var SSRShader = {
     "maxDistance": { value: 0.05 },
     "cameraRange": { value: 0 },
     "surfDist": { value: 0 },
-    "attenuationDistance": { value: null },
     "thickTolerance": { value: null },
     "noiseIntensity": { value: null },
 
@@ -72,35 +71,25 @@ var SSRShader = {
 		uniform mat4 cameraInverseProjectionMatrix;
 		uniform float thickTolerance;
 		uniform float noiseIntensity;
-		uniform float attenuationDistance;
 		#include <packing>
-		float getDepth( const in vec2 screenPosition ) {
-			return texture2D( tDepth, screenPosition ).x;
+		float getDepth( const in vec2 uv ) {
+			return texture2D( tDepth, uv ).x;
 		}
-		float getLinearDepth( const in vec2 screenPosition ) {
-			float fragCoordZ = texture2D( tDepth, screenPosition ).x;
+		float getLinearDepth( const in vec2 uv ) {
+			float fragCoordZ = texture2D( tDepth, uv ).x;
 			float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
 			return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
 		}
 		float getViewZ( const in float depth ) {
 			return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
 		}
-		vec2 getViewPosition( const in vec2 screenPosition, const in float clipW ) {
-			vec4 clipPosition = vec4( ( vec2( screenPosition ) - 0.5 ) * 2.0, .0, 1.0 );
-			clipPosition *= clipW; // unprojection.
-			return ( cameraInverseProjectionMatrix * clipPosition ).xy;
-		}
-		vec3 getViewPosition( const in vec2 screenPosition, const in float depth/*clip space*/, const in float viewZ, const in float clipW ) {
-			vec4 clipPosition = vec4( ( vec3( screenPosition, depth ) - 0.5 ) * 2.0, 1.0 );
+		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
+			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );
 			clipPosition *= clipW; // unprojection.
 			return ( cameraInverseProjectionMatrix * clipPosition ).xyz;
 		}
-		vec3 getViewPosition( const in vec2 screenPosition, const in float depth/*clip space*/, const in float viewZ ) {
-			float clipW = cameraProjectionMatrix[2][3] * viewZ + cameraProjectionMatrix[3][3];
-			return getViewPosition(screenPosition, depth, viewZ, clipW);
-		}
-		vec3 getViewNormal( const in vec2 screenPosition ) {
-			return unpackRGBToNormal( texture2D( tNormal, screenPosition ).xyz );
+		vec3 getViewNormal( const in vec2 uv ) {
+			return unpackRGBToNormal( texture2D( tNormal, uv ).xyz );
 		}
 		vec2 viewPositionToXY(vec3 viewPosition){
 			vec2 xy;
@@ -128,7 +117,7 @@ var SSRShader = {
 			if(-viewZ>=cameraFar) return;
 
 			float clipW = cameraProjectionMatrix[2][3] * viewZ + cameraProjectionMatrix[3][3];
-			vec3 viewPosition=getViewPosition( vUv, depth, viewZ, clipW );
+			vec3 viewPosition=getViewPosition( vUv, depth, clipW );
 
 			vec2 d0=gl_FragCoord.xy;
 			vec2 d1;
@@ -153,8 +142,6 @@ var SSRShader = {
 				float t=(-cameraNear-viewPosition.z)/n.z;
 				d1viewPosition=viewPosition+n*t;
 			}
-			// float nearPlaneClipW=cameraProjectionMatrix[2][3] * -cameraNear + cameraProjectionMatrix[3][3];
-			// vec3 a=getViewPosition(vUv,nearPlaneClipW);
 			d1=viewPositionToXY(d1viewPosition);
 
 			float totalLen=length(d1-d0);
@@ -177,7 +164,7 @@ var SSRShader = {
 				float vZ = getViewZ( d );
 				if(-vZ>=cameraFar) continue;
 				float clipW = cameraProjectionMatrix[2][3] * vZ + cameraProjectionMatrix[3][3];
-				vec3 vP=getViewPosition( uv, d, vZ, clipW );
+				vec3 vP=getViewPosition( uv, d, clipW );
 
 				// https://www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
 				// https://lettier.github.io/3d-game-shaders-for-beginners/screen-space-reflection.html
@@ -247,17 +234,17 @@ var SSRDepthShader = {
 
     "#include <packing>",
 
-    "float getLinearDepth( const in vec2 screenPosition ) {",
+    "float getLinearDepth( const in vec2 uv ) {",
 
     "	#if PERSPECTIVE_CAMERA == 1",
 
-    "		float fragCoordZ = texture2D( tDepth, screenPosition ).x;",
+    "		float fragCoordZ = texture2D( tDepth, uv ).x;",
     "		float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );",
     "		return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );",
 
     "	#else",
 
-    "		return texture2D( tDepth, screenPosition ).x;",
+    "		return texture2D( tDepth, uv ).x;",
 
     "	#endif",
 
