@@ -159,8 +159,8 @@ ssrPass.maxDistance=4.5
 ssrPass.surfDist=.001
 gui.add(params, 'enableSSR').name( 'Enable SSR' );
 gui.add(ssrPass, 'isDistanceAttenuation');
-ssrPass.attenuationDistance=1;
-gui.add(ssrPass, 'attenuationDistance').min(0).max(10).step(.001);
+ssrPass.maxDistance=1;
+gui.add(ssrPass, 'maxDistance').min(0).max(10).step(.001);
 gui.add(params, 'darken').name('rainy').onChange(function(value){
 	if(value){
 		ssrPass.encoding = THREE.LinearEncoding
@@ -181,11 +181,10 @@ gui.add(ssrPass, 'output', {
 
 });
 gui.add(ssrPass, 'opacity').min(0).max(1);
-gui.add(ssrPass, 'maxDistance').min(0).max(10).step(.001);
 // gui.add(ssrPass, 'surfDist').min(0).max(10).step(.1);
 gui.add(ssrPass, 'surfDist').min(0).max(.002).step(.0001);
 gui.add(ssrPass, 'isInfiniteThick');
-ssrPass.thickTolerance=.3
+ssrPass.thickTolerance=.1
 gui.add(ssrPass, 'thickTolerance').min(0).max(1).step(.01);
 gui.add(ssrPass, 'isBlur');
 gui.add(ssrPass, 'isNoise');
