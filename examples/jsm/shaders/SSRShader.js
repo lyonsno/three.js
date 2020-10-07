@@ -12,7 +12,7 @@ var SSRShader = {
   defines: {
     MAX_STEP: 0,
     isPerspectiveCamera: true,
-    isDistanceAttenuation: true,
+    isDistanceAttenuation: false,
     isInfiniteThick: false,
     isNoise: false,
     isSelective: false,
@@ -30,7 +30,7 @@ var SSRShader = {
     "cameraProjectionMatrix": { value: new Matrix4() },
     "cameraInverseProjectionMatrix": { value: new Matrix4() },
     "opacity": { value: .5 },
-    "maxDistance": { value: 0.05 },
+    "maxDistance": { value: 2000 },
     "cameraRange": { value: 0 },
     "surfDist": { value: 0 },
     "thickTolerance": { value: null },
@@ -116,7 +116,7 @@ var SSRShader = {
 			float viewZ = getViewZ( depth );
 			if(-viewZ>=cameraFar) return;
 
-			float clipW = cameraProjectionMatrix[2][3] * viewZ + cameraProjectionMatrix[3][3];
+			float clipW = cameraProjectionMatrix[2][3] * viewZ;
 			vec3 viewPosition=getViewPosition( vUv, depth, clipW );
 
 			vec2 d0=gl_FragCoord.xy;
@@ -163,14 +163,14 @@ var SSRShader = {
 				float d = getDepth(uv);
 				float vZ = getViewZ( d );
 				if(-vZ>=cameraFar) continue;
-				float clipW = cameraProjectionMatrix[2][3] * vZ + cameraProjectionMatrix[3][3];
-				vec3 vP=getViewPosition( uv, d, clipW );
+				float cW = cameraProjectionMatrix[2][3] * vZ;
+				vec3 vP=getViewPosition( uv, d, cW );
 
 				// https://www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
 				// https://lettier.github.io/3d-game-shaders-for-beginners/screen-space-reflection.html
 				float viewRayZ=1./((1./viewPosition.z)+s*(1./d1viewPosition.z-1./viewPosition.z));
 
-				float sD=surfDist*clipW;
+				float sD=surfDist*cW;
 				// float sD=surfDist;
 
 				float away=abs(viewRayZ-vZ);
