@@ -53,7 +53,7 @@ var SSRShader = {
   ].join("\n"),
 
   fragmentShader: `
-		precision highp float;
+		// precision highp float;
 		precision highp sampler2D;
 		varying vec2 vUv;
 		uniform sampler2D tDepth;
@@ -76,12 +76,20 @@ var SSRShader = {
 			return texture2D( tDepth, uv ).x;
 		}
 		float getLinearDepth( const in vec2 uv ) {
-			float fragCoordZ = texture2D( tDepth, uv ).x;
-			float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
-			return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
+			#ifdef isPerspectiveCamera
+				float fragCoordZ = texture2D( tDepth, uv ).x;
+				float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
+				return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
+			#else
+				return texture2D( tDepth, uv ).x;
+			#endif
 		}
 		float getViewZ( const in float depth ) {
-			return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
+			#ifdef isPerspectiveCamera
+				return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
+			#else
+				return orthographicDepthToViewZ( depth, cameraNear, cameraFar );
+			#endif
 		}
 		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
 			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
@@ -115,7 +123,7 @@ var SSRShader = {
 			float viewZ = getViewZ( depth );
 			if(-viewZ>=cameraFar) return;
 
-			float clipW = cameraProjectionMatrix[2][3] * viewZ;
+			float clipW = cameraProjectionMatrix[2][3] * viewZ+cameraProjectionMatrix[3][3];
 			vec3 viewPosition=getViewPosition( vUv, depth, clipW );
 
 			vec2 d0=gl_FragCoord.xy;
@@ -135,12 +143,14 @@ var SSRShader = {
 				viewReflectDir=reflect(vec3(0,0,-1),viewNormal);
 			#endif
 			vec3 d1viewPosition=viewPosition+viewReflectDir*maxDistance;
-			if(d1viewPosition.z>-cameraNear){
-				//https://tutorial.math.lamar.edu/Classes/CalcIII/EqnsOfLines.aspx
-				vec3 n=normalize(d1viewPosition-viewPosition);
-				float t=(-cameraNear-viewPosition.z)/n.z;
-				d1viewPosition=viewPosition+n*t;
-			}
+			#ifdef isPerspectiveCamera
+				if(d1viewPosition.z>-cameraNear){
+					//https://tutorial.math.lamar.edu/Classes/CalcIII/EqnsOfLines.aspx
+					vec3 n=normalize(d1viewPosition-viewPosition);
+					float t=(-cameraNear-viewPosition.z)/n.z;
+					d1viewPosition=viewPosition+n*t;
+				}
+			#endif
 			d1=viewPositionToXY(d1viewPosition);
 
 			float totalLen=length(d1-d0);
@@ -159,7 +169,7 @@ var SSRShader = {
 				float d = getDepth(uv);
 				float vZ = getViewZ( d );
 				if(-vZ>=cameraFar) continue;
-				float cW = cameraProjectionMatrix[2][3] * vZ;
+				float cW = cameraProjectionMatrix[2][3] * vZ+cameraProjectionMatrix[3][3];
 				vec3 vP=getViewPosition( uv, d, cW );
 
 				#ifdef isPerspectiveCamera
@@ -169,10 +179,8 @@ var SSRShader = {
 					float sD=surfDist*cW;
 				#else
 				float viewReflectRayZ=viewPosition.z+s*(d1viewPosition.z-viewPosition.z);
-					float sD=surfDist*1000.;
+					float sD=surfDist;
 				#endif
-
-
 
 				float away=abs(viewReflectRayZ-vZ);
 
@@ -235,21 +243,21 @@ var SSRDepthShader = {
 
     "#include <packing>",
 
-    "float getLinearDepth( const in vec2 uv ) {",
+		"float getLinearDepth( const in vec2 uv ) {",
 
-    "	#if PERSPECTIVE_CAMERA == 1",
+		"	#if PERSPECTIVE_CAMERA == 1",
 
-    "		float fragCoordZ = texture2D( tDepth, uv ).x;",
-    "		float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );",
-    "		return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );",
+		"		float fragCoordZ = texture2D( tDepth, uv ).x;",
+		"		float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );",
+		"		return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );",
 
-    "	#else",
+		"	#else",
 
-    "		return texture2D( tDepth, uv ).x;",
+		"		return texture2D( tDepth, uv ).x;",
 
-    "	#endif",
+		"	#endif",
 
-    "}",
+		"}",
 
     "void main() {",
 
