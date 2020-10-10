@@ -22,6 +22,7 @@
 			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 			import { RGBELoader } from './jsm/loaders/RGBELoader.js';
 			import { RoughnessMipmapper } from './jsm/utils/RoughnessMipmapper.js';
+			import Stats from './jsm/libs/stats.module.js';
 	
 	import { GUI } from './jsm/libs/dat.gui.module.js';
 	import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
@@ -33,7 +34,7 @@
 	var ssrPass
 	var gui
 
-			var container, controls;
+			var container, controls, stats;
 			var camera, scene, renderer;
 
 			init();
@@ -96,21 +97,24 @@
 				{
 					{
 						let geo=new THREE.PlaneBufferGeometry(4,4)
-						let mtl=new THREE.MeshBasicMaterial({
-							color:'rgb(0,0,80)'
+						let mtl=new THREE.MeshStandardMaterial({
+							color:'rgb(53,60,85)'
 						})
 						let mesh=new THREE.Mesh(geo,mtl)
 						scene.add(mesh)
 						geo.rotateX(Math.PI/-2)
+						geo.translate(0,-.9,0)
 					}
 					{
-						let geo=new THREE.BoxBufferGeometry(1,1,1)
-						let mtl=new THREE.MeshBasicMaterial({
+						let name='main'
+						let geo=new THREE.IcosahedronBufferGeometry(.7,1)
+						let mtl=new THREE.MeshStandardMaterial({
 							color:'rgb(80,0,0)'
 						})
 						let mesh=new THREE.Mesh(geo,mtl)
+						window['mesh_'+name]=mesh
 						scene.add(mesh)
-						geo.translate(0,.5,0)
+						geo.translate(1.5,.5,0)
 					}
 				}
 
@@ -124,6 +128,11 @@
 				controls = new OrbitControls( camera, renderer.domElement );
 
 				window.addEventListener( 'resize', onWindowResize, false );
+
+		// STATS
+
+		stats = new Stats();
+		container.appendChild( stats.dom );
 
 				// composer
 
@@ -184,12 +193,17 @@
 
 			function animate() {
 				requestAnimationFrame(animate)
+				stats.begin();
+
+				if(window.mesh_main)mesh_main.rotation.z+=.005
 
 				if(params.enableSSR){
 					composer.render();
 				}else{
 					renderer.render(scene,camera)
 				}
+				
+				stats.end();
 
 			}
 
