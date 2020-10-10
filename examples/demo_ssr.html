@@ -165,6 +165,7 @@
 				gui.add(ssrPass, 'isBlur');
 				gui.add(ssrPass, 'isNoise');
 				gui.add(ssrPass, 'noiseIntensity').min(0).max(.3).step(.001);
+				gui.add(ssrPass, 'noiseOversample').min(1).max(5).step(1);
 
 				animate()
 			}

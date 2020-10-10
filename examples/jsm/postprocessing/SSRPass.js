@@ -62,7 +62,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
     }
   })
 
-  this.isBlur = true
+  this.isBlur = false
 
   this._isDistanceAttenuation = SSRShader.defines.isDistanceAttenuation
   Object.defineProperty(this, 'isDistanceAttenuation', {
@@ -104,6 +104,18 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
     }
   })
   this.noiseIntensity = SSRShader.uniforms.noiseIntensity.value;
+  this._noiseOversample = SSRShader.defines.noiseOversample
+  Object.defineProperty(this, 'noiseOversample', {
+    get() {
+      return this._noiseOversample
+    },
+    set(val) {
+      if (this._noiseOversample === val) return
+      this._noiseOversample = val
+      this.ssrMaterial.defines.noiseOversample = val
+      this.ssrMaterial.needsUpdate = true
+    }
+  })
 
   // beauty render target with depth buffer
 

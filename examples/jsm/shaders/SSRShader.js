@@ -12,9 +12,10 @@ var SSRShader = {
   defines: {
     MAX_STEP: 0,
     isPerspectiveCamera: true,
-    isDistanceAttenuation: true,
+    isDistanceAttenuation: false,
     isInfiniteThick: false,
-    isNoise: false,
+    isNoise: true,
+    noiseOversample: 1,
     isSelective: false,
   },
 
@@ -120,80 +121,91 @@ var SSRShader = {
 			vec2 d0=gl_FragCoord.xy;
 			vec2 d1;
 
-			vec3 viewNormal=getViewNormal( vUv );
-
+			vec4 allResult;
 			#ifdef isNoise
-				viewNormal+=(hash3(viewPosition.x+viewPosition.y+viewPosition.z)-.5)*noiseIntensity;
-				viewNormal=normalize(viewNormal);
-			#endif
-
-			vec3 viewReflectDir;
-			#ifdef isPerspectiveCamera
-				viewReflectDir=reflect(normalize(viewPosition),viewNormal);
+				float no=float(noiseOversample);
 			#else
-				viewReflectDir=reflect(vec3(0,0,-1),viewNormal);
+				float no=1.;
 			#endif
-			vec3 d1viewPosition=viewPosition+viewReflectDir*maxDistance;
-			#ifdef isPerspectiveCamera
-				if(d1viewPosition.z>-cameraNear){
-					//https://tutorial.math.lamar.edu/Classes/CalcIII/EqnsOfLines.aspx
-					vec3 n=normalize(d1viewPosition-viewPosition);
-					float t=(-cameraNear-viewPosition.z)/n.z;
-					d1viewPosition=viewPosition+n*t;
-				}
-			#endif
-			d1=viewPositionToXY(d1viewPosition);
+			for(float ni=0.;ni<no;ni++){
+				vec4 result;
+				vec3 viewNormal=getViewNormal( vUv );
 
-			float totalLen=length(d1-d0);
-			float xLen=d1.x-d0.x;
-			float yLen=d1.y-d0.y;
-			float totalStep=max(abs(xLen),abs(yLen));
-			float xSpan=xLen/totalStep;
-			float ySpan=yLen/totalStep;
-			for(float i=0.;i<MAX_STEP;i++){
-				if(i>=totalStep) break;
-				vec2 xy=vec2(d0.x+i*xSpan,d0.y+i*ySpan);
-				if(xy.x<0.||xy.x>resolution.x||xy.y<0.||xy.y>resolution.y) break;
-				float s=length(xy-d0)/totalLen;
-				vec2 uv=xy/resolution;
+				#ifdef isNoise
+					viewNormal+=(hash3(viewPosition.x+viewPosition.y+viewPosition.z+ni)-.5)*noiseIntensity;
+					viewNormal=normalize(viewNormal);
+				#endif
 
-				float d = getDepth(uv);
-				float vZ = getViewZ( d );
-				if(-vZ>=cameraFar) continue;
-				float cW = cameraProjectionMatrix[2][3] * vZ+cameraProjectionMatrix[3][3];
-				vec3 vP=getViewPosition( uv, d, cW );
-
+				vec3 viewReflectDir;
 				#ifdef isPerspectiveCamera
-					// https://www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
-					float recipVPZ=1./viewPosition.z;
-					float viewReflectRayZ=1./(recipVPZ+s*(1./d1viewPosition.z-recipVPZ));
-					float sD=surfDist*cW;
+					viewReflectDir=reflect(normalize(viewPosition),viewNormal);
 				#else
-				float viewReflectRayZ=viewPosition.z+s*(d1viewPosition.z-viewPosition.z);
-					float sD=surfDist;
+					viewReflectDir=reflect(vec3(0,0,-1),viewNormal);
 				#endif
-
-				#ifdef isInfiniteThick
-					if(viewReflectRayZ+thickTolerance*clipW<vP.z) break;
+				vec3 d1viewPosition=viewPosition+viewReflectDir*maxDistance;
+				#ifdef isPerspectiveCamera
+					if(d1viewPosition.z>-cameraNear){
+						//https://tutorial.math.lamar.edu/Classes/CalcIII/EqnsOfLines.aspx
+						vec3 n=normalize(d1viewPosition-viewPosition);
+						float t=(-cameraNear-viewPosition.z)/n.z;
+						d1viewPosition=viewPosition+n*t;
+					}
 				#endif
-				float away=abs(viewReflectRayZ-vZ);
+				d1=viewPositionToXY(d1viewPosition);
 
-				float op=opacity;
-				#ifdef isDistanceAttenuation
-					float one_minus_s=1.-s;
-					float attenuation=one_minus_s*one_minus_s;
-					op=opacity*attenuation;
-				#endif
+				float totalLen=length(d1-d0);
+				float xLen=d1.x-d0.x;
+				float yLen=d1.y-d0.y;
+				float totalStep=max(abs(xLen),abs(yLen));
+				float xSpan=xLen/totalStep;
+				float ySpan=yLen/totalStep;
+				for(float i=0.;i<MAX_STEP;i++){
+					if(i>=totalStep) break;
+					vec2 xy=vec2(d0.x+i*xSpan,d0.y+i*ySpan);
+					if(xy.x<0.||xy.x>resolution.x||xy.y<0.||xy.y>resolution.y) break;
+					float s=length(xy-d0)/totalLen;
+					vec2 uv=xy/resolution;
 
-				if(away<sD){
-					vec3 vN=getViewNormal( uv );
-					if(dot(viewReflectDir,vN)>=0.) continue;
-					vec4 reflectColor=texture2D(tDiffuse,uv);
-					gl_FragColor.xyz=reflectColor.xyz;
-					gl_FragColor.a=op;
-					break;
+					float d = getDepth(uv);
+					float vZ = getViewZ( d );
+					if(-vZ>=cameraFar) continue;
+					float cW = cameraProjectionMatrix[2][3] * vZ+cameraProjectionMatrix[3][3];
+					vec3 vP=getViewPosition( uv, d, cW );
+
+					#ifdef isPerspectiveCamera
+						// https://www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
+						float recipVPZ=1./viewPosition.z;
+						float viewReflectRayZ=1./(recipVPZ+s*(1./d1viewPosition.z-recipVPZ));
+						float sD=surfDist*cW;
+					#else
+					float viewReflectRayZ=viewPosition.z+s*(d1viewPosition.z-viewPosition.z);
+						float sD=surfDist;
+					#endif
+
+					#ifdef isInfiniteThick
+						if(viewReflectRayZ+thickTolerance*clipW<vP.z) break;
+					#endif
+					float away=abs(viewReflectRayZ-vZ);
+
+					float op=opacity;
+					#ifdef isDistanceAttenuation
+						float one_minus_s=1.-s;
+						float attenuation=one_minus_s*one_minus_s;
+						op=opacity*attenuation;
+					#endif
+
+					if(away<sD){
+						vec3 vN=getViewNormal( uv );
+						if(dot(viewReflectDir,vN)>=0.) continue;
+						vec4 reflectColor=texture2D(tDiffuse,uv);
+						result.xyz=reflectColor.xyz;
+						result.a=op;
+						allResult+=result;
+						break;
+					}
 				}
 			}
+			gl_FragColor=allResult/no;
 		}
 	`
 
