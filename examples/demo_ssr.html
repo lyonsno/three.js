@@ -50,6 +50,48 @@
 
 				scene = new THREE.Scene();
 
+				new RGBELoader()
+					.setDataType( THREE.UnsignedByteType )
+					.setPath( 'textures/equirectangular/' )
+					.load( 'royal_esplanade_1k.hdr', function ( texture ) {
+
+						var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+
+						scene.background = envMap;
+						scene.environment = envMap;
+
+						texture.dispose();
+						pmremGenerator.dispose();
+
+						// model
+
+						// use of RoughnessMipmapper is optional
+						var roughnessMipmapper = new RoughnessMipmapper( renderer );
+
+						var loader = new GLTFLoader().setPath( 'models/gltf/DamagedHelmet/glTF/' );
+						loader.load( 'DamagedHelmet.gltf', function ( gltf ) {
+
+							gltf.scene.traverse( function ( child ) {
+
+								if ( child.isMesh ) {
+
+									// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
+									// roughnessMipmapper.generateMipmaps( child.material );
+
+								}
+
+							} );
+
+							scene.add( gltf.scene );
+
+							roughnessMipmapper.dispose();
+
+						} );
+
+					} );
+
+
+
 				//mesh
 				{
 					{
@@ -76,7 +118,9 @@
 				// renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				container.appendChild( renderer.domElement );
-
+				
+				var pmremGenerator = new THREE.PMREMGenerator( renderer );
+				pmremGenerator.compileEquirectangularShader();
 				controls = new OrbitControls( camera, renderer.domElement );
 
 				window.addEventListener( 'resize', onWindowResize, false );
@@ -99,8 +143,8 @@
 				ssrPass.surfDist=.003
 				gui.add(params, 'enableSSR').name( 'Enable SSR' );
 				gui.add(ssrPass, 'isDistanceAttenuation');
-				ssrPass.attenuationDistance=10;
-				gui.add(ssrPass, 'attenuationDistance').min(0).max(50).step(.1);
+				ssrPass.maxDistance=10;
+				gui.add(ssrPass, 'maxDistance').min(0).max(30).step(.1);
 				gui.add(ssrPass,'isBouncing')
 				gui.add(ssrPass, 'output', {
 					'Default': SSRPass.OUTPUT.Default,
@@ -114,7 +158,6 @@
 
 				});
 				gui.add(ssrPass, 'opacity').min(0).max(1);
-				gui.add(ssrPass, 'maxDistance').min(0).max(2000);
 				gui.add(ssrPass, 'surfDist').min(0).max(.02).step(.0001);
 				gui.add(ssrPass, 'isInfiniteThick');
 				ssrPass.thickTolerance=.3
