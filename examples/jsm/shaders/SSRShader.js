@@ -12,9 +12,9 @@ var SSRShader = {
   defines: {
     MAX_STEP: 0,
     isPerspectiveCamera: true,
-    isDistanceAttenuation: false,
+    isDistanceAttenuation: true,
     isInfiniteThick: false,
-    isNoise: true,
+    isNoise: false,
     noiseOversample: 1,
     isSelective: false,
   },
@@ -122,17 +122,12 @@ var SSRShader = {
 			vec2 d1;
 
 			vec4 allResult;
-			#ifdef isNoise
-				float no=float(noiseOversample);
-			#else
-				float no=1.;
-			#endif
-			for(float ni=0.;ni<no;ni++){
+			for(int ni=0;ni<noiseOversample;ni++){
 				vec4 result;
 				vec3 viewNormal=getViewNormal( vUv );
 
 				#ifdef isNoise
-					viewNormal+=(hash3(viewPosition.x+viewPosition.y+viewPosition.z+ni)-.5)*noiseIntensity;
+					viewNormal+=(hash3(viewPosition.x+viewPosition.y+viewPosition.z+float(ni))-.5)*noiseIntensity;
 					viewNormal=normalize(viewNormal);
 				#endif
 
@@ -205,7 +200,7 @@ var SSRShader = {
 					}
 				}
 			}
-			gl_FragColor=allResult/no;
+			gl_FragColor=allResult/float(noiseOversample);
 		}
 	`
 

@@ -26,10 +26,10 @@
 		based on <a href="https://threejs.org/examples/?q=physic#webgl_shading_physical" target="_blank" rel="noopener">this scene</a>
 	</div>
 
-<!-- <script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.3.4/vconsole.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.3.4/vconsole.min.js"></script>
 <script>
   var vConsole = new VConsole();
-</script> -->
+</script>
 
 <!-- <script>window.THREE=true</script> -->
 <!-- <script src="/lib/vs_util/vs_util.js"></script> -->
@@ -341,6 +341,7 @@
 		gui.add(ssrPass, 'isBlur');
 		gui.add(ssrPass, 'isNoise');
 		gui.add(ssrPass, 'noiseIntensity').min(0).max(.3).step(.001);
+		gui.add(ssrPass, 'noiseOversample').min(1).max(5).step(1);
 
 	}
 

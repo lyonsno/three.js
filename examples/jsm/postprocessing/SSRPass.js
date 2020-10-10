@@ -62,7 +62,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
     }
   })
 
-  this.isBlur = false
+  this.isBlur = true
 
   this._isDistanceAttenuation = SSRShader.defines.isDistanceAttenuation
   Object.defineProperty(this, 'isDistanceAttenuation', {
