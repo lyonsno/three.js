@@ -69,8 +69,8 @@
 						// use of RoughnessMipmapper is optional
 						var roughnessMipmapper = new RoughnessMipmapper( renderer );
 
-						var loader = new GLTFLoader().setPath( '/_3d_model/ssr/' );
-						loader.load( 'ssr2.glb', function ( gltf ) {
+						var loader = new GLTFLoader().setPath( 'models/gltf/DamagedHelmet/glTF/' );
+						loader.load( 'DamagedHelmet.gltf', function ( gltf ) {
 
 							gltf.scene.traverse( function ( child ) {
 
@@ -93,30 +93,30 @@
 
 
 
-				// //mesh
-				// {
-				// 	{
-				// 		let geo=new THREE.PlaneBufferGeometry(4,4)
-				// 		let mtl=new THREE.MeshStandardMaterial({
-				// 			color:'rgb(53,60,85)'
-				// 		})
-				// 		let mesh=new THREE.Mesh(geo,mtl)
-				// 		scene.add(mesh)
-				// 		geo.rotateX(Math.PI/-2)
-				// 		geo.translate(0,-.9,0)
-				// 	}
-				// 	{
-				// 		let name='main'
-				// 		let geo=new THREE.IcosahedronBufferGeometry(.7,1)
-				// 		let mtl=new THREE.MeshStandardMaterial({
-				// 			color:'rgb(80,0,0)'
-				// 		})
-				// 		let mesh=new THREE.Mesh(geo,mtl)
-				// 		window['mesh_'+name]=mesh
-				// 		scene.add(mesh)
-				// 		geo.translate(1.5,.5,0)
-				// 	}
-				// }
+				//mesh
+				{
+					{
+						let geo=new THREE.PlaneBufferGeometry(4,4)
+						let mtl=new THREE.MeshStandardMaterial({
+							color:'rgb(53,60,85)'
+						})
+						let mesh=new THREE.Mesh(geo,mtl)
+						scene.add(mesh)
+						geo.rotateX(Math.PI/-2)
+						geo.translate(0,-.9,0)
+					}
+					{
+						let name='main'
+						let geo=new THREE.IcosahedronBufferGeometry(.7,1)
+						let mtl=new THREE.MeshStandardMaterial({
+							color:'rgb(80,0,0)'
+						})
+						let mesh=new THREE.Mesh(geo,mtl)
+						window['mesh_'+name]=mesh
+						scene.add(mesh)
+						geo.translate(1.5,.5,0)
+					}
+				}
 
 				renderer = new THREE.WebGLRenderer( { antialias: false } );
 				// renderer.setPixelRatio( window.devicePixelRatio );
@@ -142,7 +142,7 @@
 					camera, 
 					width: innerWidth, 
 					height: innerHeight,
-					encoding: THREE.sRGBEncoding,
+					// encoding: THREE.sRGBEncoding,
 				});
 				composer.addPass(ssrPass);
 
@@ -151,7 +151,6 @@
 				gui = new GUI( { width: 400 } );
 				ssrPass.surfDist=.003
 				gui.add(params, 'enableSSR').name( 'Enable SSR' );
-				ssrPass.isDistanceAttenuation=false
 				gui.add(ssrPass, 'isDistanceAttenuation');
 				ssrPass.maxDistance=10;
 				gui.add(ssrPass, 'maxDistance').min(0).max(30).step(.1);
@@ -196,7 +195,7 @@
 				requestAnimationFrame(animate)
 				stats.begin();
 
-				// if(window.mesh_main)mesh_main.rotation.z+=.005
+				if(window.mesh_main)mesh_main.rotation.z+=.005
 
 				if(params.enableSSR){
 					composer.render();
