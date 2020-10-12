@@ -1,7 +1,8 @@
 import {
   AddEquation,
   Color,
-  AdditiveBlending,
+	AdditiveBlending,
+	NormalBlending,
   DepthTexture,
   DstAlphaFactor,
   DstColorFactor,
@@ -9,7 +10,7 @@ import {
   MeshNormalMaterial,
   MeshBasicMaterial,
   NearestFilter,
-  NoBlending,
+	NoBlending,
   RGBAFormat,
   ShaderMaterial,
   UniformsUtils,
@@ -251,7 +252,8 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
     blendEquation: AddEquation,
     blendSrcAlpha: DstAlphaFactor,
     blendDstAlpha: ZeroFactor,
-    blendEquationAlpha: AddEquation
+		blendEquationAlpha: AddEquation,
+		// premultipliedAlpha:true,
   });
 
   this.fsQuad = new Pass.FullScreenQuad(null);
@@ -342,7 +344,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
             this.copyMaterial.uniforms['tDiffuse'].value = this.blurRenderTarget.texture;
           else
             this.copyMaterial.uniforms['tDiffuse'].value = this.ssrRenderTarget.texture;
-          this.copyMaterial.blending = AdditiveBlending;
+          this.copyMaterial.blending = NormalBlending;
           this.renderPass(renderer, this.copyMaterial, this.prevRenderTarget);
 
           this.copyMaterial.uniforms['tDiffuse'].value = this.prevRenderTarget.texture;
@@ -357,7 +359,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
             this.copyMaterial.uniforms['tDiffuse'].value = this.blurRenderTarget.texture;
           else
             this.copyMaterial.uniforms['tDiffuse'].value = this.ssrRenderTarget.texture;
-          this.copyMaterial.blending = AdditiveBlending;
+          this.copyMaterial.blending = NormalBlending;
           this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
         }
 
@@ -380,7 +382,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
           this.renderPass(renderer, this.copyMaterial, this.prevRenderTarget);
 
           this.copyMaterial.uniforms['tDiffuse'].value = this.ssrRenderTarget.texture;
-          this.copyMaterial.blending = AdditiveBlending;
+          this.copyMaterial.blending = NormalBlending;
           this.renderPass(renderer, this.copyMaterial, this.prevRenderTarget);
         }
 

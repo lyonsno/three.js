@@ -41,7 +41,6 @@
 
 	var params = {
 		enableSSR: true,
-		darken: true,
 	}
 	var composer
 	var ssrPass
@@ -287,10 +286,11 @@
 			camera, 
 			width: innerWidth, 
 			height: innerHeight,
-			// encoding: THREE.sRGBEncoding,
+			encoding: THREE.sRGBEncoding,
 			isPerspectiveCamera:isPerspectiveCamera,
 			morphTargets: true,
 		});
+		window.ssrPass=ssrPass///test
 		composer.addPass(ssrPass);
 
 		// GUI
@@ -299,13 +299,6 @@
 		gui.add(params, 'enableSSR').name( 'Enable SSR' );
 		gui.add(ssrPass, 'isDistanceAttenuation');
 		gui.add(ssrPass, 'maxDistance').min(0).max(2000);
-		gui.add(params, 'darken').onChange(function(value){
-			if(value){
-				ssrPass.encoding = THREE.LinearEncoding
-			}else{
-				ssrPass.encoding = THREE.sRGBEncoding
-			}
-		});
 		gui.add(ssrPass,'isBouncing')
 		gui.add(ssrPass, 'output', {
 			'Default': SSRPass.OUTPUT.Default,
