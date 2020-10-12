@@ -46,7 +46,6 @@
 
 	var params = {
 		enableSSR: true,
-		darken: true,
 	}
 	var composer
 	var ssrPass
@@ -288,13 +287,13 @@
 			camera, 
 			width: innerWidth, 
 			height: innerHeight,
-			// encoding: THREE.sRGBEncoding,
-			selects:[
-				scene.children[1],
-				scene.children[3],
-				scene.children[4],
-				scene.children[10],
-			]
+			encoding: THREE.sRGBEncoding,
+			// selects:[
+			// 	scene.children[1],
+			// 	scene.children[3],
+			// 	scene.children[4],
+			// 	scene.children[10],
+			// ]
 		});
 		composer.addPass(ssrPass);
 
@@ -307,13 +306,6 @@
 		gui.add(ssrPass, 'isDistanceAttenuation');
 		ssrPass.maxDistance=900;
 		gui.add(ssrPass, 'maxDistance').min(0).max(2000);
-		gui.add(params, 'darken').onChange(function(value){
-			if(value){
-				ssrPass.encoding = THREE.LinearEncoding
-			}else{
-				ssrPass.encoding = THREE.sRGBEncoding
-			}
-		});
 		gui.add(ssrPass,'isBouncing')
 		gui.add(ssrPass, 'output', {
 			'Default': SSRPass.OUTPUT.Default,
@@ -332,6 +324,7 @@
 		gui.add(ssrPass, 'isInfiniteThick');
 		ssrPass.thickTolerance=.3
 		gui.add(ssrPass, 'thickTolerance').min(0).max(1).step(.01);
+		ssrPass.isBlur=false
 		gui.add(ssrPass, 'isBlur');
 		gui.add(ssrPass, 'isNoise');
 		gui.add(ssrPass, 'noiseIntensity').min(0).max(.3).step(.001);
