@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - glTF loader</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+	</head>
+
+	<body>
+		<div id="info">
+			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - GLTFLoader<br />
+			Battle Damaged Sci-fi Helmet by
+			<a href="https://sketchfab.com/theblueturtle_" target="_blank" rel="noopener">theblueturtle_</a><br />
+			<a href="https://hdrihaven.com/hdri/?h=royal_esplanade" target="_blank" rel="noopener">Royal Esplanade</a> by <a href="https://hdrihaven.com/" target="_blank" rel="noopener">HDRI Haven</a>
+		</div>
+
+		<script type="module">
+			import * as THREE from '../build/three.module.js';
+
+			import { OrbitControls } from './jsm/controls/OrbitControls.js';
+			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+			import { RGBELoader } from './jsm/loaders/RGBELoader.js';
+			import { RoughnessMipmapper } from './jsm/utils/RoughnessMipmapper.js';
+			import Stats from './jsm/libs/stats.module.js';
+	
+	import { GUI } from './jsm/libs/dat.gui.module.js';
+	import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
+	import { SSRPass } from './jsm/postprocessing/SSRPass.js';
+
+	var params = {
+		enableSSR: true,
+	}
+	var ssrPass
+	var gui
+
+			var container, controls, stats;
+			var camera, scene, renderer;
+
+			init();
+			
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 50 );
+				camera.position.set(  -2.5164585178227235, 2.1567002191660913,  2.4424705475447324);
+				window.camera=camera///test
+
+				scene = new THREE.Scene();
+
+				new RGBELoader()
+					.setDataType( THREE.UnsignedByteType )
+					.setPath( 'textures/equirectangular/' )
+					.load( 'royal_esplanade_1k.hdr', function ( texture ) {
+
+						var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+
+						scene.background = envMap;
+						scene.environment = envMap;
+
+						texture.dispose();
+						pmremGenerator.dispose();
+
+						// model
+
+						// use of RoughnessMipmapper is optional
+						var roughnessMipmapper = new RoughnessMipmapper( renderer );
+
+						var loader = new GLTFLoader().setPath( 'models/gltf/DamagedHelmet/glTF/' );
+						loader.load( 'DamagedHelmet.gltf', function ( gltf ) {
+
+							gltf.scene.traverse( function ( child ) {
+
+								if ( child.isMesh ) {
+
+									// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
+									// roughnessMipmapper.generateMipmaps( child.material );
+
+								}
+
+							} );
+
+							scene.add( gltf.scene );
+
+							roughnessMipmapper.dispose();
+
+						} );
+
+					} );
+
+
+
+				//mesh
+				{
+					{
+						let geo=new THREE.PlaneBufferGeometry(4,4)
+						let mtl=new THREE.MeshStandardMaterial({
+							color:'rgb(53,60,85)'
+						})
+						let mesh=new THREE.Mesh(geo,mtl)
+						scene.add(mesh)
+						geo.rotateX(Math.PI/-2)
+						geo.translate(0,-.9,0)
+					}
+					{
+						let name='main'
+						let geo=new THREE.IcosahedronBufferGeometry(.7,1)
+						let mtl=new THREE.MeshStandardMaterial({
+							color:'rgb(80,0,0)'
+						})
+						let mesh=new THREE.Mesh(geo,mtl)
+						window['mesh_'+name]=mesh
+						scene.add(mesh)
+						geo.translate(1.5,.5,0)
+					}
+				}
+
+				renderer = new THREE.WebGLRenderer( { antialias: false } );
+				// renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+				
+				var pmremGenerator = new THREE.PMREMGenerator( renderer );
+				pmremGenerator.compileEquirectangularShader();
+				controls = new OrbitControls( camera, renderer.domElement );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+		// STATS
+
+		stats = new Stats();
+		container.appendChild( stats.dom );
+
+				// composer
+
+				window.composer = new EffectComposer(renderer);
+				ssrPass = new SSRPass({
+					scene, 
+					camera, 
+					width: innerWidth, 
+					height: innerHeight,
+					// encoding: THREE.sRGBEncoding,
+				});
+				composer.addPass(ssrPass);
+
+				// GUI
+
+				gui = new GUI( { width: 400 } );
+				ssrPass.surfDist=.003
+				gui.add(params, 'enableSSR').name( 'Enable SSR' );
+				gui.add(ssrPass, 'isDistanceAttenuation');
+				ssrPass.maxDistance=10;
+				gui.add(ssrPass, 'maxDistance').min(0).max(30).step(.1);
+				gui.add(ssrPass,'isBouncing')
+				gui.add(ssrPass, 'output', {
+					'Default': SSRPass.OUTPUT.Default,
+					'SSR Only': SSRPass.OUTPUT.SSR,
+					'Beauty': SSRPass.OUTPUT.Beauty,
+					'Depth': SSRPass.OUTPUT.Depth,
+					'Normal': SSRPass.OUTPUT.Normal
+				}).onChange(function (value) {
+
+					ssrPass.output = parseInt(value);
+
+				});
+				gui.add(ssrPass, 'opacity').min(0).max(1);
+				gui.add(ssrPass, 'surfDist').min(0).max(.02).step(.0001);
+				gui.add(ssrPass, 'isInfiniteThick');
+				ssrPass.thickTolerance=.3
+				gui.add(ssrPass, 'thickTolerance').min(0).max(1).step(.01);
+				gui.add(ssrPass, 'isBlur');
+				gui.add(ssrPass, 'isNoise');
+				gui.add(ssrPass, 'noiseIntensity').min(0).max(.3).step(.001);
+
+				animate()
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+
+			}
+
+			//
+
+			function animate() {
+				requestAnimationFrame(animate)
+				stats.begin();
+
+				if(window.mesh_main)mesh_main.rotation.z+=.005
+
+				if(params.enableSSR){
+					composer.render();
+				}else{
+					renderer.render(scene,camera)
+				}
+				
+				stats.end();
+
+			}
+
+		</script>
+
+	</body>
+</html>
