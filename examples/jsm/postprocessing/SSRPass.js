@@ -1,22 +1,28 @@
 import {
   AddEquation,
   Color,
-	AdditiveBlending,
-	NormalBlending,
+  AdditiveBlending,
+  NormalBlending,
   DepthTexture,
   DstAlphaFactor,
-  DstColorFactor,
+	DstColorFactor,
+	SrcAlphaFactor,
+	SubtractEquation,
+	OneMinusDstAlphaFactor,
+	OneMinusSrcAlphaFactor,
+  SrcColorFactor,
   LinearFilter,
   MeshNormalMaterial,
   MeshBasicMaterial,
   NearestFilter,
-	NoBlending,
+  NoBlending,
   RGBAFormat,
   ShaderMaterial,
   UniformsUtils,
   UnsignedShortType,
   WebGLRenderTarget,
   ZeroFactor,
+  CustomBlending
 } from "../../../build/three.module.js";
 import { Pass } from "../postprocessing/Pass.js";
 import { SSRShader } from "../shaders/SSRShader.js";
@@ -247,13 +253,13 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
     transparent: true,
     depthTest: false,
     depthWrite: false,
-    blendSrc: DstColorFactor,
-    blendDst: ZeroFactor,
+    blendSrc: SrcAlphaFactor,
+    blendDst: OneMinusSrcAlphaFactor,
     blendEquation: AddEquation,
-    blendSrcAlpha: DstAlphaFactor,
-    blendDstAlpha: ZeroFactor,
-		blendEquationAlpha: AddEquation,
-		// premultipliedAlpha:true,
+    blendSrcAlpha: SrcAlphaFactor,
+    blendDstAlpha: OneMinusSrcAlphaFactor,
+    blendEquationAlpha: AddEquation,
+    // premultipliedAlpha:true,
   });
 
   this.fsQuad = new Pass.FullScreenQuad(null);
@@ -344,7 +350,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
             this.copyMaterial.uniforms['tDiffuse'].value = this.blurRenderTarget.texture;
           else
             this.copyMaterial.uniforms['tDiffuse'].value = this.ssrRenderTarget.texture;
-          this.copyMaterial.blending = NormalBlending;
+          this.copyMaterial.blending = CustomBlending;
           this.renderPass(renderer, this.copyMaterial, this.prevRenderTarget);
 
           this.copyMaterial.uniforms['tDiffuse'].value = this.prevRenderTarget.texture;
@@ -359,7 +365,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
             this.copyMaterial.uniforms['tDiffuse'].value = this.blurRenderTarget.texture;
           else
             this.copyMaterial.uniforms['tDiffuse'].value = this.ssrRenderTarget.texture;
-          this.copyMaterial.blending = NormalBlending;
+          this.copyMaterial.blending = CustomBlending;
           this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
         }
 
@@ -382,7 +388,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
           this.renderPass(renderer, this.copyMaterial, this.prevRenderTarget);
 
           this.copyMaterial.uniforms['tDiffuse'].value = this.ssrRenderTarget.texture;
-          this.copyMaterial.blending = NormalBlending;
+          this.copyMaterial.blending = CustomBlending;
           this.renderPass(renderer, this.copyMaterial, this.prevRenderTarget);
         }
 

@@ -289,35 +289,29 @@ var SSRBlurShader = {
 
   ].join("\n"),
 
-  fragmentShader: [
+  fragmentShader: `
 
-    "uniform sampler2D tDiffuse;",
+    uniform sampler2D tDiffuse;
+    uniform vec2 resolution;
+    varying vec2 vUv;
+    void main() {
+    	vec2 texelSize = ( 1.0 / resolution );
+    	vec4 result = vec4(0);
+    	for ( int i = - 2; i <= 2; i ++ ) {
+    		for ( int j = - 2; j <= 2; j ++ ) {
+    			vec2 offset = ( vec2( float( i ), float( j ) ) ) * texelSize;
+    			vec4 c = texture2D( tDiffuse, vUv + offset );
+					if(c.w<=0.){
+						c.xyz=texture2D( tDiffuse, vUv ).xyz;
+					}
+    			result += c;
+    		}
+    	}
+    	gl_FragColor = vec4(  result / ( 25.0 ) ); // 25.0 = 5.0 * 5.0
 
-    "uniform vec2 resolution;",
+		}
+	`
 
-    "varying vec2 vUv;",
-
-    "void main() {",
-
-    "	vec2 texelSize = ( 1.0 / resolution );",
-    "	vec4 result = vec4(0);",
-
-    "	for ( int i = - 2; i <= 2; i ++ ) {",
-
-    "		for ( int j = - 2; j <= 2; j ++ ) {",
-
-    "			vec2 offset = ( vec2( float( i ), float( j ) ) ) * texelSize;",
-    "			result += texture2D( tDiffuse, vUv + offset );",
-
-    "		}",
-
-    "	}",
-
-    "	gl_FragColor = vec4(  result / ( 25.0 ) ); // 25.0 = 5.0 * 5.0",
-
-    "}"
-
-  ].join("\n")
 
 };
 
