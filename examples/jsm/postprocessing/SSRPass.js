@@ -164,6 +164,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
 
   this.blurRenderTarget = this.ssrRenderTarget.clone();
   this.blurRenderTarget2 = this.ssrRenderTarget.clone();
+  // this.blurRenderTarget3 = this.ssrRenderTarget.clone();
 
   // ssr material
 
@@ -243,6 +244,17 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   this.blurMaterial2.uniforms['tDiffuse'].value = this.blurRenderTarget.texture;
   this.blurMaterial2.uniforms['resolution'].value.set(this.width, this.height);
 
+  // // blur material 3
+
+  // this.blurMaterial3 = new ShaderMaterial({
+  //   defines: Object.assign({}, SSRBlurShader.defines),
+  //   uniforms: UniformsUtils.clone(SSRBlurShader.uniforms),
+  //   vertexShader: SSRBlurShader.vertexShader,
+  //   fragmentShader: SSRBlurShader.fragmentShader
+  // });
+  // this.blurMaterial3.uniforms['tDiffuse'].value = this.blurRenderTarget2.texture;
+  // this.blurMaterial3.uniforms['resolution'].value.set(this.width, this.height);
+
   // material for rendering the depth
 
   this.depthRenderMaterial = new ShaderMaterial({
@@ -294,6 +306,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     this.ssrRenderTarget.dispose();
     this.blurRenderTarget.dispose();
     this.blurRenderTarget2.dispose();
+    // this.blurRenderTarget3.dispose();
 
     // dispose materials
 
@@ -347,6 +360,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     if (this.isBlur) {
       this.renderPass(renderer, this.blurMaterial, this.blurRenderTarget);
       this.renderPass(renderer, this.blurMaterial2, this.blurRenderTarget2);
+      // this.renderPass(renderer, this.blurMaterial3, this.blurRenderTarget3);
     }
 
     // output result to screen
@@ -560,6 +574,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     if (this.isSelective) this.metalnessRenderTarget.setSize(width, height);
     this.blurRenderTarget.setSize(width, height);
     this.blurRenderTarget2.setSize(width, height);
+    // this.blurRenderTarget3.setSize(width, height);
 
     this.ssrMaterial.uniforms['resolution'].value.set(width, height);
     this.ssrMaterial.uniforms['cameraProjectionMatrix'].value.copy(this.camera.projectionMatrix);

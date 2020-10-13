@@ -295,6 +295,7 @@ var SSRBlurShader = {
     uniform vec2 resolution;
     varying vec2 vUv;
     void main() {
+			//reverse engineering from PhotoShop blur filter, then change coefficient
 
 			// gl_FragColor=vec4(0,0,1,.5);return;
 
@@ -318,9 +319,13 @@ var SSRBlurShader = {
 
 			// gl_FragColor=cr;return;
 
-			float a=c.a*.5+cl.a*.125+cr.a*.125+cb.a*.125+ct.a*.125;
+			// float coeCenter=.5;
+			// float coeSide=.125
+			float coeCenter=.2;
+			float coeSide=.2;
+			float a=c.a*coeCenter+cl.a*coeSide+cr.a*coeSide+cb.a*coeSide+ct.a*coeSide;
 			// gl_FragColor=vec4(vec3(a),1);return;
-			vec3 rgb=(c.rgb*c.a*.5+cl.rgb*cl.a*.125+cr.rgb*cr.a*.125+cb.rgb*cb.a*.125+ct.rgb*ct.a*.125)/a;
+			vec3 rgb=(c.rgb*c.a*coeCenter+cl.rgb*cl.a*coeSide+cr.rgb*cr.a*coeSide+cb.rgb*cb.a*coeSide+ct.rgb*ct.a*coeSide)/a;
 			gl_FragColor=vec4(rgb,a);
 
 		}

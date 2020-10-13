@@ -82,7 +82,7 @@
 
 		if(isPerspectiveCamera){
 			camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 2, 10000 );
-			camera.position.set( 388.5770726262176,  305.6568142796153,  647.1326965696304);
+			camera.position.set( 320.3799692585287,  340.3719443974168,  666.8602336478249);
 			// camera.position.set( -612.8787517743004,  518.3480614141735,  137.45500830289768);
 		}else{
 			var initialFrustumSize = 1000
@@ -297,7 +297,7 @@
 
 		gui = new GUI( { width: 400 } );
 		gui.add(params, 'enableSSR').name( 'Enable SSR' );
-		ssrPass.isDistanceAttenuation=false
+		// ssrPass.isDistanceAttenuation=false
 		gui.add(ssrPass, 'isDistanceAttenuation');
 		ssrPass.maxDistance=880
 		gui.add(ssrPass, 'maxDistance').min(0).max(2000);
@@ -314,7 +314,7 @@
 			ssrPass.output = parseInt(value);
 
 		});
-		ssrPass.opacity=1
+		// ssrPass.opacity=1
 		gui.add(ssrPass, 'opacity').min(0).max(1);
 		if(isPerspectiveCamera){
 		ssrPass.surfDist=.007
@@ -325,7 +325,7 @@
 		}
 		gui.add(ssrPass, 'isInfiniteThick');
 		gui.add(ssrPass, 'thickTolerance').min(0).max(.05).step(.0001);
-		ssrPass.isBlur=false
+		// ssrPass.isBlur=false
 		gui.add(ssrPass, 'isBlur');
 		gui.add(ssrPass, 'isNoise');
 		gui.add(ssrPass, 'noiseIntensity').min(0).max(.3).step(.01);
