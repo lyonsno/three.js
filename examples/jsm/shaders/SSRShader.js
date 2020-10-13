@@ -127,19 +127,21 @@ var SSRShader = {
 				viewNormal=normalize(viewNormal);
 			#endif
 
-			vec3 viewReflectDir;
 			#ifdef isPerspectiveCamera
-				viewReflectDir=reflect(normalize(viewPosition),viewNormal);
+				vec3 viewIncidenceDir=normalize(viewPosition);
+				vec3 viewReflectDir=reflect(viewIncidenceDir,viewNormal);
 			#else
-				viewReflectDir=reflect(vec3(0,0,-1),viewNormal);
+				vec3 viewIncidenceDir=vec3(0,0,-1);
+				vec3 viewReflectDir=reflect(viewIncidenceDir,viewNormal);
 			#endif
+			// float angleCompensation=(dot(viewIncidenceDir,viewReflectDir)+1.)/2.;
+			// vec3 d1viewPosition=viewPosition+viewReflectDir*(maxDistance*angleCompensation);
 			vec3 d1viewPosition=viewPosition+viewReflectDir*maxDistance;
 			#ifdef isPerspectiveCamera
 				if(d1viewPosition.z>-cameraNear){
 					//https://tutorial.math.lamar.edu/Classes/CalcIII/EqnsOfLines.aspx
-					vec3 n=normalize(d1viewPosition-viewPosition);
-					float t=(-cameraNear-viewPosition.z)/n.z;
-					d1viewPosition=viewPosition+n*t;
+					float t=(-cameraNear-viewPosition.z)/viewReflectDir.z;
+					d1viewPosition=viewPosition+viewReflectDir*t;
 				}
 			#endif
 			d1=viewPositionToXY(d1viewPosition);
@@ -287,35 +289,48 @@ var SSRBlurShader = {
 
   ].join("\n"),
 
-  fragmentShader: [
+  fragmentShader: `
 
-    "uniform sampler2D tDiffuse;",
+    uniform sampler2D tDiffuse;
+    uniform vec2 resolution;
+    varying vec2 vUv;
+    void main() {
+			//reverse engineering from PhotoShop blur filter, then change coefficient
 
-    "uniform vec2 resolution;",
+			// gl_FragColor=vec4(0,0,1,.5);return;
 
-    "varying vec2 vUv;",
+    	vec2 texelSize = ( 1.0 / resolution );
 
-    "void main() {",
+			vec4 c=texture2D(tDiffuse,vUv);
 
-    "	vec2 texelSize = ( 1.0 / resolution );",
-    "	vec4 result = vec4(0);",
+			vec2 offset;
 
-    "	for ( int i = - 2; i <= 2; i ++ ) {",
+			offset=(vec2(-1,0))*texelSize;
+			vec4 cl=texture2D(tDiffuse,vUv+offset);
 
-    "		for ( int j = - 2; j <= 2; j ++ ) {",
+			offset=(vec2(1,0))*texelSize;
+			vec4 cr=texture2D(tDiffuse,vUv+offset);
 
-    "			vec2 offset = ( vec2( float( i ), float( j ) ) ) * texelSize;",
-    "			result += texture2D( tDiffuse, vUv + offset );",
+			offset=(vec2(0,-1))*texelSize;
+			vec4 cb=texture2D(tDiffuse,vUv+offset);
 
-    "		}",
+			offset=(vec2(0,1))*texelSize;
+			vec4 ct=texture2D(tDiffuse,vUv+offset);
 
-    "	}",
+			// gl_FragColor=cr;return;
 
-    "	gl_FragColor = vec4(  result / ( 25.0 ) ); // 25.0 = 5.0 * 5.0",
+			// float coeCenter=.5;
+			// float coeSide=.125
+			float coeCenter=.2;
+			float coeSide=.2;
+			float a=c.a*coeCenter+cl.a*coeSide+cr.a*coeSide+cb.a*coeSide+ct.a*coeSide;
+			// gl_FragColor=vec4(vec3(a),1);return;
+			vec3 rgb=(c.rgb*c.a*coeCenter+cl.rgb*cl.a*coeSide+cr.rgb*cr.a*coeSide+cb.rgb*cb.a*coeSide+ct.rgb*ct.a*coeSide)/a;
+			gl_FragColor=vec4(rgb,a);
 
-    "}"
+		}
+	`
 
-  ].join("\n")
 
 };
 
