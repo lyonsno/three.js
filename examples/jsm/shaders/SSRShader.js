@@ -295,19 +295,33 @@ var SSRBlurShader = {
     uniform vec2 resolution;
     varying vec2 vUv;
     void main() {
+
+			// gl_FragColor=vec4(0,0,1,.5);return;
+
     	vec2 texelSize = ( 1.0 / resolution );
-    	vec4 result = vec4(0);
-    	for ( int i = - 2; i <= 2; i ++ ) {
-    		for ( int j = - 2; j <= 2; j ++ ) {
-    			vec2 offset = ( vec2( float( i ), float( j ) ) ) * texelSize;
-    			vec4 c = texture2D( tDiffuse, vUv + offset );
-					if(c.w<=0.){
-						c.xyz=texture2D( tDiffuse, vUv ).xyz;
-					}
-    			result += c;
-    		}
-    	}
-    	gl_FragColor = vec4(  result / ( 25.0 ) ); // 25.0 = 5.0 * 5.0
+
+			vec4 c=texture2D(tDiffuse,vUv);
+
+			vec2 offset;
+
+			offset=(vec2(-1,0))*texelSize;
+			vec4 cl=texture2D(tDiffuse,vUv+offset);
+
+			offset=(vec2(1,0))*texelSize;
+			vec4 cr=texture2D(tDiffuse,vUv+offset);
+
+			offset=(vec2(0,-1))*texelSize;
+			vec4 cb=texture2D(tDiffuse,vUv+offset);
+
+			offset=(vec2(0,1))*texelSize;
+			vec4 ct=texture2D(tDiffuse,vUv+offset);
+
+			// gl_FragColor=cr;return;
+
+			float a=c.a*.5+cl.a*.125+cr.a*.125+cb.a*.125+ct.a*.125;
+			// gl_FragColor=vec4(vec3(a),1);return;
+			vec3 rgb=(c.rgb*c.a*.5+cl.rgb*cl.a*.125+cr.rgb*cr.a*.125+cb.rgb*cb.a*.125+ct.rgb*ct.a*.125)/a;
+			gl_FragColor=vec4(rgb,a);
 
 		}
 	`
