@@ -27,7 +27,6 @@ precision highp int;
 uniform mat4 viewMatrix;
 uniform vec3 cameraPosition;
 uniform bool isOrthographic;
-#define TONE_MAPPING
 #ifndef saturate
     #define saturate(a) clamp( a, 0.0, 1.0 )
 #endif
@@ -74,10 +73,6 @@ uniform float opacity;
 varying vec3 vViewPosition;
 #ifndef FLAT_SHADED
     varying vec3 vNormal;
-    #ifdef USE_TANGENT
-        varying vec3 vTangent;
-        varying vec3 vBitangent;
-    #endif
 #endif
 #define PI 3.141592653589793
 #define PI2 6.283185307179586
@@ -209,42 +204,8 @@ float viewZToPerspectiveDepth( const in float viewZ, const in float near, const 
 float perspectiveDepthToViewZ( const in float invClipZ, const in float near, const in float far ) {
     return ( near * far ) / ( ( far - near ) * invClipZ - far );
 }
-#ifdef DITHERING
-    vec3 dithering( vec3 color ) {
-        float grid_position = rand( gl_FragCoord.xy );
-        vec3 dither_shift_RGB = vec3( 0.25 / 255.0, -0.25 / 255.0, 0.25 / 255.0 );
-        dither_shift_RGB = mix( 2.0 * dither_shift_RGB, -2.0 * dither_shift_RGB, grid_position );
-        return color + dither_shift_RGB;
-    }
-#endif
-#ifdef USE_COLOR
-    varying vec3 vColor;
-#endif
 #if ( defined( USE_UV ) && ! defined( UVS_VERTEX_ONLY ) )
     varying vec2 vUv;
-#endif
-#if defined( USE_LIGHTMAP ) || defined( USE_AOMAP )
-    varying vec2 vUv2;
-#endif
-#ifdef USE_MAP
-    uniform sampler2D map;
-#endif
-#ifdef USE_ALPHAMAP
-    uniform sampler2D alphaMap;
-#endif
-#ifdef USE_AOMAP
-    uniform sampler2D aoMap;
-    uniform float aoMapIntensity;
-#endif
-#ifdef USE_LIGHTMAP
-    uniform sampler2D lightMap;
-    uniform float lightMapIntensity;
-#endif
-#ifdef USE_EMISSIVEMAP
-    uniform sampler2D emissiveMap;
-#endif
-#ifdef USE_TRANSMISSIONMAP
-    uniform sampler2D transmissionMap;
 #endif
 vec2 integrateSpecularBRDF( const in float dotNV, const in float roughness ) {
     const vec4 c0 = vec4( - 1, - 0.0275, - 0.572, 0.022 );
@@ -505,32 +466,13 @@ float BlinnExponentToGGXRoughness( const in float blinnExponent ) {
     uniform float envMapIntensity;
     uniform float flipEnvMap;
     uniform int maxMipLevel;
-    #ifdef ENVMAP_TYPE_CUBE
-        uniform samplerCube envMap;
-    #else
-        uniform sampler2D envMap;
-    #endif
+    uniform sampler2D envMap;
     
 #endif
 #if defined( USE_ENVMAP )
-    #ifdef ENVMAP_MODE_REFRACTION
-        uniform float refractionRatio;
-    #endif
     vec3 getLightProbeIndirectIrradiance( const in GeometricContext geometry, const in int maxMIPLevel ) {
         vec3 worldNormal = inverseTransformDirection( geometry.normal, viewMatrix );
-        #ifdef ENVMAP_TYPE_CUBE
-            vec3 queryVec = vec3( flipEnvMap * worldNormal.x, worldNormal.yz );
-            #ifdef TEXTURE_LOD_EXT
-                vec4 envMapColor = textureCubeLodEXT( envMap, queryVec, float( maxMIPLevel ) );
-            #else
-                vec4 envMapColor = textureCube( envMap, queryVec, float( maxMIPLevel ) );
-            #endif
-            envMapColor.rgb = envMapTexelToLinear( envMapColor ).rgb;
-            #elif defined( ENVMAP_TYPE_CUBE_UV )
-            vec4 envMapColor = textureCubeUV( envMap, worldNormal, 1.0 );
-        #else
-            vec4 envMapColor = vec4( 0.0 );
-        #endif
+        vec4 envMapColor = vec4( 0.0 );
         return PI * envMapColor.rgb * envMapIntensity;
     }
     float getSpecularMIPLevel( const in float roughness, const in int maxMIPLevel ) {
@@ -548,29 +490,8 @@ float BlinnExponentToGGXRoughness( const in float blinnExponent ) {
         #endif
         reflectVec = inverseTransformDirection( reflectVec, viewMatrix );
         float specularMIPLevel = getSpecularMIPLevel( roughness, maxMIPLevel );
-        #ifdef ENVMAP_TYPE_CUBE
-            vec3 queryReflectVec = vec3( flipEnvMap * reflectVec.x, reflectVec.yz );
-            #ifdef TEXTURE_LOD_EXT
-                vec4 envMapColor = textureCubeLodEXT( envMap, queryReflectVec, specularMIPLevel );
-            #else
-                vec4 envMapColor = textureCube( envMap, queryReflectVec, specularMIPLevel );
-            #endif
-            envMapColor.rgb = envMapTexelToLinear( envMapColor ).rgb;
-            #elif defined( ENVMAP_TYPE_CUBE_UV )
-            vec4 envMapColor = textureCubeUV( envMap, reflectVec, roughness );
-        #endif
         return envMapColor.rgb * envMapIntensity;
     }
-#endif
-#ifdef USE_FOG
-    uniform vec3 fogColor;
-    varying float fogDepth;
-    #ifdef FOG_EXP2
-        uniform float fogDensity;
-    #else
-        uniform float fogNear;
-        uniform float fogFar;
-    #endif
 #endif
 uniform bool receiveShadow;
 uniform vec3 ambientLightColor;
@@ -636,9 +557,6 @@ struct PhysicalMaterial {
 };
 #define MAXIMUM_SPECULAR_COEFFICIENT 0.16
 #define DEFAULT_SPECULAR_COEFFICIENT 0.04
-float clearcoatDHRApprox( const in float roughness, const in float dotNL ) {
-    return DEFAULT_SPECULAR_COEFFICIENT + ( 1.0 - DEFAULT_SPECULAR_COEFFICIENT ) * ( pow( 1.0 - dotNL, 5.0 ) * pow( 1.0 - roughness, 2.0 ) );
-}
 void RE_Direct_Physical( const in IncidentLight directLight, const in GeometricContext geometry, const in PhysicalMaterial material, inout ReflectedLight reflectedLight ) {
     float dotNL = saturate( dot( geometry.normal, directLight.direction ) );
     vec3 irradiance = dotNL * directLight.color;
@@ -671,37 +589,7 @@ void RE_IndirectSpecular_Physical( const in vec3 radiance, const in vec3 irradia
 float computeSpecularOcclusion( const in float dotNV, const in float ambientOcclusion, const in float roughness ) {
     return saturate( pow( dotNV + ambientOcclusion, exp2( - 16.0 * roughness - 1.0 ) ) - 1.0 + ambientOcclusion );
 }
-#ifdef USE_BUMPMAP
-    uniform sampler2D bumpMap;
-    uniform float bumpScale;
-    vec2 dHdxy_fwd() {
-        vec2 dSTdx = dFdx( vUv );
-        vec2 dSTdy = dFdy( vUv );
-        float Hll = bumpScale * texture2D( bumpMap, vUv ).x;
-        float dBx = bumpScale * texture2D( bumpMap, vUv + dSTdx ).x - Hll;
-        float dBy = bumpScale * texture2D( bumpMap, vUv + dSTdy ).x - Hll;
-        return vec2( dBx, dBy );
-    }
-    vec3 perturbNormalArb( vec3 surf_pos, vec3 surf_norm, vec2 dHdxy ) {
-        vec3 vSigmaX = vec3( dFdx( surf_pos.x ), dFdx( surf_pos.y ), dFdx( surf_pos.z ) );
-        vec3 vSigmaY = vec3( dFdy( surf_pos.x ), dFdy( surf_pos.y ), dFdy( surf_pos.z ) );
-        vec3 vN = surf_norm;
-        vec3 R1 = cross( vSigmaY, vN );
-        vec3 R2 = cross( vN, vSigmaX );
-        float fDet = dot( vSigmaX, R1 );
-        fDet *= ( float( gl_FrontFacing ) * 2.0 - 1.0 );
-        vec3 vGrad = sign( fDet ) * ( dHdxy.x * R1 + dHdxy.y * R2 );
-        return normalize( abs( fDet ) * surf_norm - vGrad );
-    }
-#endif
-#ifdef USE_NORMALMAP
-    uniform sampler2D normalMap;
-    uniform vec2 normalScale;
-#endif
-#ifdef OBJECTSPACE_NORMALMAP
-    uniform mat3 normalMatrix;
-#endif
-#if ! defined ( USE_TANGENT ) && ( defined ( TANGENTSPACE_NORMALMAP ) || defined ( USE_CLEARCOAT_NORMALMAP ) )
+#if ! defined ( USE_TANGENT ) && ( defined ( TANGENTSPACE_NORMALMAP ) )
     vec3 perturbNormal2Arb( vec3 eye_pos, vec3 surf_norm, vec3 mapN ) {
         vec3 q0 = vec3( dFdx( eye_pos.x ), dFdx( eye_pos.y ), dFdx( eye_pos.z ) );
         vec3 q1 = vec3( dFdy( eye_pos.x ), dFdy( eye_pos.y ), dFdy( eye_pos.z ) );
@@ -716,22 +604,6 @@ float computeSpecularOcclusion( const in float dotNV, const in float ambientOccl
         return normalize( tsn * mapN );
     }
 #endif
-#ifdef USE_CLEARCOATMAP
-    uniform sampler2D clearcoatMap;
-#endif
-#ifdef USE_CLEARCOAT_ROUGHNESSMAP
-    uniform sampler2D clearcoatRoughnessMap;
-#endif
-#ifdef USE_CLEARCOAT_NORMALMAP
-    uniform sampler2D clearcoatNormalMap;
-    uniform vec2 clearcoatNormalScale;
-#endif
-#ifdef USE_ROUGHNESSMAP
-    uniform sampler2D roughnessMap;
-#endif
-#ifdef USE_METALNESSMAP
-    uniform sampler2D metalnessMap;
-#endif
 #if defined( USE_LOGDEPTHBUF ) && defined( USE_LOGDEPTHBUF_EXT )
     uniform float logDepthBufFC;
     varying float vFragDepth;
@@ -744,83 +616,10 @@ void main() {
     #if defined( USE_LOGDEPTHBUF ) && defined( USE_LOGDEPTHBUF_EXT )
         gl_FragDepthEXT = vIsPerspective == 0.0 ? gl_FragCoord.z : log2( vFragDepth ) * logDepthBufFC * 0.5;
     #endif
-    #ifdef USE_MAP
-        vec4 texelColor = texture2D( map, vUv );
-        texelColor = mapTexelToLinear( texelColor );
-        diffuseColor *= texelColor;
-    #endif
-    #ifdef USE_COLOR
-        diffuseColor.rgb *= vColor;
-    #endif
-    #ifdef USE_ALPHAMAP
-        diffuseColor.a *= texture2D( alphaMap, vUv ).g;
-    #endif
-    #ifdef ALPHATEST
-        if ( diffuseColor.a < ALPHATEST ) discard;
-    #endif
     float roughnessFactor = roughness;
-    #ifdef USE_ROUGHNESSMAP
-        vec4 texelRoughness = texture2D( roughnessMap, vUv );
-        roughnessFactor *= texelRoughness.g;
-    #endif
     float metalnessFactor = metalness;
-    #ifdef USE_METALNESSMAP
-        vec4 texelMetalness = texture2D( metalnessMap, vUv );
-        metalnessFactor *= texelMetalness.b;
-    #endif
     vec3 normal = normalize( vNormal );
-    #ifdef DOUBLE_SIDED
-        normal = normal * ( float( gl_FrontFacing ) * 2.0 - 1.0 );
-    #endif
-    #ifdef USE_TANGENT
-        vec3 tangent = normalize( vTangent );
-        vec3 bitangent = normalize( vBitangent );
-        #ifdef DOUBLE_SIDED
-            tangent = tangent * ( float( gl_FrontFacing ) * 2.0 - 1.0 );
-            bitangent = bitangent * ( float( gl_FrontFacing ) * 2.0 - 1.0 );
-        #endif
-        #if defined( TANGENTSPACE_NORMALMAP ) || defined( USE_CLEARCOAT_NORMALMAP )
-            mat3 vTBN = mat3( tangent, bitangent, normal );
-        #endif
-    #endif
     vec3 geometryNormal = normal;
-    #ifdef OBJECTSPACE_NORMALMAP
-        normal = texture2D( normalMap, vUv ).xyz * 2.0 - 1.0;
-        #ifdef FLIP_SIDED
-            normal = - normal;
-        #endif
-        #ifdef DOUBLE_SIDED
-            normal = normal * ( float( gl_FrontFacing ) * 2.0 - 1.0 );
-        #endif
-        normal = normalize( normalMatrix * normal );
-        #elif defined( TANGENTSPACE_NORMALMAP )
-        vec3 mapN = texture2D( normalMap, vUv ).xyz * 2.0 - 1.0;
-        mapN.xy *= normalScale;
-        #ifdef USE_TANGENT
-            normal = normalize( vTBN * mapN );
-        #else
-            normal = perturbNormal2Arb( -vViewPosition, normal, mapN );
-        #endif
-        #elif defined( USE_BUMPMAP )
-        normal = perturbNormalArb( -vViewPosition, normal, dHdxy_fwd() );
-    #endif
-    #ifdef USE_CLEARCOAT_NORMALMAP
-        vec3 clearcoatMapN = texture2D( clearcoatNormalMap, vUv ).xyz * 2.0 - 1.0;
-        clearcoatMapN.xy *= clearcoatNormalScale;
-        #ifdef USE_TANGENT
-            clearcoatNormal = normalize( vTBN * clearcoatMapN );
-        #else
-            clearcoatNormal = perturbNormal2Arb( - vViewPosition, clearcoatNormal, clearcoatMapN );
-        #endif
-    #endif
-    #ifdef USE_EMISSIVEMAP
-        vec4 emissiveColor = texture2D( emissiveMap, vUv );
-        emissiveColor.rgb = emissiveMapTexelToLinear( emissiveColor ).rgb;
-        totalEmissiveRadiance *= emissiveColor.rgb;
-    #endif
-    #ifdef USE_TRANSMISSIONMAP
-        totalTransmission *= texture2D( transmissionMap, vUv ).r;
-    #endif
     PhysicalMaterial material;
     material.diffuseColor = diffuseColor.rgb * ( 1.0 - metalnessFactor );
     vec3 dxy = max( abs( dFdx( geometryNormal ) ), abs( dFdy( geometryNormal ) ) );
@@ -859,14 +658,6 @@ void main() {
         vec3 clearcoatRadiance = vec3( 0.0 );
     #endif
     #if defined( RE_IndirectDiffuse )
-        #ifdef USE_LIGHTMAP
-            vec4 lightMapTexel = texture2D( lightMap, vUv2 );
-            vec3 lightMapIrradiance = lightMapTexelToLinear( lightMapTexel ).rgb * lightMapIntensity;
-            #ifndef PHYSICALLY_CORRECT_LIGHTS
-                lightMapIrradiance *= PI;
-            #endif
-            irradiance += lightMapIrradiance;
-        #endif
         #if defined( USE_ENVMAP ) && defined( STANDARD ) && defined( ENVMAP_TYPE_CUBE_UV )
             iblIrradiance += getLightProbeIndirectIrradiance( geometry, maxMipLevel );
         #endif
@@ -880,32 +671,7 @@ void main() {
     #if defined( RE_IndirectSpecular )
         RE_IndirectSpecular( radiance, iblIrradiance, clearcoatRadiance, geometry, material, reflectedLight );
     #endif
-    #ifdef USE_AOMAP
-        float ambientOcclusion = ( texture2D( aoMap, vUv2 ).r - 1.0 ) * aoMapIntensity + 1.0;
-        reflectedLight.indirectDiffuse *= ambientOcclusion;
-        #if defined( USE_ENVMAP ) && defined( STANDARD )
-            float dotNV = saturate( dot( geometry.normal, geometry.viewDir ) );
-            reflectedLight.indirectSpecular *= computeSpecularOcclusion( dotNV, ambientOcclusion, material.specularRoughness );
-        #endif
-    #endif
     vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;
     gl_FragColor = vec4( outgoingLight, diffuseColor.a );
-    #if defined( TONE_MAPPING )
-        gl_FragColor.rgb = toneMapping( gl_FragColor.rgb );
-    #endif
     gl_FragColor = linearToOutputTexel( gl_FragColor );
-    #ifdef USE_FOG
-        #ifdef FOG_EXP2
-            float fogFactor = 1.0 - exp( - fogDensity * fogDensity * fogDepth * fogDepth );
-        #else
-            float fogFactor = smoothstep( fogNear, fogFar, fogDepth );
-        #endif
-        gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
-    #endif
-    #ifdef PREMULTIPLIED_ALPHA
-        gl_FragColor.rgb *= gl_FragColor.a;
-    #endif
-    #ifdef DITHERING
-        gl_FragColor.rgb = dithering( gl_FragColor.rgb );
-    #endif
 }
