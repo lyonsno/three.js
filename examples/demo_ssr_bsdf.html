@@ -73,7 +73,7 @@
 					var geometry = new THREE.SphereBufferGeometry(sphereRadius, 128, 64);
 
 					// basic monochromatic energy preservation
-					var diffuseColor = new THREE.Color().setHSL(1, 0.5, 0.5 + 0.1);
+					var diffuseColor = new THREE.Color().setHSL(0, .906, 1);
 
 					var material = new THREE.MeshStandardMaterial({
 						map: imgTexture,
@@ -93,8 +93,8 @@
 
 					// GUI
 					gui = new GUI({ width: 400 });
-					gui.add(material, 'metalness').min(0).max(1);
-					gui.add(material, 'roughness').min(0).max(1);
+					gui.add(material, 'metalness').min(0).max(1).step(.01);
+					gui.add(material, 'roughness').min(0).max(1).step(.01);
 
 				});
 
@@ -120,6 +120,8 @@
 			container.appendChild(renderer.domElement);
 
 			renderer.outputEncoding = THREE.sRGBEncoding;
+			renderer.toneMapping = THREE.ACESFilmicToneMapping;
+			renderer.toneMappingExposure = 0.75;
 
 			//
 

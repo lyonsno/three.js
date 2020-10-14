@@ -164,12 +164,8 @@ float getSpecularMIPLevel( const in float roughness, const in int maxMIPLevel ) 
     return clamp( desiredMIPLevel, 0.0, maxMIPLevelScalar );
 }
 vec3 getLightProbeIndirectRadiance( const in vec3 viewDir, const in vec3 normal, const in float roughness, const in int maxMIPLevel ) {
-    #ifdef ENVMAP_MODE_REFLECTION
-        vec3 reflectVec = reflect( -viewDir, normal );
-        reflectVec = normalize( mix( reflectVec, normal, roughness * roughness) );
-    #else
-        vec3 reflectVec = refract( -viewDir, normal, refractionRatio );
-    #endif
+    vec3 reflectVec = reflect( -viewDir, normal );
+    reflectVec = normalize( mix( reflectVec, normal, roughness * roughness) );
     reflectVec = inverseTransformDirection( reflectVec, viewMatrix );
     float specularMIPLevel = getSpecularMIPLevel( roughness, maxMIPLevel );
     return envMapColor.rgb * envMapIntensity;
@@ -238,29 +234,25 @@ void RE_Direct_Physical( const in IncidentLight directLight, const in GeometricC
     #ifndef PHYSICALLY_CORRECT_LIGHTS
         irradiance *= PI;
     #endif
-    float clearcoatDHR = 0.0;
-    reflectedLight.directSpecular += ( 1.0 - clearcoatDHR ) * irradiance * BRDF_Specular_GGX( directLight, geometry.viewDir, geometry.normal, material.specularColor, material.specularRoughness);
-    reflectedLight.directDiffuse += ( 1.0 - clearcoatDHR ) * irradiance * BRDF_Diffuse_Lambert( material.diffuseColor );
+    reflectedLight.directSpecular += irradiance * BRDF_Specular_GGX( directLight, geometry.viewDir, geometry.normal, material.specularColor, material.specularRoughness);
+    reflectedLight.directDiffuse += irradiance * BRDF_Diffuse_Lambert( material.diffuseColor );
 }
 void RE_IndirectDiffuse_Physical( const in vec3 irradiance, const in GeometricContext geometry, const in PhysicalMaterial material, inout ReflectedLight reflectedLight ) {
     reflectedLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert( material.diffuseColor );
 }
 void RE_IndirectSpecular_Physical( const in vec3 radiance, const in vec3 irradiance, const in vec3 clearcoatRadiance, const in GeometricContext geometry, const in PhysicalMaterial material, inout ReflectedLight reflectedLight) {
-    float clearcoatDHR = 0.0;
-    float clearcoatInv = 1.0 - clearcoatDHR;
     vec3 singleScattering = vec3( 0.0 );
     vec3 multiScattering = vec3( 0.0 );
     vec3 cosineWeightedIrradiance = irradiance * RECIPROCAL_PI;
     BRDF_Specular_Multiscattering_Environment( geometry, material.specularColor, material.specularRoughness, singleScattering, multiScattering );
     vec3 diffuse = material.diffuseColor * ( 1.0 - ( singleScattering + multiScattering ) );
-    reflectedLight.indirectSpecular += clearcoatInv * radiance * singleScattering;
+    reflectedLight.indirectSpecular += radiance * singleScattering;
     reflectedLight.indirectSpecular += multiScattering * cosineWeightedIrradiance;
     reflectedLight.indirectDiffuse += diffuse * cosineWeightedIrradiance;
 }
 #define RE_Direct				RE_Direct_Physical
 #define RE_IndirectDiffuse		RE_IndirectDiffuse_Physical
 #define RE_IndirectSpecular		RE_IndirectSpecular_Physical
-///
 void main() {
     vec4 diffuseColor = vec4( diffuse, opacity );
     ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );
