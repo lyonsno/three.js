@@ -3,59 +3,18 @@
 #define varying in
 out highp vec4 pc_fragColor;
 #define gl_FragColor pc_fragColor
-#define gl_FragDepthEXT gl_FragDepth
-#define texture2D texture
-#define textureCube texture
-#define texture2DProj textureProj
-#define texture2DLodEXT textureLod
-#define texture2DProjLodEXT textureProjLod
-#define textureCubeLodEXT textureLod
-#define texture2DGradEXT textureGrad
-#define texture2DProjGradEXT textureProjGrad
-#define textureCubeGradEXT textureGrad
 precision highp float;
 precision highp int;
-#define HIGH_PRECISION
-#define SHADER_NAME MeshStandardMaterial
 #define STANDARD 
-#define GAMMA_FACTOR 2
 #define ENVMAP_TYPE_CUBE_UV
 #define ENVMAP_MODE_REFLECTION
-#define ENVMAP_BLENDING_NONE
-#define TEXTURE_LOD_EXT
 uniform mat4 viewMatrix;
-uniform vec3 cameraPosition;
 uniform bool isOrthographic;
 #ifndef saturate
     #define saturate(a) clamp( a, 0.0, 1.0 )
 #endif
-uniform float toneMappingExposure;
-vec3 RRTAndODTFit( vec3 v ) {
-    vec3 a = v * ( v + 0.0245786 ) - 0.000090537;
-    vec3 b = v * ( 0.983729 * v + 0.4329510 ) + 0.238081;
-    return a / b;
-}
-vec3 ACESFilmicToneMapping( vec3 color ) {
-    const mat3 ACESInputMat = mat3(
-    vec3( 0.59719, 0.07600, 0.02840 ), vec3( 0.35458, 0.90834, 0.13383 ), vec3( 0.04823, 0.01566, 0.83777 )
-    );
-    const mat3 ACESOutputMat = mat3(
-    vec3(  1.60475, -0.10208, -0.00327 ), vec3( -0.53108, 1.10813, -0.07276 ), vec3( -0.07367, -0.00605, 1.07602 )
-    );
-    color *= toneMappingExposure / 0.6;
-    color = ACESInputMat * color;
-    color = RRTAndODTFit( color );
-    color = ACESOutputMat * color;
-    return saturate( color );
-}
 vec4 LinearTosRGB( in vec4 value ) {
     return vec4( mix( pow( value.rgb, vec3( 0.41666 ) ) * 1.055 - vec3( 0.055 ), value.rgb * 12.92, vec3( lessThanEqual( value.rgb, vec3( 0.0031308 ) ) ) ), value.a );
-}
-vec4 RGBEToLinear( in vec4 value ) {
-    return vec4( value.rgb * exp2( value.a * 255.0 - 128.0 ), 1.0 );
-}
-vec4 envMapTexelToLinear( vec4 value ) {
-    return RGBEToLinear( value );
 }
 vec4 linearToOutputTexel( vec4 value ) {
     return LinearTosRGB( value );
@@ -83,9 +42,6 @@ varying vec3 vViewPosition;
 float pow2( const in float x ) {
     return x*x;
 }
-float precisionSafeLength( vec3 v ) {
-    return length( v );
-}
 struct IncidentLight {
     vec3 color;
     vec3 direction;
@@ -105,18 +61,9 @@ struct GeometricContext {
 vec3 inverseTransformDirection( in vec3 dir, in mat4 matrix ) {
     return normalize( ( vec4( dir, 0.0 ) * matrix ).xyz );
 }
-mat3 transposeMat3( const in mat3 m ) {
-    mat3 tmp;
-    tmp[ 0 ] = vec3( m[ 0 ].x, m[ 1 ].x, m[ 2 ].x );
-    tmp[ 1 ] = vec3( m[ 0 ].y, m[ 1 ].y, m[ 2 ].y );
-    tmp[ 2 ] = vec3( m[ 0 ].z, m[ 1 ].z, m[ 2 ].z );
-    return tmp;
-}
 const float UnpackDownscale = 255. / 256.;
 const vec3 PackFactors = vec3( 256. * 256. * 256., 256. * 256., 256. );
-const vec4 UnpackFactors = UnpackDownscale / vec4( PackFactors, 1. );
-const float ShiftRight8 = 1. / 256.;
-#if ( defined( USE_UV ) && ! defined( UVS_VERTEX_ONLY ) )
+#if ( ! defined( UVS_VERTEX_ONLY ) )
     varying vec2 vUv;
 #endif
 vec2 integrateSpecularBRDF( const in float dotNV, const in float roughness ) {
@@ -227,7 +174,6 @@ vec3 getLightProbeIndirectRadiance( const in vec3 viewDir, const in vec3 normal,
     float specularMIPLevel = getSpecularMIPLevel( roughness, maxMIPLevel );
     return envMapColor.rgb * envMapIntensity;
 }
-uniform bool receiveShadow;
 uniform vec3 ambientLightColor;
 uniform vec3 lightProbe[ 9 ];
 vec3 shGetIrradianceAt( in vec3 normal, in vec3 shCoefficients[ 9 ] ) {
@@ -285,7 +231,6 @@ struct PhysicalMaterial {
     float specularRoughness;
     vec3 specularColor;
 };
-#define MAXIMUM_SPECULAR_COEFFICIENT 0.16
 #define DEFAULT_SPECULAR_COEFFICIENT 0.04
 void RE_Direct_Physical( const in IncidentLight directLight, const in GeometricContext geometry, const in PhysicalMaterial material, inout ReflectedLight reflectedLight ) {
     float dotNL = saturate( dot( geometry.normal, directLight.direction ) );
@@ -313,9 +258,9 @@ void RE_IndirectSpecular_Physical( const in vec3 radiance, const in vec3 irradia
     reflectedLight.indirectDiffuse += diffuse * cosineWeightedIrradiance;
 }
 #define RE_Direct				RE_Direct_Physical
-#define RE_Direct_RectArea		RE_Direct_RectArea_Physical
 #define RE_IndirectDiffuse		RE_IndirectDiffuse_Physical
 #define RE_IndirectSpecular		RE_IndirectSpecular_Physical
+///
 void main() {
     vec4 diffuseColor = vec4( diffuse, opacity );
     ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );
