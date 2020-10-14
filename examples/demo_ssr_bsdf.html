@@ -41,8 +41,8 @@
 			document.body.appendChild(container);
 
 			camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 2500);
-			camera.position.set(0.0, 54.944225579475635,  192.30478952816463);
-			window.camera=camera///test
+			camera.position.set(0.0, 54.944225579475635, 192.30478952816463);
+			window.camera = camera///test
 
 			scene = new THREE.Scene();
 
@@ -91,10 +91,10 @@
 
 					scene.background = hdrCubeRenderTarget.texture;
 
-		// GUI
-		gui = new GUI( { width: 400 } );
-		gui.add(material, 'metalness').min(0).max(1);
-		gui.add(material, 'roughness').min(0).max(1);
+					// GUI
+					gui = new GUI({ width: 400 });
+					gui.add(material, 'metalness').min(0).max(1);
+					gui.add(material, 'roughness').min(0).max(1);
 
 				});
 
