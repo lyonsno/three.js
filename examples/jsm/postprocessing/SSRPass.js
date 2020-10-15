@@ -15,7 +15,7 @@ import {
   UniformsUtils,
   UnsignedShortType,
   WebGLRenderTarget,
-} from "../../../build/three.module.js";
+} from "../../../src/Three.js";
 import { Pass } from "../postprocessing/Pass.js";
 import { SSRShader } from "../shaders/SSRShader.js";
 import { SSRBlurShader } from "../shaders/SSRShader.js";

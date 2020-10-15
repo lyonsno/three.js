@@ -1,6 +1,6 @@
 import {
 	Face3
-} from "../../../build/three.module.js";
+} from "../../../src/Three.js";
 /**
  * Break faces with edges longer than maxEdgeLength
  * - not recursive

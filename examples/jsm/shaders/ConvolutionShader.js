@@ -1,6 +1,6 @@
 import {
 	Vector2
-} from "../../../build/three.module.js";
+} from "../../../src/Three.js";
 /**
  * Convolution shader
  * ported from o3d sample to WebGL / GLSL

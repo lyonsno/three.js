@@ -2,7 +2,7 @@ import {
 	OrthographicCamera,
 	PlaneBufferGeometry,
 	Mesh
-} from "../../../build/three.module.js";
+} from "../../../src/Three.js";
 
 function Pass() {
 

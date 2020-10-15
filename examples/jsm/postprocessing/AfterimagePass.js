@@ -6,7 +6,7 @@ import {
 	ShaderMaterial,
 	UniformsUtils,
 	WebGLRenderTarget
-} from "../../../build/three.module.js";
+} from "../../../src/Three.js";
 import { Pass } from "../postprocessing/Pass.js";
 import { AfterimageShader } from "../shaders/AfterimageShader.js";
 

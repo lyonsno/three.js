@@ -5,7 +5,7 @@ import {
 	Raycaster,
 	Vector2,
 	Vector3
-} from "../../../build/three.module.js";
+} from "../../../src/Three.js";
 
 var DragControls = function ( _objects, _camera, _domElement ) {
 

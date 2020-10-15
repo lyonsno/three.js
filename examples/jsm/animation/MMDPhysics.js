@@ -11,7 +11,7 @@ import {
 	Quaternion,
 	SphereBufferGeometry,
 	Vector3
-} from "../../../build/three.module.js";
+} from "../../../src/Three.js";
 /**
  * Dependencies
  *  - Ammo.js https://github.com/kripken/ammo.js

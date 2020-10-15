@@ -3,7 +3,7 @@ import {
 	Geometry,
 	Vector2,
 	Vector3
-} from "../../../build/three.module.js";
+} from "../../../src/Three.js";
 /**
  *	Subdivision Geometry Modifier
  *		using Loop Subdivision Scheme

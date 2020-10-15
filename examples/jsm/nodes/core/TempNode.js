@@ -1,4 +1,4 @@
-import { MathUtils } from '../../../../build/three.module.js';
+import { MathUtils } from '../../../../src/Three.js';
 import { Node } from './Node.js';
 
 function TempNode( type, params ) {

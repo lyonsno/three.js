@@ -11,7 +11,7 @@ import {
 	Quaternion,
 	SphereBufferGeometry,
 	Vector3
-} from "../../../build/three.module.js";
+} from "../../../src/Three.js";
 /**
  * CCD Algorithm
  *  - https://sites.google.com/site/auraliusproject/ccd-algorithm

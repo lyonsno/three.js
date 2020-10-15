@@ -7,7 +7,7 @@ import {
 	Texture,
 	UniformsUtils,
 	WebGLRenderTarget
-} from "../../../build/three.module.js";
+} from "../../../src/Three.js";
 import { Pass } from "../postprocessing/Pass.js";
 import { SMAAEdgesShader } from "../shaders/SMAAShader.js";
 import { SMAAWeightsShader } from "../shaders/SMAAShader.js";
