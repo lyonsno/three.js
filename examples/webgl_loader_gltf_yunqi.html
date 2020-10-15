@@ -24,8 +24,8 @@
 			import { RGBELoader } from './jsm/loaders/RGBELoader.js';
 			import { RoughnessMipmapper } from './jsm/utils/RoughnessMipmapper.js';
 
-			var container, controls;
-			var camera, scene, renderer;
+			let container, controls;
+			let camera, scene, renderer;
 
 			init();
 			render();
@@ -45,7 +45,7 @@
 					.setPath( 'textures/equirectangular/' )
 					.load( 'royal_esplanade_1k.hdr', function ( texture ) {
 
-						var envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+						let envMap = pmremGenerator.fromEquirectangular( texture ).texture;
 
 						scene.background = envMap;
 						scene.environment = envMap;
@@ -57,10 +57,16 @@
 
 						// model
 
-						// use of RoughnessMipmapper is optional
-						var roughnessMipmapper = new RoughnessMipmapper( renderer );
+						let mtl=new THREE.MeshBasicMaterial({
+							color:'white',
+							wireframe:true,
+						})
+						let mtl_line=new THREE.LineBasicMaterial( { color: 0xffffff } )
 
-						var loader = new GLTFLoader().setPath( '/_3d_model/yunqi/' );
+						// use of RoughnessMipmapper is optional
+						let roughnessMipmapper = new RoughnessMipmapper( renderer );
+
+						let loader = new GLTFLoader().setPath( '/_3d_model/yunqi/' );
 						loader.load( 'model.glb', function ( gltf ) {
 							window.gltf=gltf
 
@@ -70,18 +76,43 @@
 									// if(child.material.map) console.log(child.material.map)
 									// if(child.material){ 
 									// 	child.material.wireframe=true
+									// 	child.material.side=THREE.FrontSide
 									// 	// child.material.color=0x000000
 									// }
+									// child.material=mtl
 
 									// TOFIX RoughnessMipmapper seems to be broken with WebGL 2.0
 									// roughnessMipmapper.generateMipmaps( child.material );
 
+									let edges = new THREE.EdgesGeometry( child.geometry );
+									let line = new THREE.LineSegments( edges, mtl_line );
+									line.name='line_'+child.name
+									// child.getWorldPosition(line.position)
+									line.position.copy(child.position)
+									line.rotation.copy(child.rotation)
+									line.scale.copy(child.scale)
+									child.parent.add(line)
+									child.visible=false
+									// child.parent.remove(child)
+									// scene.add(line)
 								}
 
 							} );
 							gltf.scene.scale.setScalar(.001)
 
 							scene.add( gltf.scene );
+
+							let mtl_black=new THREE.MeshBasicMaterial({
+								color:'black',
+							})
+							let mesh_black=gltf.scene.clone()
+							gltf.scene.traverse( function ( child ) {
+								if ( child.isMesh ) {
+									child.visible=true
+									child.material=mtl_black
+								}
+							});
+							scene.add( mesh_black );
 
 							roughnessMipmapper.dispose();
 
@@ -99,7 +130,7 @@
 				renderer.outputEncoding = THREE.sRGBEncoding;
 				container.appendChild( renderer.domElement );
 
-				var pmremGenerator = new THREE.PMREMGenerator( renderer );
+				let pmremGenerator = new THREE.PMREMGenerator( renderer );
 				pmremGenerator.compileEquirectangularShader();
 
 				controls = new OrbitControls( camera, renderer.domElement );
