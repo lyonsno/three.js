@@ -1172,6 +1172,7 @@ void RE_Direct_Physical( const in IncidentLight directLight, const in GeometricC
 void RE_IndirectDiffuse_Physical( const in vec3 irradiance, const in GeometricContext geometry, const in PhysicalMaterial material, inout ReflectedLight reflectedLight ) {
     reflectedLight.indirectDiffuse += irradiance * BRDF_Diffuse_Lambert( material.diffuseColor );
 }
+///
 void RE_IndirectSpecular_Physical( const in vec3 radiance, const in vec3 irradiance, const in vec3 clearcoatRadiance, const in GeometricContext geometry, const in PhysicalMaterial material, inout ReflectedLight reflectedLight) {
     #ifdef CLEARCOAT
         
@@ -1574,7 +1575,7 @@ float computeSpecularOcclusion( const in float dotNV, const in float ambientOccl
     uniform vec4 clippingPlanes[ 0 ];
 #endif
 
-
+///
 void main() {
     #if 0 > 0
         
