@@ -49,16 +49,16 @@
 			{
 				let geo = new THREE.BoxBufferGeometry(1, 1, 1)
 				// let geo = new THREE.PlaneBufferGeometry(1, 1)
-				window.geo=geo
+				window.geo = geo
 
-				let p3d_Vertexs=[]
-				geo.attributes.position.array.forEach((n,i)=>{
+				let p3d_Vertexs = []
+				geo.attributes.position.array.forEach((n, i) => {
 					p3d_Vertexs.push(n)
-					if(i%3===2){
+					if (i % 3 === 2) {
 						p3d_Vertexs.push(1)
 					}
 				})
-				geo.setAttribute( 'p3d_Vertex', new THREE.BufferAttribute( new Float32Array(p3d_Vertexs), 4 ) );
+				geo.setAttribute('p3d_Vertex', new THREE.BufferAttribute(new Float32Array(p3d_Vertexs), 4));
 
 				// let mtl = new THREE.MeshStandardMaterial({
 				// 	color: 'red',
@@ -70,8 +70,17 @@
 				textureABC.wrapT = THREE.RepeatWrapping;
 				textureABC.repeat.set(4, 4);
 				window.uniforms = {
-					p3d_ProjectionMatrix:{value:null},
-					p3d_ModelViewMatrix:{value:null},
+					p3d_Material: {
+						value: {
+							ambient: null,
+							diffuse: null,
+							emission: null,
+							specular: null,
+							shininess: null,
+						}
+					},
+					p3d_ProjectionMatrix: { value: null },
+					p3d_ModelViewMatrix: { value: null },
 					isParticle: { value: new THREE.Vector2() },
 					p3d_LightSource: {
 						value: [
@@ -89,7 +98,7 @@
 								linearAttenuation: 0,
 								quadraticAttenuation: 0,
 								attenuation: new THREE.Vector3(),
-								sampler2DShadow: textureABC,
+								shadowMap: textureABC,
 								shadowViewMatrix: new THREE.Matrix4(),
 							}, {
 								color: new THREE.Vector4(),
@@ -105,7 +114,7 @@
 								linearAttenuation: 0,
 								quadraticAttenuation: 0,
 								attenuation: new THREE.Vector3(),
-								sampler2DShadow: textureABC,
+								shadowMap: textureABC,
 								shadowViewMatrix: new THREE.Matrix4(),
 							}, {
 								color: new THREE.Vector4(),
@@ -121,7 +130,7 @@
 								linearAttenuation: 0,
 								quadraticAttenuation: 0,
 								attenuation: new THREE.Vector3(),
-								sampler2DShadow: textureABC,
+								shadowMap: textureABC,
 								shadowViewMatrix: new THREE.Matrix4(),
 							}, {
 								color: new THREE.Vector4(),
@@ -137,7 +146,7 @@
 								linearAttenuation: 0,
 								quadraticAttenuation: 0,
 								attenuation: new THREE.Vector3(),
-								sampler2DShadow: textureABC,
+								shadowMap: textureABC,
 								shadowViewMatrix: new THREE.Matrix4(),
 							},
 						]
@@ -149,7 +158,7 @@
 					fragmentShader,
 				})
 				let mesh = new THREE.Mesh(geo, mtl)
-				window.mesh=mesh
+				window.mesh = mesh
 				scene.add(mesh)
 			}
 			{
@@ -180,8 +189,15 @@
 
 		function render() {
 			console.log('render')
-			uniforms.p3d_ProjectionMatrix.value=camera.projectionMatrix
-			uniforms.p3d_ModelViewMatrix.value=mesh.modelViewMatrix
+			uniforms.p3d_ProjectionMatrix.value = camera.projectionMatrix
+			uniforms.p3d_ModelViewMatrix.value = mesh.modelViewMatrix
+
+			uniforms.p3d_Material.value.ambient = new THREE.Vector4(0, 0, .5, 1)
+			uniforms.p3d_Material.value.diffuse = new THREE.Vector4(0, 0, 0, 1)
+			uniforms.p3d_Material.value.emission = new THREE.Vector4(0, 0, 0, 1)
+			uniforms.p3d_Material.value.specular = new THREE.Vector3(0, 0, 0)
+			uniforms.p3d_Material.value.shininess = 1
+
 			renderer.render(scene, camera);
 
 		}

@@ -59,7 +59,7 @@ struct p3d_LightSourceParameters
 
   ; vec3 attenuation
 
-  ; sampler2DShadow shadowMap
+  // ; sampler2DShadow shadowMap
 
   ; mat4 shadowViewMatrix
   ;
@@ -334,7 +334,8 @@ void main() {
              + emission.rgb;
 
   if (isWater.x == 1.) { out0.a = 0.0; }
-  out0=vec4(1,0,0,1);
+  // out0=vec4(1,0,0,1);
+  out0=p3d_Material.ambient;
 
   // out1.a   = diffuseColor.a;
   // out1.rgb = specular.rgb;

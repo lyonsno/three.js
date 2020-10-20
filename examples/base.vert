@@ -30,13 +30,13 @@ struct p3d_LightSourceParameters
 
   ; vec3 attenuation
 
-  ; sampler2DShadow shadowMap
+  // ; sampler2DShadow shadowMap
 
   ; mat4 shadowViewMatrix
   ;
   };
 
-// uniform p3d_LightSourceParameters p3d_LightSource[NUMBER_OF_LIGHTS];
+uniform p3d_LightSourceParameters p3d_LightSource[NUMBER_OF_LIGHTS];
 
 in vec4 p3d_Vertex;
 in vec3 p3d_Normal;
@@ -72,9 +72,9 @@ void main() {
   normalCoord   = p3d_MultiTexCoord0;
   diffuseCoord  = p3d_MultiTexCoord1;
 
-  // for (int i = 0; i < p3d_LightSource.length(); ++i) {
-  //   vertexInShadowSpaces[i] = p3d_LightSource[i].shadowViewMatrix * vertexPosition;
-  // }
+  for (int i = 0; i < p3d_LightSource.length(); ++i) {
+    vertexInShadowSpaces[i] = p3d_LightSource[i].shadowViewMatrix * vertexPosition;
+  }
 
   gl_Position = p3d_ProjectionMatrix * vertexPosition;
 }
