@@ -51,11 +51,16 @@
 				// let mtl = new THREE.MeshStandardMaterial({
 				// 	color: 'red',
 				// })
-				let vertexShader=await(await fetch('/lib/3d-game-shaders-for-beginners_github/demonstration/shaders/fragment/base.vert')).text()
-				let fragmentShader=await(await fetch('/lib/3d-game-shaders-for-beginners_github/demonstration/shaders/fragment/base.frag')).text()
-				vertexShader=vertexShader.replace('#version 150','')
-				fragmentShader=fragmentShader.replace('#version 150','')
+				let vertexShader=await(await fetch('./base.vert')).text()
+				let fragmentShader=await(await fetch('./base.frag')).text()
+				let uniforms={
+					isParticle:{value:new THREE.Vector2()},
+					// p3d_LightSourceParameters:{value:{
+					// 	shadowMap
+					// }},
+				}
 				let mtl = new THREE.RawShaderMaterial({
+					uniforms,
 					vertexShader,
 					fragmentShader,
 				})
