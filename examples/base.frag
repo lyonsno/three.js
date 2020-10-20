@@ -96,7 +96,7 @@ out vec4 out0;
 
 void main() {
   // out0=vec4(1,0,0,0);return;
-  out0=texture(p3d_Texture0, diffuseCoord);return;
+  // out0=texture(p3d_Texture0, diffuseCoord);return;
   vec3  shadowColor   = pow(vec3(0.149, 0.220, 0.227), vec3(gamma.x));
   int   shadowSamples = 2;
 
@@ -107,8 +107,10 @@ void main() {
     diffuseColor   = texture(p3d_Texture0, diffuseCoord);
   }
   diffuseColor.rgb = pow(diffuseColor.rgb, vec3(gamma.x));
+  // out0=diffuseColor;return;
 
   vec3 materialSpecularColor = p3d_Material.specular;
+  // out0=vec4(materialSpecularColor,1);return;
 
   vec2 flow   = texture(flowTexture, normalCoord).xy;
        flow   = (flow - 0.5) * 2.0;
@@ -195,12 +197,14 @@ void main() {
         ( clamp
             (   diffuseColor.rgb
               * lightDiffuseColor.rgb
-              * diffuseIntensity
+              // * diffuseIntensity
             , 0.0
             , 1.0
             )
         , diffuseColor.a
         );
+    out0=diffuseTemp;return;
+
 
     float specularIntensity =
       ( blinnPhongEnabled.x == 1.

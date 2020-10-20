@@ -72,9 +72,9 @@ void main() {
   normalCoord   = p3d_MultiTexCoord0;
   diffuseCoord  = p3d_MultiTexCoord1;
 
-  for (int i = 0; i < p3d_LightSource.length(); ++i) {
-    vertexInShadowSpaces[i] = p3d_LightSource[i].shadowViewMatrix * vertexPosition;
-  }
+  // for (int i = 0; i < p3d_LightSource.length(); ++i) {
+  //   vertexInShadowSpaces[i] = p3d_LightSource[i].shadowViewMatrix * vertexPosition;
+  // }
 
   gl_Position = p3d_ProjectionMatrix * vertexPosition;
 }

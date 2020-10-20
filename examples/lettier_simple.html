@@ -53,7 +53,7 @@
 				// let geo = new THREE.PlaneBufferGeometry(1, 1)
 				window.geo = geo
 
-				itemSize=4
+				itemSize = 4
 				let p3d_Vertexs = []
 				geo.attributes.position.array.forEach((n, i) => {
 					p3d_Vertexs.push(n)
@@ -63,17 +63,17 @@
 				})
 				geo.setAttribute('p3d_Vertex', new THREE.BufferAttribute(new Float32Array(p3d_Vertexs), itemSize));
 
-				itemSize=2
+				itemSize = 2
 				let p3d_MultiTexCoord1s = []
 				geo.attributes.uv.array.forEach((n, i) => {
 					p3d_MultiTexCoord1s.push(n)
 				})
 				geo.setAttribute('p3d_MultiTexCoord1', new THREE.BufferAttribute(new Float32Array(p3d_MultiTexCoord1s), itemSize));
 
-				itemSize=4
+				itemSize = 4
 				let p3d_Colors = []
-				for(let i=0,ii=0;i<geo.attributes.position.count;i++,ii+=itemSize){
-					p3d_Colors.push(1,1,1,1)
+				for (let i = 0, ii = 0; i < geo.attributes.position.count; i++, ii += itemSize) {
+					p3d_Colors.push(1, 1, 1, 1)
 				}
 				geo.setAttribute('p3d_Color', new THREE.BufferAttribute(new Float32Array(p3d_Colors), itemSize));
 
@@ -82,94 +82,47 @@
 				// })
 				let vertexShader = await (await fetch('./base.vert')).text()
 				let fragmentShader = await (await fetch('./base.frag')).text()
-				window.textureABC = new THREE.TextureLoader().load("/lib/three.js_github_gonnavis/examples/models/lwo/Images/material-Phong-metal/167_COLOR.JPG",render);
+				window.textureABC = new THREE.TextureLoader().load("/lib/three.js_github_gonnavis/examples/models/lwo/Images/material-Phong-metal/167_COLOR.JPG", render);
 				textureABC.wrapS = THREE.RepeatWrapping;
 				textureABC.wrapT = THREE.RepeatWrapping;
 				textureABC.repeat.set(4, 4);
+
+				let o_p3d_LightSource = {
+					color: new THREE.Vector4(1,1,1,1),
+					ambient: new THREE.Vector4(1,1,1,1),
+					diffuse: new THREE.Vector4(1,1,1,1),
+					specular: new THREE.Vector4(1,1,1,1),
+					position: new THREE.Vector4(1,1,1),
+					spotDirection: new THREE.Vector3(-1,-1,-1),
+					spotExponent: 0,
+					spotCutoff: 10,
+					spotCosCutoff: -1,
+					constantAttenuation: 1,
+					linearAttenuation: 0,
+					quadraticAttenuation: 1,
+					attenuation: new THREE.Vector3(1,1,1,1),///todo not need
+					shadowMap: textureABC,
+					shadowViewMatrix: new THREE.Matrix4(),
+				}
+
 				window.uniforms = {
-					p3d_Texture0:{value:textureABC},
-					pi:{value:new THREE.Vector2(0,Math.PI)},
-					gamma:{value:new THREE.Vector2(1,0)},
+					p3d_Texture0: { value: textureABC },
+					pi: { value: new THREE.Vector2(0, Math.PI) },
+					gamma: { value: new THREE.Vector2(1, 0) },
 					p3d_Material: {
 						value: {
-							ambient: null,
-							diffuse: null,
-							emission: null,
-							specular: null,
-							shininess: null,
+							ambient: new THREE.Vector4(1,1,1,1),
+							diffuse: new THREE.Vector4(1,1,1,1),
+							emission: new THREE.Vector4(1,1,1,1),
+							specular: new THREE.Vector3(1,1,1),
+							shininess: 1,
 						}
 					},
 					p3d_ProjectionMatrix: { value: null },
 					p3d_ModelViewMatrix: { value: null },
 					isParticle: { value: new THREE.Vector2() },
 					p3d_LightSource: {
-						value: [
-							{
-								color: new THREE.Vector4(),
-								ambient: new THREE.Vector4(),
-								diffuse: new THREE.Vector4(),
-								specular: new THREE.Vector4(),
-								position: new THREE.Vector4(),
-								spotDirection: new THREE.Vector3(),
-								spotExponent: 0,
-								spotCutoff: 0,
-								spotCosCutoff: 0,
-								constantAttenuation: 0,
-								linearAttenuation: 0,
-								quadraticAttenuation: 0,
-								attenuation: new THREE.Vector3(),
-								shadowMap: textureABC,
-								shadowViewMatrix: new THREE.Matrix4(),
-							}, {
-								color: new THREE.Vector4(),
-								ambient: new THREE.Vector4(),
-								diffuse: new THREE.Vector4(),
-								specular: new THREE.Vector4(),
-								position: new THREE.Vector4(),
-								spotDirection: new THREE.Vector3(),
-								spotExponent: 0,
-								spotCutoff: 0,
-								spotCosCutoff: 0,
-								constantAttenuation: 0,
-								linearAttenuation: 0,
-								quadraticAttenuation: 0,
-								attenuation: new THREE.Vector3(),
-								shadowMap: textureABC,
-								shadowViewMatrix: new THREE.Matrix4(),
-							}, {
-								color: new THREE.Vector4(),
-								ambient: new THREE.Vector4(),
-								diffuse: new THREE.Vector4(),
-								specular: new THREE.Vector4(),
-								position: new THREE.Vector4(),
-								spotDirection: new THREE.Vector3(),
-								spotExponent: 0,
-								spotCutoff: 0,
-								spotCosCutoff: 0,
-								constantAttenuation: 0,
-								linearAttenuation: 0,
-								quadraticAttenuation: 0,
-								attenuation: new THREE.Vector3(),
-								shadowMap: textureABC,
-								shadowViewMatrix: new THREE.Matrix4(),
-							}, {
-								color: new THREE.Vector4(),
-								ambient: new THREE.Vector4(),
-								diffuse: new THREE.Vector4(),
-								specular: new THREE.Vector4(),
-								position: new THREE.Vector4(),
-								spotDirection: new THREE.Vector3(),
-								spotExponent: 0,
-								spotCutoff: 0,
-								spotCosCutoff: 0,
-								constantAttenuation: 0,
-								linearAttenuation: 0,
-								quadraticAttenuation: 0,
-								attenuation: new THREE.Vector3(),
-								shadowMap: textureABC,
-								shadowViewMatrix: new THREE.Matrix4(),
-							},
-						]
+						value: [o_p3d_LightSource, o_p3d_LightSource, o_p3d_LightSource, o_p3d_LightSource],
 					},
 				}
 				let mtl = new THREE.RawShaderMaterial({
@@ -213,11 +166,11 @@
 			uniforms.p3d_ModelViewMatrix.value = mesh.modelViewMatrix
 			uniforms.p3d_Texture0.value = textureABC
 
-			uniforms.p3d_Material.value.ambient = new THREE.Vector4(0, 0, .5, 1)
-			uniforms.p3d_Material.value.diffuse = new THREE.Vector4(1, 0, 0, 1)
-			uniforms.p3d_Material.value.emission = new THREE.Vector4(.5, .5, .5, 1)
-			uniforms.p3d_Material.value.specular = new THREE.Vector3(0, 0, 0)
-			uniforms.p3d_Material.value.shininess = 1
+			// uniforms.p3d_Material.value.ambient = new THREE.Vector4(0, 0, .5, 1)
+			// uniforms.p3d_Material.value.diffuse = new THREE.Vector4(1, 0, 0, 1)
+			// uniforms.p3d_Material.value.emission = new THREE.Vector4(.5, .5, .5, 1)
+			// uniforms.p3d_Material.value.specular = new THREE.Vector3(0, 0, 0)
+			// uniforms.p3d_Material.value.shininess = 1
 
 			renderer.render(scene, camera);
 
