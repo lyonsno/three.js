@@ -1,4 +1,5 @@
 #version 300 es
+precision lowp sampler2DShadow;
 /*
   (C) 2019 David Lettier
   lettier.com
@@ -28,6 +29,8 @@ uniform struct p3d_LightSourceParameters
   ; float quadraticAttenuation
 
   ; vec3 attenuation
+
+  ; sampler2DShadow shadowMap
 
   ; mat4 shadowViewMatrix
   ;

@@ -90,7 +90,7 @@ in vec2 diffuseCoord;
 in vec2 normalCoord;
 
 out vec4 out0;
-out vec4 out1;
+// out vec4 out1;
 
 void main() {
   vec3  shadowColor   = pow(vec3(0.149, 0.220, 0.227), vec3(gamma.x));
@@ -333,8 +333,8 @@ void main() {
 
   if (isWater.x == 1.) { out0.a = 0.0; }
 
-  out1.a   = diffuseColor.a;
-  out1.rgb = specular.rgb;
+  // out1.a   = diffuseColor.a;
+  // out1.rgb = specular.rgb;
 
-  if (isParticle.x == 1.) { out1.rgb = vec3(0.0); }
+  // if (isParticle.x == 1.) { out1.rgb = vec3(0.0); }
 }
