@@ -39,7 +39,7 @@ uniform struct
   ;
   } p3d_LightModel;
 
-uniform struct p3d_LightSourceParameters
+struct p3d_LightSourceParameters
   { vec4 color
 
   ; vec4 ambient
@@ -63,7 +63,9 @@ uniform struct p3d_LightSourceParameters
 
   ; mat4 shadowViewMatrix
   ;
-  } p3d_LightSource[NUMBER_OF_LIGHTS];
+  };
+
+uniform p3d_LightSourceParameters p3d_LightSource[NUMBER_OF_LIGHTS];
 
 uniform vec2 normalMapsEnabled;
 uniform vec2 fresnelEnabled;

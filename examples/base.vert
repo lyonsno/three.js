@@ -10,7 +10,7 @@ uniform mat4 p3d_ModelViewMatrix;
 uniform mat4 p3d_ProjectionMatrix;
 uniform mat3 p3d_NormalMatrix;
 
-uniform struct p3d_LightSourceParameters
+struct p3d_LightSourceParameters
   { vec4 color
 
   ; vec4 ambient
@@ -34,7 +34,9 @@ uniform struct p3d_LightSourceParameters
 
   ; mat4 shadowViewMatrix
   ;
-  } p3d_LightSource[NUMBER_OF_LIGHTS];
+  };
+
+uniform p3d_LightSourceParameters p3d_LightSource[NUMBER_OF_LIGHTS];
 
 in vec4 p3d_Vertex;
 in vec3 p3d_Normal;
