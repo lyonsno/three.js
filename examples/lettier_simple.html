@@ -47,10 +47,13 @@
 			window.addEventListener('resize', onWindowResize, false);
 
 			{
+				let itemSize
+
 				let geo = new THREE.BoxBufferGeometry(1, 1, 1)
 				// let geo = new THREE.PlaneBufferGeometry(1, 1)
 				window.geo = geo
 
+				itemSize=4
 				let p3d_Vertexs = []
 				geo.attributes.position.array.forEach((n, i) => {
 					p3d_Vertexs.push(n)
@@ -58,18 +61,35 @@
 						p3d_Vertexs.push(1)
 					}
 				})
-				geo.setAttribute('p3d_Vertex', new THREE.BufferAttribute(new Float32Array(p3d_Vertexs), 4));
+				geo.setAttribute('p3d_Vertex', new THREE.BufferAttribute(new Float32Array(p3d_Vertexs), itemSize));
+
+				itemSize=2
+				let p3d_MultiTexCoord1s = []
+				geo.attributes.uv.array.forEach((n, i) => {
+					p3d_MultiTexCoord1s.push(n)
+				})
+				geo.setAttribute('p3d_MultiTexCoord1', new THREE.BufferAttribute(new Float32Array(p3d_MultiTexCoord1s), itemSize));
+
+				itemSize=4
+				let p3d_Colors = []
+				for(let i=0,ii=0;i<geo.attributes.position.count;i++,ii+=itemSize){
+					p3d_Colors.push(1,1,1,1)
+				}
+				geo.setAttribute('p3d_Color', new THREE.BufferAttribute(new Float32Array(p3d_Colors), itemSize));
 
 				// let mtl = new THREE.MeshStandardMaterial({
 				// 	color: 'red',
 				// })
 				let vertexShader = await (await fetch('./base.vert')).text()
 				let fragmentShader = await (await fetch('./base.frag')).text()
-				const textureABC = new THREE.TextureLoader().load("/lib/three.js_github_gonnavis/examples/models/lwo/Images/material-Phong-metal/167_COLOR.JPG");
+				window.textureABC = new THREE.TextureLoader().load("/lib/three.js_github_gonnavis/examples/models/lwo/Images/material-Phong-metal/167_COLOR.JPG",render);
 				textureABC.wrapS = THREE.RepeatWrapping;
 				textureABC.wrapT = THREE.RepeatWrapping;
 				textureABC.repeat.set(4, 4);
 				window.uniforms = {
+					p3d_Texture0:{value:textureABC},
+					pi:{value:new THREE.Vector2(0,Math.PI)},
+					gamma:{value:new THREE.Vector2(1,0)},
 					p3d_Material: {
 						value: {
 							ambient: null,
@@ -191,10 +211,11 @@
 			console.log('render')
 			uniforms.p3d_ProjectionMatrix.value = camera.projectionMatrix
 			uniforms.p3d_ModelViewMatrix.value = mesh.modelViewMatrix
+			uniforms.p3d_Texture0.value = textureABC
 
 			uniforms.p3d_Material.value.ambient = new THREE.Vector4(0, 0, .5, 1)
-			uniforms.p3d_Material.value.diffuse = new THREE.Vector4(0, 0, 0, 1)
-			uniforms.p3d_Material.value.emission = new THREE.Vector4(0, 0, 0, 1)
+			uniforms.p3d_Material.value.diffuse = new THREE.Vector4(1, 0, 0, 1)
+			uniforms.p3d_Material.value.emission = new THREE.Vector4(.5, .5, .5, 1)
 			uniforms.p3d_Material.value.specular = new THREE.Vector3(0, 0, 0)
 			uniforms.p3d_Material.value.shininess = 1
 
