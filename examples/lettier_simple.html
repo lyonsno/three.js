@@ -47,7 +47,9 @@
 			window.addEventListener('resize', onWindowResize, false);
 
 			{
-				let geo = new THREE.BoxBufferGeometry(1, 1, 1)
+				// let geo = new THREE.BoxBufferGeometry(1, 1, 1)
+				let geo = new THREE.PlaneBufferGeometry(1, 1)
+				window.geo=geo
 				// let mtl = new THREE.MeshStandardMaterial({
 				// 	color: 'red',
 				// })

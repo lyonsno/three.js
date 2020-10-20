@@ -65,7 +65,7 @@ struct p3d_LightSourceParameters
   ;
   };
 
-uniform p3d_LightSourceParameters p3d_LightSource[NUMBER_OF_LIGHTS];
+// uniform p3d_LightSourceParameters p3d_LightSource[NUMBER_OF_LIGHTS];
 
 uniform vec2 normalMapsEnabled;
 uniform vec2 fresnelEnabled;
@@ -152,132 +152,132 @@ void main() {
   vec4 diffuse  = vec4(0.0, 0.0, 0.0, diffuseColor.a);
   vec4 specular = vec4(0.0, 0.0, 0.0, diffuseColor.a);
 
-  for (int i = 0; i < p3d_LightSource.length(); ++i) {
-    vec3 lightDirection =
-        p3d_LightSource[i].position.xyz
-      - vertexPosition.xyz
-      * p3d_LightSource[i].position.w;
+  // for (int i = 0; i < p3d_LightSource.length(); ++i) {
+  //   vec3 lightDirection =
+  //       p3d_LightSource[i].position.xyz
+  //     - vertexPosition.xyz
+  //     * p3d_LightSource[i].position.w;
 
-    vec3 unitLightDirection = normalize(lightDirection);
-    vec3 eyeDirection       = normalize(-vertexPosition.xyz);
-    vec3 reflectedDirection = normalize(-reflect(unitLightDirection, normal));
-    vec3 halfwayDirection   = normalize(unitLightDirection + eyeDirection);
+  //   vec3 unitLightDirection = normalize(lightDirection);
+  //   vec3 eyeDirection       = normalize(-vertexPosition.xyz);
+  //   vec3 reflectedDirection = normalize(-reflect(unitLightDirection, normal));
+  //   vec3 halfwayDirection   = normalize(unitLightDirection + eyeDirection);
 
-    float lightDistance = length(lightDirection);
+  //   float lightDistance = length(lightDirection);
 
-    float attenuation =
-        1.0
-      / ( p3d_LightSource[i].constantAttenuation
-        + p3d_LightSource[i].linearAttenuation
-        * lightDistance
-        + p3d_LightSource[i].quadraticAttenuation
-        * (lightDistance * lightDistance)
-        );
+  //   float attenuation =
+  //       1.0
+  //     / ( p3d_LightSource[i].constantAttenuation
+  //       + p3d_LightSource[i].linearAttenuation
+  //       * lightDistance
+  //       + p3d_LightSource[i].quadraticAttenuation
+  //       * (lightDistance * lightDistance)
+  //       );
 
-    if (attenuation <= 0.0) { continue; }
+  //   if (attenuation <= 0.0) { continue; }
 
-    float diffuseIntensity = dot(normal, unitLightDirection);
+  //   float diffuseIntensity = dot(normal, unitLightDirection);
 
-    if (diffuseIntensity < 0.0) { continue; }
+  //   if (diffuseIntensity < 0.0) { continue; }
 
-    diffuseIntensity =
-        celShadingEnabled.x == 1.
-      ? smoothstep(0.1, 0.2, diffuseIntensity)
-      : diffuseIntensity;
+  //   diffuseIntensity =
+  //       celShadingEnabled.x == 1.
+  //     ? smoothstep(0.1, 0.2, diffuseIntensity)
+  //     : diffuseIntensity;
 
-    vec4 lightDiffuseColor     = p3d_LightSource[i].diffuse;
-         lightDiffuseColor.rgb = pow(lightDiffuseColor.rgb, vec3(gamma.x));
+  //   vec4 lightDiffuseColor     = p3d_LightSource[i].diffuse;
+  //        lightDiffuseColor.rgb = pow(lightDiffuseColor.rgb, vec3(gamma.x));
 
-    vec4 diffuseTemp =
-      vec4
-        ( clamp
-            (   diffuseColor.rgb
-              * lightDiffuseColor.rgb
-              * diffuseIntensity
-            , 0.0
-            , 1.0
-            )
-        , diffuseColor.a
-        );
+  //   vec4 diffuseTemp =
+  //     vec4
+  //       ( clamp
+  //           (   diffuseColor.rgb
+  //             * lightDiffuseColor.rgb
+  //             * diffuseIntensity
+  //           , 0.0
+  //           , 1.0
+  //           )
+  //       , diffuseColor.a
+  //       );
 
-    float specularIntensity =
-      ( blinnPhongEnabled.x == 1.
-      ? clamp(dot(normal,       halfwayDirection),   0.0, 1.0)
-      : clamp(dot(eyeDirection, reflectedDirection), 0.0, 1.0)
-      );
+  //   float specularIntensity =
+  //     ( blinnPhongEnabled.x == 1.
+  //     ? clamp(dot(normal,       halfwayDirection),   0.0, 1.0)
+  //     : clamp(dot(eyeDirection, reflectedDirection), 0.0, 1.0)
+  //     );
 
-    specularIntensity =
-      ( celShadingEnabled.x == 1.
-      ? smoothstep(0.9, 1.0, specularIntensity)
-      : specularIntensity
-      );
+  //   specularIntensity =
+  //     ( celShadingEnabled.x == 1.
+  //     ? smoothstep(0.9, 1.0, specularIntensity)
+  //     : specularIntensity
+  //     );
 
-    vec4  lightSpecularColor     = p3d_LightSource[i].specular;
-          lightSpecularColor.rgb = pow(lightSpecularColor.rgb, vec3(gamma.x));
+  //   vec4  lightSpecularColor     = p3d_LightSource[i].specular;
+  //         lightSpecularColor.rgb = pow(lightSpecularColor.rgb, vec3(gamma.x));
 
-    vec4 materialSpecularColor        = vec4(vec3(specularMap.r), diffuseColor.a);
-    if (fresnelEnabled.x == 1.) {
-      float fresnelFactor             = dot((blinnPhongEnabled.x == 1. ? halfwayDirection : normal), eyeDirection);
-            fresnelFactor             = max(fresnelFactor, 0.0);
-            fresnelFactor             = 1.0 - fresnelFactor;
-            fresnelFactor             = pow(fresnelFactor, specularMap.b * MAX_FRESNEL_POWER);
-            materialSpecularColor.rgb = mix(materialSpecularColor.rgb, vec3(1.0), clamp(fresnelFactor, 0.0, 1.0));
-    }
+  //   vec4 materialSpecularColor        = vec4(vec3(specularMap.r), diffuseColor.a);
+  //   if (fresnelEnabled.x == 1.) {
+  //     float fresnelFactor             = dot((blinnPhongEnabled.x == 1. ? halfwayDirection : normal), eyeDirection);
+  //           fresnelFactor             = max(fresnelFactor, 0.0);
+  //           fresnelFactor             = 1.0 - fresnelFactor;
+  //           fresnelFactor             = pow(fresnelFactor, specularMap.b * MAX_FRESNEL_POWER);
+  //           materialSpecularColor.rgb = mix(materialSpecularColor.rgb, vec3(1.0), clamp(fresnelFactor, 0.0, 1.0));
+  //   }
 
-    vec4 specularTemp      = vec4(vec3(0.0), diffuseColor.a);
-         specularTemp.rgb  = lightSpecularColor.rgb * pow(specularIntensity, specularMap.g * MAX_SHININESS);
-         specularTemp.rgb *= materialSpecularColor.rgb;
-         specularTemp.rgb *= (1. - isParticle.x);
-         specularTemp.rgb  = clamp(specularTemp.rgb, 0.0, 1.0);
+  //   vec4 specularTemp      = vec4(vec3(0.0), diffuseColor.a);
+  //        specularTemp.rgb  = lightSpecularColor.rgb * pow(specularIntensity, specularMap.g * MAX_SHININESS);
+  //        specularTemp.rgb *= materialSpecularColor.rgb;
+  //        specularTemp.rgb *= (1. - isParticle.x);
+  //        specularTemp.rgb  = clamp(specularTemp.rgb, 0.0, 1.0);
 
-    float unitLightDirectionDelta =
-      dot
-        ( normalize(p3d_LightSource[i].spotDirection)
-        , -unitLightDirection
-        );
+  //   float unitLightDirectionDelta =
+  //     dot
+  //       ( normalize(p3d_LightSource[i].spotDirection)
+  //       , -unitLightDirection
+  //       );
 
-    if (unitLightDirectionDelta < p3d_LightSource[i].spotCosCutoff) { continue; }
+  //   if (unitLightDirectionDelta < p3d_LightSource[i].spotCosCutoff) { continue; }
 
-    float spotExponent = p3d_LightSource[i].spotExponent;
+  //   float spotExponent = p3d_LightSource[i].spotExponent;
 
-    diffuseTemp.rgb *= (spotExponent <= 0.0 ? 1.0 : pow(unitLightDirectionDelta, spotExponent));
+  //   diffuseTemp.rgb *= (spotExponent <= 0.0 ? 1.0 : pow(unitLightDirectionDelta, spotExponent));
 
-    vec2  shadowMapSize = vec2(textureSize(p3d_LightSource[i].shadowMap, 0));
-    float inShadow      = 0.0;
-    float count         = 0.0;
+  //   vec2  shadowMapSize = vec2(textureSize(p3d_LightSource[i].shadowMap, 0));
+  //   float inShadow      = 0.0;
+  //   float count         = 0.0;
 
-    for (  int si = -shadowSamples; si <= shadowSamples; ++si) {
-      for (int sj = -shadowSamples; sj <= shadowSamples; ++sj) {
-        inShadow +=
-          ( 1.0
-          - textureProj
-              ( p3d_LightSource[i].shadowMap
-              , vertexInShadowSpaces[i] + vec4(vec2(si, sj) / shadowMapSize, vec2(0.0))
-              )
-          );
+  //   for (  int si = -shadowSamples; si <= shadowSamples; ++si) {
+  //     for (int sj = -shadowSamples; sj <= shadowSamples; ++sj) {
+  //       inShadow +=
+  //         ( 1.0
+  //         - textureProj
+  //             ( p3d_LightSource[i].shadowMap
+  //             , vertexInShadowSpaces[i] + vec4(vec2(si, sj) / shadowMapSize, vec2(0.0))
+  //             )
+  //         );
 
-        count += 1.0;
-      }
-    }
+  //       count += 1.0;
+  //     }
+  //   }
 
-    inShadow /= count;
+  //   inShadow /= count;
 
-    vec3 shadow =
-      mix
-        ( vec3(1.0)
-        , shadowColor
-        , inShadow
-        );
+  //   vec3 shadow =
+  //     mix
+  //       ( vec3(1.0)
+  //       , shadowColor
+  //       , inShadow
+  //       );
 
-    diffuseTemp.rgb  *= mix(shadow, vec3(1.0), isParticle.x);
-    specularTemp.rgb *= mix(shadow, vec3(1.0), isParticle.x);
+  //   diffuseTemp.rgb  *= mix(shadow, vec3(1.0), isParticle.x);
+  //   specularTemp.rgb *= mix(shadow, vec3(1.0), isParticle.x);
 
-    diffuseTemp.rgb  *= attenuation;
-    specularTemp.rgb *= attenuation;
+  //   diffuseTemp.rgb  *= attenuation;
+  //   specularTemp.rgb *= attenuation;
 
-    diffuse.rgb  += diffuseTemp.rgb;
-    specular.rgb += specularTemp.rgb;
-  }
+  //   diffuse.rgb  += diffuseTemp.rgb;
+  //   specular.rgb += specularTemp.rgb;
+  // }
 
   vec4 rimLight = vec4(vec3(0.0), diffuseColor.a);
   if (rimLightEnabled.x == 1.) {
@@ -334,6 +334,7 @@ void main() {
              + emission.rgb;
 
   if (isWater.x == 1.) { out0.a = 0.0; }
+  out0=vec4(1,0,0,1);
 
   // out1.a   = diffuseColor.a;
   // out1.rgb = specular.rgb;
