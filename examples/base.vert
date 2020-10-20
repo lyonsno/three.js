@@ -37,7 +37,8 @@ struct p3d_LightSourceParameters
   };
 
 // uniform p3d_LightSourceParameters p3d_LightSource[NUMBER_OF_LIGHTS];
-in vec3 position;
+
+in vec4 p3d_Vertex;
 in vec3 p3d_Normal;
 
 in vec4 p3d_Color;
@@ -61,10 +62,8 @@ out vec2 diffuseCoord;
 out vec4 vertexInShadowSpaces[NUMBER_OF_LIGHTS];
 
 void main() {
-  vec4 p3d_Vertex=vec4(position,1);
   vertexColor    = p3d_Color;
   vertexPosition = p3d_ModelViewMatrix * p3d_Vertex;
-  vertexPosition = vec4(position,1);
 
   vertexNormal = normalize(p3d_NormalMatrix * p3d_Normal);
   binormal     = normalize(p3d_NormalMatrix * p3d_Binormal);
@@ -78,5 +77,4 @@ void main() {
   // }
 
   gl_Position = p3d_ProjectionMatrix * vertexPosition;
-  gl_Position = vertexPosition;
 }

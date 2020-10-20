@@ -47,9 +47,19 @@
 			window.addEventListener('resize', onWindowResize, false);
 
 			{
-				// let geo = new THREE.BoxBufferGeometry(1, 1, 1)
-				let geo = new THREE.PlaneBufferGeometry(1, 1)
+				let geo = new THREE.BoxBufferGeometry(1, 1, 1)
+				// let geo = new THREE.PlaneBufferGeometry(1, 1)
 				window.geo=geo
+
+				let p3d_Vertexs=[]
+				geo.attributes.position.array.forEach((n,i)=>{
+					p3d_Vertexs.push(n)
+					if(i%3===2){
+						p3d_Vertexs.push(1)
+					}
+				})
+				geo.setAttribute( 'p3d_Vertex', new THREE.BufferAttribute( new Float32Array(p3d_Vertexs), 4 ) );
+
 				// let mtl = new THREE.MeshStandardMaterial({
 				// 	color: 'red',
 				// })
@@ -59,7 +69,9 @@
 				textureABC.wrapS = THREE.RepeatWrapping;
 				textureABC.wrapT = THREE.RepeatWrapping;
 				textureABC.repeat.set(4, 4);
-				let uniforms = {
+				window.uniforms = {
+					p3d_ProjectionMatrix:{value:null},
+					p3d_ModelViewMatrix:{value:null},
 					isParticle: { value: new THREE.Vector2() },
 					p3d_LightSource: {
 						value: [
@@ -136,8 +148,8 @@
 					vertexShader,
 					fragmentShader,
 				})
-				let mt
 				let mesh = new THREE.Mesh(geo, mtl)
+				window.mesh=mesh
 				scene.add(mesh)
 			}
 			{
@@ -167,7 +179,9 @@
 		//
 
 		function render() {
-
+			console.log('render')
+			uniforms.p3d_ProjectionMatrix.value=camera.projectionMatrix
+			uniforms.p3d_ModelViewMatrix.value=mesh.modelViewMatrix
 			renderer.render(scene, camera);
 
 		}
