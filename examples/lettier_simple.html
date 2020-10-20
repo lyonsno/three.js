@@ -51,13 +51,83 @@
 				// let mtl = new THREE.MeshStandardMaterial({
 				// 	color: 'red',
 				// })
-				let vertexShader=await(await fetch('./base.vert')).text()
-				let fragmentShader=await(await fetch('./base.frag')).text()
-				let uniforms={
-					isParticle:{value:new THREE.Vector2()},
-					// p3d_LightSourceParameters:{value:{
-					// 	shadowMap
-					// }},
+				let vertexShader = await (await fetch('./base.vert')).text()
+				let fragmentShader = await (await fetch('./base.frag')).text()
+				const textureABC = new THREE.TextureLoader().load("/lib/three.js_github_gonnavis/examples/models/lwo/Images/material-Phong-metal/167_COLOR.JPG");
+				textureABC.wrapS = THREE.RepeatWrapping;
+				textureABC.wrapT = THREE.RepeatWrapping;
+				textureABC.repeat.set(4, 4);
+				let uniforms = {
+					isParticle: { value: new THREE.Vector2() },
+					p3d_LightSource: {
+						value: [
+							{
+								color: new THREE.Vector4(),
+								ambient: new THREE.Vector4(),
+								diffuse: new THREE.Vector4(),
+								specular: new THREE.Vector4(),
+								position: new THREE.Vector4(),
+								spotDirection: new THREE.Vector3(),
+								spotExponent: 0,
+								spotCutoff: 0,
+								spotCosCutoff: 0,
+								constantAttenuation: 0,
+								linearAttenuation: 0,
+								quadraticAttenuation: 0,
+								attenuation: new THREE.Vector3(),
+								sampler2DShadow: textureABC,
+								shadowViewMatrix: new THREE.Matrix4(),
+							}, {
+								color: new THREE.Vector4(),
+								ambient: new THREE.Vector4(),
+								diffuse: new THREE.Vector4(),
+								specular: new THREE.Vector4(),
+								position: new THREE.Vector4(),
+								spotDirection: new THREE.Vector3(),
+								spotExponent: 0,
+								spotCutoff: 0,
+								spotCosCutoff: 0,
+								constantAttenuation: 0,
+								linearAttenuation: 0,
+								quadraticAttenuation: 0,
+								attenuation: new THREE.Vector3(),
+								sampler2DShadow: textureABC,
+								shadowViewMatrix: new THREE.Matrix4(),
+							}, {
+								color: new THREE.Vector4(),
+								ambient: new THREE.Vector4(),
+								diffuse: new THREE.Vector4(),
+								specular: new THREE.Vector4(),
+								position: new THREE.Vector4(),
+								spotDirection: new THREE.Vector3(),
+								spotExponent: 0,
+								spotCutoff: 0,
+								spotCosCutoff: 0,
+								constantAttenuation: 0,
+								linearAttenuation: 0,
+								quadraticAttenuation: 0,
+								attenuation: new THREE.Vector3(),
+								sampler2DShadow: textureABC,
+								shadowViewMatrix: new THREE.Matrix4(),
+							}, {
+								color: new THREE.Vector4(),
+								ambient: new THREE.Vector4(),
+								diffuse: new THREE.Vector4(),
+								specular: new THREE.Vector4(),
+								position: new THREE.Vector4(),
+								spotDirection: new THREE.Vector3(),
+								spotExponent: 0,
+								spotCutoff: 0,
+								spotCosCutoff: 0,
+								constantAttenuation: 0,
+								linearAttenuation: 0,
+								quadraticAttenuation: 0,
+								attenuation: new THREE.Vector3(),
+								sampler2DShadow: textureABC,
+								shadowViewMatrix: new THREE.Matrix4(),
+							},
+						]
+					},
 				}
 				let mtl = new THREE.RawShaderMaterial({
 					uniforms,
