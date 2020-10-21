@@ -97,6 +97,7 @@ out vec4 out0;
 void main() {
   // out0=vec4(1,0,0,0);return;
   // out0=texture(p3d_Texture0, diffuseCoord);return;
+  out0=vec4(vertexNormal,1);return;
   vec3  shadowColor   = pow(vec3(0.149, 0.220, 0.227), vec3(gamma.x));
   int   shadowSamples = 2;
 
@@ -181,6 +182,7 @@ void main() {
     if (attenuation <= 0.0) { continue; }
 
     float diffuseIntensity = dot(normal, unitLightDirection);
+    out0=vec4(vec3(diffuseIntensity),1);return;
 
     if (diffuseIntensity < 0.0) { continue; }
 
@@ -197,7 +199,7 @@ void main() {
         ( clamp
             (   diffuseColor.rgb
               * lightDiffuseColor.rgb
-              // * diffuseIntensity
+              * diffuseIntensity
             , 0.0
             , 1.0
             )

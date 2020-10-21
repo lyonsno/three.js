@@ -10,9 +10,12 @@
 
 <body>
 
+	<script>window.THREE=true</script>
+	<script src='/lib/vs_util/vs_util.js'></script>
 	<script type="module">
 
 		import * as THREE from '../build/three.module.js';
+		window.THREE=THREE
 
 		import { OrbitControls } from './jsm/controls/OrbitControls.js';
 
@@ -36,6 +39,7 @@
 			const aspect = window.innerWidth / window.innerHeight;
 			camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 10 );
 			camera.position.set(0, 0, 5);
+			// camera.position.set(-5, 0, 0);
 
 			window.camera = camera
 
@@ -68,6 +72,13 @@
 					}
 				})
 				geo.setAttribute('p3d_Vertex', new THREE.BufferAttribute(new Float32Array(p3d_Vertexs), itemSize));
+
+				itemSize = 3
+				let p3d_Normals = []
+				geo.attributes.normal.array.forEach((n, i) => {
+					p3d_Normals.push(n)
+				})
+				geo.setAttribute('p3d_Normal', new THREE.BufferAttribute(new Float32Array(p3d_Normals), itemSize));
 
 				itemSize = 2
 				let p3d_MultiTexCoord1s = []
@@ -113,6 +124,8 @@
 
 				window.uniforms = {
 					trans_world_to_view:{value:null},
+					trans_view_to_world:{value:null},
+					p3d_NormalMatrix:{value:new THREE.Matrix3()},
 					p3d_Texture0: { value: textureABC },
 					pi: { value: new THREE.Vector2(0, Math.PI) },
 					gamma: { value: new THREE.Vector2(1, 0) },
@@ -179,7 +192,10 @@
 			uniforms.p3d_ProjectionMatrix.value = camera.projectionMatrix
 			uniforms.p3d_ModelViewMatrix.value = mesh.modelViewMatrix
 			uniforms.p3d_Texture0.value = textureABC
+
+			camera.updateMatrixWorld()
 			uniforms.trans_world_to_view.value = camera.matrixWorldInverse
+			uniforms.trans_view_to_world.value = camera.matrixWorld
 
 			// uniforms.p3d_Material.value.ambient = new THREE.Vector4(0, 0, .5, 1)
 			// uniforms.p3d_Material.value.diffuse = new THREE.Vector4(1, 0, 0, 1)
