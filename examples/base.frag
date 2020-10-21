@@ -95,6 +95,8 @@ out vec4 out0;
 // out vec4 out1;
 
 void main() {
+  // out0=vec4(1,0,1,0);
+
   // out0=vec4(1,0,0,0);return;
   // out0=vec4(vertexPosition.xyz,1);return;
   // out0=vec4(abs(vertexPosition.xyz),1);return;
@@ -196,14 +198,14 @@ void main() {
         );
 
     // if (attenuation <= 0.0) { continue; }
-    if (attenuation <= 0.0) { return; }
+    if (attenuation <= 0.0) { continue; }
 
     float diffuseIntensity = dot(normal, unitLightDirection);
     // out0=vec4(vec3(celShadingEnabled.x),1);return;
     // out0=vec4(vec3(diffuseIntensity),1);return;
 
     // if (diffuseIntensity < 0.0) { continue; }
-    if (diffuseIntensity < 0.0) { return; }
+    if (diffuseIntensity < 0.0) { continue; }
 
     diffuseIntensity =
         celShadingEnabled.x == 1.
@@ -226,7 +228,7 @@ void main() {
             )
         , diffuseColor.a
         );
-    out0=diffuseTemp;return;
+    // out0=diffuseTemp;return;
 
 
     float specularIntensity =
@@ -234,6 +236,7 @@ void main() {
       ? clamp(dot(normal,       halfwayDirection),   0.0, 1.0)
       : clamp(dot(eyeDirection, reflectedDirection), 0.0, 1.0)
       );
+    // out0=vec4(vec3(specularIntensity),1);return;
 
     specularIntensity =
       ( celShadingEnabled.x == 1.
@@ -243,6 +246,7 @@ void main() {
 
     vec4  lightSpecularColor     = p3d_LightSource[i].specular;
           lightSpecularColor.rgb = pow(lightSpecularColor.rgb, vec3(gamma.x));
+    // out0=lightSpecularColor;return;
 
     vec4 materialSpecularColor        = vec4(vec3(specularMap.r), diffuseColor.a);
     if (fresnelEnabled.x == 1.) {
@@ -258,6 +262,7 @@ void main() {
          specularTemp.rgb *= materialSpecularColor.rgb;
          specularTemp.rgb *= (1. - isParticle.x);
          specularTemp.rgb  = clamp(specularTemp.rgb, 0.0, 1.0);
+    // out0=specularTemp;return;
 
     float unitLightDirectionDelta =
       dot
@@ -266,7 +271,7 @@ void main() {
         );
 
     // if (unitLightDirectionDelta < p3d_LightSource[i].spotCosCutoff) { continue; }
-    if (unitLightDirectionDelta < p3d_LightSource[i].spotCosCutoff) { return; }
+    if (unitLightDirectionDelta < p3d_LightSource[i].spotCosCutoff) { continue; }
 
     float spotExponent = p3d_LightSource[i].spotExponent;
 
@@ -308,6 +313,7 @@ void main() {
     diffuse.rgb  += diffuseTemp.rgb;
     specular.rgb += specularTemp.rgb;
   }
+  // return;
 
   vec4 rimLight = vec4(vec3(0.0), diffuseColor.a);
   if (rimLightEnabled.x == 1.) {
@@ -350,6 +356,8 @@ void main() {
       , 0.5 * (1.0 + dot(worldNormal, vec3(0, 0, 1)))
       );
 
+
+  ssao=vec3(1);
   vec3 ambient =
       ambientLight.rgb
     * diffuseColor.rgb

@@ -203,6 +203,7 @@
 			uniforms.p3d_NormalMatrix.value = new THREE.Matrix3().setFromMatrix4(new THREE.Matrix4().extractRotation(camera.matrixWorldInverse)) 
 
 			o_p3d_LightSource.position.copy(new THREE.Vector4(.2,.4,.6,0).applyMatrix4(mesh.modelViewMatrix))
+			// o_p3d_LightSource.position.copy(new THREE.Vector4(0,0,1,0).applyMatrix4(mesh.modelViewMatrix))
 
 			// uniforms.p3d_Material.value.ambient = new THREE.Vector4(0, 0, .5, 1)
 			// uniforms.p3d_Material.value.diffuse = new THREE.Vector4(1, 0, 0, 1)
