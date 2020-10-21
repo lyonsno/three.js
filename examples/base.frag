@@ -7,7 +7,7 @@ precision lowp sampler2DShadow;
   lettier.com
 */
 
-#define NUMBER_OF_LIGHTS    4
+#define NUMBER_OF_LIGHTS    1
 #define MAX_SHININESS     127.75
 #define MAX_FRESNEL_POWER   5.0
 
@@ -96,8 +96,10 @@ out vec4 out0;
 
 void main() {
   // out0=vec4(1,0,0,0);return;
+  // out0=vec4(vertexPosition.xyz,1);return;
+  // out0=vec4(abs(vertexPosition.xyz),1);return;
   // out0=texture(p3d_Texture0, diffuseCoord);return;
-  out0=vec4(vertexNormal,1);return;
+  // out0=vec4(vertexNormal,1);return;
   vec3  shadowColor   = pow(vec3(0.149, 0.220, 0.227), vec3(gamma.x));
   int   shadowSamples = 2;
 
@@ -126,12 +128,15 @@ void main() {
           , normalCoord.y + flowMapsEnabled.y * flow.y * osg_FrameTime
           )
       );
+    // out0=normalTex;return;
 
   vec3 normal;
 
   if (isParticle.x == 1.) {
+    // out0=vec4(1,0,0,1);return;
     normal = normalize((trans_world_to_view * vec4(0.0, 0.0, 1.0, 0.0)).xyz);
   } else if (normalMapsEnabled.x == 1.) {
+    // out0=vec4(0,1,0,1);return;
     vec3 normalRaw =
       normalize
         ( normalTex.rgb
@@ -148,25 +153,36 @@ void main() {
         * normalRaw
         );
   } else {
+    // out0=vec4(0,0,1,1);return;
     normal =
       normalize(vertexNormal);
   }
+  // out0=vec4(normal,1);return;
 
   vec4 specularMap = texture(p3d_Texture2, diffuseCoord);
+  // out0=specularMap;return;
 
   vec4 diffuse  = vec4(0.0, 0.0, 0.0, diffuseColor.a);
   vec4 specular = vec4(0.0, 0.0, 0.0, diffuseColor.a);
 
+  // out0=vec4(vec3(float(p3d_LightSource.length())/4.),1);return;
   for (int i = 0; i < p3d_LightSource.length(); ++i) {
+    // out0=vec4(p3d_LightSource[i].position.xyz,1);return;
+    // out0=vec4(vertexPosition.xyz,1);return;
+    // out0=vec4(vertexPosition.xyz* p3d_LightSource[i].position.w,1);return;
     vec3 lightDirection =
         p3d_LightSource[i].position.xyz
       - vertexPosition.xyz
       * p3d_LightSource[i].position.w;
 
     vec3 unitLightDirection = normalize(lightDirection);
+    // out0=vec4(unitLightDirection,1);return;
     vec3 eyeDirection       = normalize(-vertexPosition.xyz);
+    // out0=vec4(eyeDirection,1);return;
     vec3 reflectedDirection = normalize(-reflect(unitLightDirection, normal));
+    // out0=vec4(reflectedDirection,1);return;
     vec3 halfwayDirection   = normalize(unitLightDirection + eyeDirection);
+    // out0=vec4(halfwayDirection,1);return;
 
     float lightDistance = length(lightDirection);
 
@@ -179,17 +195,22 @@ void main() {
         * (lightDistance * lightDistance)
         );
 
-    if (attenuation <= 0.0) { continue; }
+    // if (attenuation <= 0.0) { continue; }
+    if (attenuation <= 0.0) { return; }
 
     float diffuseIntensity = dot(normal, unitLightDirection);
-    out0=vec4(vec3(diffuseIntensity),1);return;
+    // out0=vec4(vec3(celShadingEnabled.x),1);return;
+    // out0=vec4(vec3(diffuseIntensity),1);return;
 
-    if (diffuseIntensity < 0.0) { continue; }
+    // if (diffuseIntensity < 0.0) { continue; }
+    if (diffuseIntensity < 0.0) { return; }
 
     diffuseIntensity =
         celShadingEnabled.x == 1.
       ? smoothstep(0.1, 0.2, diffuseIntensity)
       : diffuseIntensity;
+      
+    // out0=vec4(vec3(diffuseIntensity),1);return;
 
     vec4 lightDiffuseColor     = p3d_LightSource[i].diffuse;
          lightDiffuseColor.rgb = pow(lightDiffuseColor.rgb, vec3(gamma.x));
@@ -244,7 +265,8 @@ void main() {
         , -unitLightDirection
         );
 
-    if (unitLightDirectionDelta < p3d_LightSource[i].spotCosCutoff) { continue; }
+    // if (unitLightDirectionDelta < p3d_LightSource[i].spotCosCutoff) { continue; }
+    if (unitLightDirectionDelta < p3d_LightSource[i].spotCosCutoff) { return; }
 
     float spotExponent = p3d_LightSource[i].spotExponent;
 

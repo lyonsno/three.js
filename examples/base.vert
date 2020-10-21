@@ -4,7 +4,7 @@ precision lowp sampler2DShadow;
   (C) 2019 David Lettier
   lettier.com
 */
-#define NUMBER_OF_LIGHTS 4
+#define NUMBER_OF_LIGHTS 1
 
 uniform mat4 p3d_ModelViewMatrix;
 uniform mat4 p3d_ProjectionMatrix;
