@@ -132,14 +132,16 @@
 			{
 				let geo = new THREE.PlaneBufferGeometry(2, 2)
 				geo.rotateX(-Math.PI / 2)
-				geo.translate(0, -1, 0)
+				geo.translate(0, -.8, 0)
 				addGeoAttributes(geo)
 
 				// let mtl = new THREE.MeshBasicMaterial({
 				// 	color: 'red',
 				// })
-				window.plane = new THREE.Mesh(geo, mtl)
-				scene.add(plane)
+				let mesh = new THREE.Mesh(geo, mtl)
+				// window.plane = mesh
+				// mesh.rotation.x=-Math.PI/2
+				scene.add(mesh)
 			}
 			{
 				const light = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
