@@ -66,7 +66,6 @@
 						meshs.push(child)
 						// console.log(child.material.map)
 						let origin_mtl = child.material
-						window.mesh = child
 						addGeoAttributes(child.geometry)
 						child.material = createMtl({
 							map: origin_mtl.map
@@ -218,41 +217,34 @@
 		window.render = render
 		function render() {
 			// console.log('render')
-			if (!window.mesh) return;
-			// console.log(1)
+			// if (!window.mesh) return;
 			// camera.updateMatrix()
 			// camera.updateMatrixWorld()
 			// camera.updateWorldMatrix()
 			// camera.updateProjectionMatrix()
 
-			gltf.scene.traverse(function (child) {
-				// console.log(2)
+			meshs.forEach(child => {
+				let uniforms = child.material.uniforms
 
-				meshs.forEach(child => {
-					// console.log(3)
-					let uniforms = child.material.uniforms
+				uniforms.p3d_ProjectionMatrix.value = camera.projectionMatrix
+				uniforms.p3d_ModelViewMatrix.value = child.modelViewMatrix
+				// uniforms.p3d_ModelViewMatrix.value.getInverse(camera.modelViewMatrix)
 
-					uniforms.p3d_ProjectionMatrix.value = camera.projectionMatrix
-					uniforms.p3d_ModelViewMatrix.value = mesh.modelViewMatrix
-					// uniforms.p3d_ModelViewMatrix.value.getInverse(camera.modelViewMatrix)
+				uniforms.trans_world_to_view.value = camera.matrixWorldInverse
+				uniforms.trans_view_to_world.value = camera.matrixWorld
+				uniforms.p3d_NormalMatrix.value = new THREE.Matrix3().setFromMatrix4(new THREE.Matrix4().extractRotation(camera.matrixWorldInverse))
 
-					uniforms.trans_world_to_view.value = camera.matrixWorldInverse
-					uniforms.trans_view_to_world.value = camera.matrixWorld
-					uniforms.p3d_NormalMatrix.value = new THREE.Matrix3().setFromMatrix4(new THREE.Matrix4().extractRotation(camera.matrixWorldInverse))
+				uniforms.p3d_LightSource.value[0].position.copy(new THREE.Vector4(.2, .4, .6, 0).applyMatrix4(child.modelViewMatrix))
+				// uniforms.p3d_LightSource.value[0].position.copy(new THREE.Vector4(0,0,1,0).applyMatrix4(child.modelViewMatrix))
 
-					uniforms.p3d_LightSource.value[0].position.copy(new THREE.Vector4(.2, .4, .6, 0).applyMatrix4(mesh.modelViewMatrix))
-					// uniforms.p3d_LightSource.value[0].position.copy(new THREE.Vector4(0,0,1,0).applyMatrix4(mesh.modelViewMatrix))
+				// uniforms.p3d_Material.value.ambient = new THREE.Vector4(0, 0, .5, 1)
+				// uniforms.p3d_Material.value.diffuse = new THREE.Vector4(1, 0, 0, 1)
+				// uniforms.p3d_Material.value.emission = new THREE.Vector4(.5, .5, .5, 1)
+				// uniforms.p3d_Material.value.specular = new THREE.Vector3(0, 0, 0)
+				// uniforms.p3d_Material.value.shininess = 1
 
-					// uniforms.p3d_Material.value.ambient = new THREE.Vector4(0, 0, .5, 1)
-					// uniforms.p3d_Material.value.diffuse = new THREE.Vector4(1, 0, 0, 1)
-					// uniforms.p3d_Material.value.emission = new THREE.Vector4(.5, .5, .5, 1)
-					// uniforms.p3d_Material.value.specular = new THREE.Vector3(0, 0, 0)
-					// uniforms.p3d_Material.value.shininess = 1
+			})
 
-					// console.log(uniforms)
-				})
-
-			});
 
 			renderer.render(scene, camera);
 
