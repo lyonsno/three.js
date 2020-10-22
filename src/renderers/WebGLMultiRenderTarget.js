@@ -75,4 +75,3 @@ WebGLMultiRenderTarget.prototype = Object.assign( Object.create( WebGLRenderTarg
 
 
 export { WebGLMultiRenderTarget };
-4

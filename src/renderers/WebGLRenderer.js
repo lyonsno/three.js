@@ -144,6 +144,8 @@ function WebGLRenderer( parameters ) {
 	const _scissor = new Vector4( 0, 0, _width, _height );
 	let _scissorTest = false;
 
+	const _currentDrawBuffers = [];
+
 	// frustum
 
 	const _frustum = new Frustum();
@@ -281,8 +283,6 @@ function WebGLRenderer( parameters ) {
 		extensions.get( 'OES_texture_float_linear' );
 
 		utils = new WebGLUtils( _gl, extensions, capabilities );
-
-		_currentDrawBuffers = [],
 
 		state = new WebGLState( _gl, extensions, capabilities );
 		state.scissor( _currentScissor.copy( _scissor ).multiplyScalar( _pixelRatio ).floor() );

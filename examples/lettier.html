@@ -10,14 +10,14 @@
 
 <body>
 	<div id="dom_tip"
-		style="width:100%;height:100%;position:fixed;left:0;top:0;pointer-events: none;display:flex;align-items: center;justify-content: center;color:white;">
+		style="width:100%;height:100%;position:fixed;left:0;top:0;pointer-events: none;display:flex;align-items: center;justify-content: center;color:white;user-select: none;">
 		drag</div>
 
 	<script>window.THREE = true</script>
 	<script src='/lib/vs_util/vs_util.js'></script>
 	<script type="module">
 
-		import * as THREE from '../build/three.module.js';
+		import * as THREE from '../src/Three.js';
 		window.THREE = THREE
 
 		import { OrbitControls } from './jsm/controls/OrbitControls.js';
@@ -34,13 +34,17 @@
 
 		main()
 		async function main() {
-			window.vertexShader = await (await fetch('./base.vert')).text()
-			window.fragmentShader = await (await fetch('./base.frag')).text()
 			await init();
 			// render();
 		}
 
 		async function init() {
+
+			window.vertexShader = await (await fetch('./base.vert')).text()
+			window.fragmentShader = await (await fetch('./base.frag')).text()
+
+			const attachmentNums = 2;
+			window.renderTarget = new THREE.WebGLMultiRenderTarget(innerWidth, innerHeight, attachmentNums);
 
 			container = document.createElement('div');
 			document.body.appendChild(container);
@@ -81,6 +85,31 @@
 				// render();
 
 			});
+
+			{//scene2
+				window.scene2 = new THREE.Scene();
+
+				let frustumSize = 2
+				const aspect = window.innerWidth / window.innerHeight;
+				window.camera2 = new THREE.OrthographicCamera(frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, .001, 100);
+				camera2.position.set(0, 0, 1);
+				{
+					let geo = new THREE.PlaneBufferGeometry(1, 1)
+					window.material1 = new THREE.MeshBasicMaterial()
+					let mesh = new THREE.Mesh(geo, material1)
+					scene2.add(mesh)
+					mesh.position.x=-.5
+					mesh.position.y=.5
+				}
+				{
+					let geo = new THREE.PlaneBufferGeometry(1, 1)
+					window.material2 = new THREE.MeshBasicMaterial()
+					let mesh = new THREE.Mesh(geo, material2)
+					scene2.add(mesh)
+					mesh.position.x=.5
+					mesh.position.y=.5
+				}
+			}
 
 
 			renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -253,7 +282,16 @@
 			})
 
 
+
+			// rendering to MultiRenderTarget
+			renderer.setRenderTarget(renderTarget);
 			renderer.render(scene, camera);
+
+			// rendering to screen with MultiRenderTarget as input
+			material1.map = renderTarget.textures[0];
+			material2.map = renderTarget.textures[1];
+			renderer.setRenderTarget(null);
+			renderer.render(scene2, camera2);
 
 		}
 

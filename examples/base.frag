@@ -91,8 +91,8 @@ in vec3 tangent;
 in vec2 diffuseCoord;
 in vec2 normalCoord;
 
-out vec4 out0;
-// out vec4 out1;
+layout(location = 0) out vec4 out0;
+layout(location = 1) out vec4 out1;
 
 void main() {
   // out0=vec4(1,0,1,0);
@@ -375,8 +375,9 @@ void main() {
   // out0=vec4(1,0,0,1);
   // out0=p3d_Material.ambient;
 
-  // out1.a   = diffuseColor.a;
-  // out1.rgb = specular.rgb;
+  out1.a   = diffuseColor.a;
+  out1.rgb = specular.rgb;
+  out1 = vec4(1,0,0,1);
 
-  // if (isParticle.x == 1.) { out1.rgb = vec3(0.0); }
+  if (isParticle.x == 1.) { out1.rgb = vec3(0.0); }
 }
