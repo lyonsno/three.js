@@ -2,20 +2,13 @@
 <html lang="en">
 
 <head>
-	<title>three.js webgl - glTF loader</title>
+	<title></title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<link type="text/css" rel="stylesheet" href="main.css">
 </head>
 
 <body>
-	<div id="info">
-		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - GLTFLoader<br />
-		Battle Damaged Sci-fi Helmet by
-		<a href="https://sketchfab.com/theblueturtle_" target="_blank" rel="noopener">theblueturtle_</a><br />
-		<a href="https://hdrihaven.com/hdri/?h=royal_esplanade" target="_blank" rel="noopener">Royal Esplanade</a> by <a
-			href="https://hdrihaven.com/" target="_blank" rel="noopener">HDRI Haven</a>
-	</div>
 
 	<script>window.THREE = true</script>
 	<script src='/lib/vs_util/vs_util.js'></script>
@@ -60,9 +53,12 @@
 				let vertexShader = await (await fetch('./base.vert')).text()
 				let fragmentShader = await (await fetch('./base.frag')).text()
 
-				window.p3d_Texture0 = new THREE.TextureLoader().load("/lib/three.js_github_gonnavis/examples/models/lwo/Images/material-Phong-metal/167_COLOR.JPG", render);
+				window.p3d_Texture0 = new THREE.TextureLoader().load("/lib/3d-game-shaders-for-beginners_github/demonstration/eggs/mill-scene/tex/earth-diffuse.png", render);
+				p3d_Texture0.flipY=false
 				window.p3d_Texture1 = new THREE.TextureLoader().load("/lib/3d-game-shaders-for-beginners_github/demonstration/eggs/mill-scene/tex/normal.png", render);
+				p3d_Texture1.flipY=false
 				window.p3d_Texture2 = new THREE.TextureLoader().load("/lib/3d-game-shaders-for-beginners_github/demonstration/eggs/mill-scene/tex/no-specular.png", render);
+				p3d_Texture2.flipY=false
 
 				window.o_p3d_LightSource = {
 					color: new THREE.Vector4(1, 1, 1, 1),
