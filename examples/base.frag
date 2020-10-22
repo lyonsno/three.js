@@ -93,6 +93,8 @@ in vec2 normalCoord;
 
 layout(location = 0) out vec4 out0;
 layout(location = 1) out vec4 out1;
+layout(location = 2) out vec4 outNormal;
+layout(location = 3) out vec4 outPosition;
 
 void main() {
   // out0=vec4(1,0,1,0);
@@ -101,7 +103,9 @@ void main() {
   // out0=vec4(vertexPosition.xyz,1);return;
   // out0=vec4(abs(vertexPosition.xyz),1);return;
   // out0=texture(p3d_Texture0, diffuseCoord);return;
-  // out0=vec4(vertexNormal,1);return;
+  outNormal=vec4(vertexNormal,1);
+  // outPosition=vertexPosition;
+  outPosition=vec4(vertexPosition.xy*.05,-vertexPosition.z*.01,1);
   vec3  shadowColor   = pow(vec3(0.149, 0.220, 0.227), vec3(gamma.x));
   int   shadowSamples = 2;
 

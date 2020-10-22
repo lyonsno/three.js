@@ -43,7 +43,7 @@
 			window.vertexShader = await (await fetch('./base.vert')).text()
 			window.fragmentShader = await (await fetch('./base.frag')).text()
 
-			const attachmentNums = 2;
+			const attachmentNums = 4;
 			window.renderTarget = new THREE.WebGLMultiRenderTarget(innerWidth, innerHeight, attachmentNums);
 
 			container = document.createElement('div');
@@ -98,16 +98,32 @@
 					window.material1 = new THREE.MeshBasicMaterial()
 					let mesh = new THREE.Mesh(geo, material1)
 					scene2.add(mesh)
-					mesh.position.x=-.5
-					mesh.position.y=.5
+					mesh.position.x = -.5
+					mesh.position.y = .5
 				}
 				{
 					let geo = new THREE.PlaneBufferGeometry(1, 1)
 					window.material2 = new THREE.MeshBasicMaterial()
 					let mesh = new THREE.Mesh(geo, material2)
 					scene2.add(mesh)
-					mesh.position.x=.5
-					mesh.position.y=.5
+					mesh.position.x = .5
+					mesh.position.y = .5
+				}
+				{
+					let geo = new THREE.PlaneBufferGeometry(1, 1)
+					window.materialNormal = new THREE.MeshBasicMaterial()
+					let mesh = new THREE.Mesh(geo, materialNormal)
+					scene2.add(mesh)
+					mesh.position.x = -.5
+					mesh.position.y = -.5
+				}
+				{
+					let geo = new THREE.PlaneBufferGeometry(1, 1)
+					window.materialPosition = new THREE.MeshBasicMaterial()
+					let mesh = new THREE.Mesh(geo, materialPosition)
+					scene2.add(mesh)
+					mesh.position.x = .5
+					mesh.position.y = -.5
 				}
 			}
 
@@ -290,6 +306,8 @@
 			// rendering to screen with MultiRenderTarget as input
 			material1.map = renderTarget.textures[0];
 			material2.map = renderTarget.textures[1];
+			materialNormal.map = renderTarget.textures[2];
+			materialPosition.map = renderTarget.textures[3];
 			renderer.setRenderTarget(null);
 			renderer.render(scene2, camera2);
 
