@@ -68,7 +68,8 @@
 						let origin_mtl = child.material
 						addGeoAttributes(child.geometry)
 						child.material = createMtl({
-							map: origin_mtl.map
+							map: origin_mtl.map,
+							isWater: child.name === 'water',
 						})
 					}
 
@@ -147,7 +148,7 @@
 			geo.setAttribute('p3d_Color', new THREE.BufferAttribute(new Float32Array(p3d_Colors), itemSize));
 		}
 
-		function createMtl({ map }) {//mtl
+		function createMtl({ map, isWater }) {//mtl
 
 			let p3d_Texture0 = map
 			// let p3d_Texture0 = new THREE.TextureLoader().load("/lib/3d-game-shaders-for-beginners_github/demonstration/eggs/mill-scene/tex/earth-diffuse.png", render);
@@ -203,10 +204,16 @@
 					// value: [o_p3d_LightSource, o_p3d_LightSource, o_p3d_LightSource, o_p3d_LightSource],
 				},
 			}
+			if (isWater) {
+				uniforms.isWater = { value: new THREE.Vector2(1, 1) }
+			} else {
+				uniforms.isWater = { value: new THREE.Vector2(0, 0) }
+			}
 			let mtl = new THREE.RawShaderMaterial({
 				uniforms,
 				vertexShader,
 				fragmentShader,
+				transparent: isWater,
 			})
 
 			return mtl

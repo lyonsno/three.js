@@ -371,7 +371,7 @@ void main() {
              + rimLight.rgb
              + emission.rgb;
 
-  if (isWater.x == 1.) { out0.a = 0.0; }
+  if (isWater.x == 1.) { out0.a = 0.7; }
   // out0=vec4(1,0,0,1);
   // out0=p3d_Material.ambient;
 
