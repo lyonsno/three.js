@@ -9,6 +9,9 @@
 </head>
 
 <body>
+	<div id="dom_tip"
+		style="width:100%;height:100%;position:fixed;left:0;top:0;pointer-events: none;display:flex;align-items: center;justify-content: center;color:white;">
+		drag</div>
 
 	<script>window.THREE = true</script>
 	<script src='/lib/vs_util/vs_util.js'></script>
@@ -27,11 +30,15 @@
 		var container, controls;
 		var camera, scene, renderer;
 		const frustumSize = 30
+		var meshs = []
 
-			; (async () => {
-				await init();
-				render();
-			})()
+		main()
+		async function main() {
+			window.vertexShader = await (await fetch('./base.vert')).text()
+			window.fragmentShader = await (await fetch('./base.frag')).text()
+			await init();
+			// render();
+		}
 
 		async function init() {
 
@@ -43,74 +50,11 @@
 
 			const aspect = window.innerWidth / window.innerHeight;
 			camera = new THREE.OrthographicCamera(frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, .001, 100);
-			camera.position.set(20, 20, 20);
+			camera.position.set(-20, 20, 20);
 
 			window.camera = camera
 
 			scene = new THREE.Scene();
-
-			{//mtl
-				let vertexShader = await (await fetch('./base.vert')).text()
-				let fragmentShader = await (await fetch('./base.frag')).text()
-
-				window.p3d_Texture0 = new THREE.TextureLoader().load("/lib/3d-game-shaders-for-beginners_github/demonstration/eggs/mill-scene/tex/earth-diffuse.png", render);
-				p3d_Texture0.flipY=false
-				window.p3d_Texture1 = new THREE.TextureLoader().load("/lib/3d-game-shaders-for-beginners_github/demonstration/eggs/mill-scene/tex/normal.png", render);
-				p3d_Texture1.flipY=false
-				window.p3d_Texture2 = new THREE.TextureLoader().load("/lib/3d-game-shaders-for-beginners_github/demonstration/eggs/mill-scene/tex/no-specular.png", render);
-				p3d_Texture2.flipY=false
-
-				window.o_p3d_LightSource = {
-					color: new THREE.Vector4(1, 1, 1, 1),
-					ambient: new THREE.Vector4(1, 1, 1, 1),
-					diffuse: new THREE.Vector4(1, 1, 1, 1),
-					specular: new THREE.Vector4(1, 1, 1, 1),
-					position: new THREE.Vector4(),//Panda3D sets p3d_LightSource[i].position.w to zero if this is a directional light.
-					spotDirection: new THREE.Vector3(-1, -1, -1),
-					spotExponent: 0,
-					spotCutoff: 10,
-					spotCosCutoff: -1,
-					constantAttenuation: 1,
-					linearAttenuation: 0,
-					quadraticAttenuation: 1,
-					attenuation: new THREE.Vector3(1, 1, 1, 1),///todo not need
-					shadowMap: p3d_Texture0,
-					shadowViewMatrix: new THREE.Matrix4(),
-				}
-
-				window.uniforms = {
-					trans_world_to_view: { value: null },
-					trans_view_to_world: { value: null },
-					p3d_NormalMatrix: { value: new THREE.Matrix3() },
-					p3d_Texture0: { value: p3d_Texture0 },
-					p3d_Texture1: { value: p3d_Texture1 },
-					p3d_Texture2: { value: p3d_Texture2 },
-					pi: { value: new THREE.Vector2(0, Math.PI) },
-					gamma: { value: new THREE.Vector2(1, 0) },
-					p3d_Material: {
-						value: {
-							ambient: new THREE.Vector4(1, 1, 1, 1),
-							diffuse: new THREE.Vector4(1, 1, 1, 1),
-							emission: new THREE.Vector4(1, 1, 1, 1),
-							specular: new THREE.Vector3(1, 1, 1),
-							shininess: 1,
-						}
-					},
-					p3d_ProjectionMatrix: { value: new THREE.Matrix4() },
-					p3d_ModelViewMatrix: { value: new THREE.Matrix4() },
-					isParticle: { value: new THREE.Vector2() },
-					p3d_LightSource: {
-						value: [o_p3d_LightSource],
-						// value: [o_p3d_LightSource, o_p3d_LightSource, o_p3d_LightSource, o_p3d_LightSource],
-					},
-				}
-				window.mtl = new THREE.RawShaderMaterial({
-					uniforms,
-					vertexShader,
-					fragmentShader,
-				})
-			}
-
 
 			var loader = new GLTFLoader().setPath('/lib/3d-game-shaders-for-beginners_github_gonnavis/demonstration/eggs/mill-scene/');
 			loader.load('all.glb', function (gltf) {
@@ -118,10 +62,15 @@
 
 				gltf.scene.traverse(function (child) {
 
-					if (child.isMesh) {
+					if (child.isMesh && child.material && child.material.map) {
+						meshs.push(child)
+						// console.log(child.material.map)
+						let origin_mtl = child.material
 						window.mesh = child
 						addGeoAttributes(child.geometry)
-						child.material = mtl
+						child.material = createMtl({
+							map: origin_mtl.map
+						})
 					}
 
 				});
@@ -129,7 +78,7 @@
 				scene.add(gltf.scene);
 
 
-				render();
+				// render();
 
 			});
 
@@ -140,7 +89,10 @@
 			container.appendChild(renderer.domElement);
 
 			controls = new OrbitControls(camera, renderer.domElement);
-			controls.addEventListener('change', render); // use if there is no animation loop
+			controls.addEventListener('change', () => {
+				dom_tip.style.display = 'none'
+				render()
+			}); // use if there is no animation loop
 			// controls.minDistance = 2;
 			// controls.maxDistance = 10;
 			// controls.target.set( 0, 0, - 0.2 );
@@ -196,29 +148,111 @@
 			geo.setAttribute('p3d_Color', new THREE.BufferAttribute(new Float32Array(p3d_Colors), itemSize));
 		}
 
+		function createMtl({ map }) {//mtl
+
+			let p3d_Texture0 = map
+			// let p3d_Texture0 = new THREE.TextureLoader().load("/lib/3d-game-shaders-for-beginners_github/demonstration/eggs/mill-scene/tex/earth-diffuse.png", render);
+			p3d_Texture0.flipY = false
+			let p3d_Texture1 = map
+			// let p3d_Texture1 = new THREE.TextureLoader().load("/lib/3d-game-shaders-for-beginners_github/demonstration/eggs/mill-scene/tex/normal.png", render);
+			p3d_Texture1.flipY = false
+			let p3d_Texture2 = map
+			// let p3d_Texture2 = new THREE.TextureLoader().load("/lib/3d-game-shaders-for-beginners_github/demonstration/eggs/mill-scene/tex/no-specular.png", render);
+			p3d_Texture2.flipY = false
+
+			let o_p3d_LightSource = {
+				color: new THREE.Vector4(1, 1, 1, 1),
+				ambient: new THREE.Vector4(1, 1, 1, 1),
+				diffuse: new THREE.Vector4(1, 1, 1, 1),
+				specular: new THREE.Vector4(1, 1, 1, 1),
+				position: new THREE.Vector4(),//Panda3D sets p3d_LightSource[i].position.w to zero if this is a directional light.
+				spotDirection: new THREE.Vector3(-1, -1, -1),
+				spotExponent: 0,
+				spotCutoff: 10,
+				spotCosCutoff: -1,
+				constantAttenuation: 1,
+				linearAttenuation: 0,
+				quadraticAttenuation: 1,
+				attenuation: new THREE.Vector3(1, 1, 1, 1),///todo not need
+				shadowMap: p3d_Texture0,
+				shadowViewMatrix: new THREE.Matrix4(),
+			}
+
+			let uniforms = {
+				trans_world_to_view: { value: null },
+				trans_view_to_world: { value: null },
+				p3d_NormalMatrix: { value: new THREE.Matrix3() },
+				p3d_Texture0: { value: p3d_Texture0 },
+				p3d_Texture1: { value: p3d_Texture1 },
+				p3d_Texture2: { value: p3d_Texture2 },
+				pi: { value: new THREE.Vector2(0, Math.PI) },
+				gamma: { value: new THREE.Vector2(1, 0) },
+				p3d_Material: {
+					value: {
+						ambient: new THREE.Vector4(1, 1, 1, 1),
+						diffuse: new THREE.Vector4(1, 1, 1, 1),
+						emission: new THREE.Vector4(1, 1, 1, 1),
+						specular: new THREE.Vector3(1, 1, 1),
+						shininess: 1,
+					}
+				},
+				p3d_ProjectionMatrix: { value: new THREE.Matrix4() },
+				p3d_ModelViewMatrix: { value: new THREE.Matrix4() },
+				isParticle: { value: new THREE.Vector2() },
+				p3d_LightSource: {
+					value: [o_p3d_LightSource],
+					// value: [o_p3d_LightSource, o_p3d_LightSource, o_p3d_LightSource, o_p3d_LightSource],
+				},
+			}
+			let mtl = new THREE.RawShaderMaterial({
+				uniforms,
+				vertexShader,
+				fragmentShader,
+			})
+
+			return mtl
+		}
+
 		//
 
+		window.render = render
 		function render() {
-			if(!window.mesh) return;
-			console.log('render')
-			camera.updateMatrixWorld()
-			camera.updateProjectionMatrix()
-			uniforms.p3d_ProjectionMatrix.value = camera.projectionMatrix
-			uniforms.p3d_ModelViewMatrix.value = mesh.modelViewMatrix
-			// uniforms.p3d_ModelViewMatrix.value.getInverse(camera.modelViewMatrix)
+			// console.log('render')
+			if (!window.mesh) return;
+			// console.log(1)
+			// camera.updateMatrix()
+			// camera.updateMatrixWorld()
+			// camera.updateWorldMatrix()
+			// camera.updateProjectionMatrix()
 
-			uniforms.trans_world_to_view.value = camera.matrixWorldInverse
-			uniforms.trans_view_to_world.value = camera.matrixWorld
-			uniforms.p3d_NormalMatrix.value = new THREE.Matrix3().setFromMatrix4(new THREE.Matrix4().extractRotation(camera.matrixWorldInverse))
+			gltf.scene.traverse(function (child) {
+				// console.log(2)
 
-			o_p3d_LightSource.position.copy(new THREE.Vector4(.2, .4, .6, 0).applyMatrix4(mesh.modelViewMatrix))
-			// o_p3d_LightSource.position.copy(new THREE.Vector4(0,0,1,0).applyMatrix4(mesh.modelViewMatrix))
+				meshs.forEach(child => {
+					// console.log(3)
+					let uniforms = child.material.uniforms
 
-			// uniforms.p3d_Material.value.ambient = new THREE.Vector4(0, 0, .5, 1)
-			// uniforms.p3d_Material.value.diffuse = new THREE.Vector4(1, 0, 0, 1)
-			// uniforms.p3d_Material.value.emission = new THREE.Vector4(.5, .5, .5, 1)
-			// uniforms.p3d_Material.value.specular = new THREE.Vector3(0, 0, 0)
-			// uniforms.p3d_Material.value.shininess = 1
+					uniforms.p3d_ProjectionMatrix.value = camera.projectionMatrix
+					uniforms.p3d_ModelViewMatrix.value = mesh.modelViewMatrix
+					// uniforms.p3d_ModelViewMatrix.value.getInverse(camera.modelViewMatrix)
+
+					uniforms.trans_world_to_view.value = camera.matrixWorldInverse
+					uniforms.trans_view_to_world.value = camera.matrixWorld
+					uniforms.p3d_NormalMatrix.value = new THREE.Matrix3().setFromMatrix4(new THREE.Matrix4().extractRotation(camera.matrixWorldInverse))
+
+					uniforms.p3d_LightSource.value[0].position.copy(new THREE.Vector4(.2, .4, .6, 0).applyMatrix4(mesh.modelViewMatrix))
+					// uniforms.p3d_LightSource.value[0].position.copy(new THREE.Vector4(0,0,1,0).applyMatrix4(mesh.modelViewMatrix))
+
+					// uniforms.p3d_Material.value.ambient = new THREE.Vector4(0, 0, .5, 1)
+					// uniforms.p3d_Material.value.diffuse = new THREE.Vector4(1, 0, 0, 1)
+					// uniforms.p3d_Material.value.emission = new THREE.Vector4(.5, .5, .5, 1)
+					// uniforms.p3d_Material.value.specular = new THREE.Vector3(0, 0, 0)
+					// uniforms.p3d_Material.value.shininess = 1
+
+					// console.log(uniforms)
+				})
+
+			});
 
 			renderer.render(scene, camera);
 
