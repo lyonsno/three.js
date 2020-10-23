@@ -11,7 +11,7 @@ uniform mat4 lensProjection;
 
 uniform sampler2D positionTexture;
 uniform sampler2D normalTexture;
-uniform sampler2D maskTexture;
+// uniform sampler2D maskTexture;
 
 uniform vec2 enabled;
 
@@ -28,18 +28,19 @@ void main() {
   float thickness   = 0.5;
 
   vec2 texSize  = vec2(textureSize(positionTexture, 0).xy);
+
   // vec2 texCoord = gl_FragCoord.xy / texSize;
 	// fragColor=texture(positionTexture, texCoord);return;
-	fragColor=texture(normalTexture, texCoord);return;
+	// fragColor=texture(normalTexture, texCoord);return;
 
   vec4 uv = vec4(0.0);
 
   vec4 positionFrom = texture(positionTexture, texCoord);
-  vec4 mask         = texture(maskTexture,     texCoord);
+  // vec4 mask         = texture(maskTexture,     texCoord);
 
   if (  positionFrom.w <= 0.0
-     || enabled.x      != 1.0
-     || mask.r         <= 0.0
+    //  || enabled.x      != 1.0
+    //  || mask.r         <= 0.0
      ) { fragColor = uv; return; }
 
   vec3 unitPositionFrom = normalize(positionFrom.xyz);
