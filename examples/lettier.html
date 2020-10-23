@@ -42,6 +42,7 @@
 
 			window.vertexShader = await (await fetch('./base.vert')).text()
 			window.fragmentShader = await (await fetch('./base.frag')).text()
+			window.fragmentShaderSSR = await (await fetch('./screen-space-reflection.frag')).text()
 
 			const attachmentNums = 4;
 			window.renderTarget = new THREE.WebGLMultiRenderTarget(innerWidth, innerHeight, attachmentNums);
@@ -105,7 +106,7 @@
 					let geo = new THREE.PlaneBufferGeometry(1, 1)
 					window.material2 = new THREE.MeshBasicMaterial()
 					let mesh = new THREE.Mesh(geo, material2)
-					scene2.add(mesh)
+					// scene2.add(mesh)
 					mesh.position.x = .5
 					mesh.position.y = .5
 				}
@@ -114,13 +115,28 @@
 					window.materialNormal = new THREE.MeshBasicMaterial()
 					let mesh = new THREE.Mesh(geo, materialNormal)
 					scene2.add(mesh)
-					mesh.position.x = -.5
-					mesh.position.y = -.5
+					mesh.position.x = .5
+					mesh.position.y = .5
 				}
 				{
 					let geo = new THREE.PlaneBufferGeometry(1, 1)
 					window.materialPosition = new THREE.MeshBasicMaterial()
 					let mesh = new THREE.Mesh(geo, materialPosition)
+					scene2.add(mesh)
+					mesh.position.x = -.5
+					mesh.position.y = -.5
+				}
+				{
+					let geo = new THREE.PlaneBufferGeometry(1, 1)
+					window.materialSSR = new THREE.RawShaderMaterial({
+						uniforms: {
+							normalTexture: { value: renderTarget.textures[2] },
+							positionTexture: { value: renderTarget.textures[3] },
+						},
+						vertexShader: vertexShader,
+						fragmentShader: fragmentShaderSSR,
+					})
+					let mesh = new THREE.Mesh(geo, materialSSR)
 					scene2.add(mesh)
 					mesh.position.x = .5
 					mesh.position.y = -.5
