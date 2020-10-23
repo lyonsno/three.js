@@ -18,7 +18,7 @@ uniform vec2 enabled;
 out vec4 fragColor;
 
 void main() {
-  fragColor=vec4(1,1,0,1);return;
+  // fragColor=vec4(1,1,0,1);return;
 
   float maxDistance = 8.;
   float resolution  = 0.3;
