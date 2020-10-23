@@ -16,7 +16,7 @@ uniform sampler2D normalTexture;
 
 uniform vec2 enabled;
 
-in vec2 texCoord;
+// in vec2 texCoord;
 
 out vec4 fragColor;
 
@@ -30,7 +30,7 @@ void main() {
 
   vec2 texSize  = vec2(textureSize(positionTexture, 0).xy);
 
-  // vec2 texCoord = gl_FragCoord.xy / texSize;
+  vec2 texCoord = gl_FragCoord.xy / texSize;
 
 	// fragColor=texture(positionTexture, texCoord);return;
 	// vec4 vertexPosition=texture(positionTexture, texCoord);
