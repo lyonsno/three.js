@@ -14,7 +14,7 @@ uniform sampler2D positionTexture;
 uniform sampler2D normalTexture;
 // uniform sampler2D maskTexture;
 
-uniform vec2 enabled;
+// uniform vec2 enabled;
 
 // in vec2 texCoord;
 
@@ -49,8 +49,11 @@ void main() {
      ) { fragColor = uv; return; }
 
   vec3 unitPositionFrom = normalize(positionFrom.xyz);
+  // fragColor=vec4(unitPositionFrom*vec3(1,1,-.2),1);return;
   vec3 normal           = normalize(texture(normalTexture, texCoord).xyz);
+  // fragColor=vec4(normal,1);return;
   vec3 pivot            = normalize(reflect(unitPositionFrom, normal));
+  // fragColor=vec4(pivot,1);return;
 
   vec4 positionTo = positionFrom;
 
@@ -62,12 +65,14 @@ void main() {
        startFrag.xyz /= startFrag.w;
        startFrag.xy   = startFrag.xy * 0.5 + 0.5;
        startFrag.xy  *= texSize;
+  // fragColor=vec4((startFrag/947.).xy,0,1);return;
 
   vec4 endFrag      = endView;
        endFrag      = lensProjection * endFrag;
        endFrag.xyz /= endFrag.w;
        endFrag.xy   = endFrag.xy * 0.5 + 0.5;
        endFrag.xy  *= texSize;
+  // fragColor=vec4((endFrag/947.).xy,0,1);return;
 
   vec2 frag  = startFrag.xy;
        uv.xy = frag / texSize;
@@ -88,6 +93,8 @@ void main() {
   float depth        = thickness;
 
   int i = 0;
+
+  // fragColor=vec4(delta/947.*10.,0,0,1);return;
 
   for (i = 0; i < int(delta); ++i) {
     frag      += increment;
@@ -113,6 +120,7 @@ void main() {
       search0 = search1;
     }
   }
+  // fragColor=vec4((startView.xyz+pivot*search0)/10.,1);return;
 
   search1 = search0 + ((search1 - search0) / 2.0);
 
@@ -135,6 +143,8 @@ void main() {
       search0 = temp;
     }
   }
+
+  // fragColor=vec4((startView.xyz+pivot*search0)/10.,1);return;
 
   float visibility =
       float(hit1)
@@ -168,10 +178,14 @@ void main() {
   uv.ba = vec2(visibility);
 
   // fragColor = uv;
+
   vec4 beautyColor=texture(beautyTexture,texCoord);
   vec4 reflectColor=texture(beautyTexture,uv.xy);
+
+  // fragColor=reflectColor;return;
+
   if(reflectColor.a>0.){
-    fragColor=vec4(vec3(reflectColor.xyz*.5+beautyColor.xyz*.5),1);
+    fragColor=vec4(vec3(reflectColor.xyz*.4+beautyColor.xyz*.6),1);
   }else{
     fragColor=beautyColor;
   }
