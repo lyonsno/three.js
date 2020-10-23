@@ -9,6 +9,7 @@ precision lowp sampler2DShadow;
 
 uniform mat4 lensProjection;
 
+uniform sampler2D beautyTexture;
 uniform sampler2D positionTexture;
 uniform sampler2D normalTexture;
 // uniform sampler2D maskTexture;
@@ -166,5 +167,12 @@ void main() {
 
   uv.ba = vec2(visibility);
 
-  fragColor = uv;
+  // fragColor = uv;
+  vec4 beautyColor=texture(beautyTexture,texCoord);
+  vec4 reflectColor=texture(beautyTexture,uv.xy);
+  if(reflectColor.a>0.){
+    fragColor=vec4(vec3(reflectColor.xyz*.5+beautyColor.xyz*.5),1);
+  }else{
+    fragColor=beautyColor;
+  }
 }
