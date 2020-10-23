@@ -30,7 +30,11 @@ void main() {
   vec2 texSize  = vec2(textureSize(positionTexture, 0).xy);
 
   // vec2 texCoord = gl_FragCoord.xy / texSize;
+
 	// fragColor=texture(positionTexture, texCoord);return;
+	// vec4 vertexPosition=texture(positionTexture, texCoord);
+  // fragColor=vec4(vertexPosition.xy*.05,-vertexPosition.z*.01,1);return;
+
 	// fragColor=texture(normalTexture, texCoord);return;
 
   vec4 uv = vec4(0.0);

@@ -52,7 +52,7 @@
 			window.fragmentShaderSSR = await (await fetch('./screen-space-reflection.frag')).text()
 
 			const attachmentNums = 4;
-			window.renderTarget = new THREE.WebGLMultiRenderTarget(innerWidth, innerHeight, attachmentNums);
+			window.renderTarget = new THREE.WebGLMultiRenderTarget(innerWidth, innerHeight, attachmentNums, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBAFormat, type: THREE.FloatType });
 
 			container = document.createElement('div');
 			document.body.appendChild(container);
