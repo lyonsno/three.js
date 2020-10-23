@@ -185,10 +185,8 @@ void main() {
 
   // fragColor=reflectColor;return;
 
-  // if(uv.b>0.&&uv.a>0.){
-  // if(uv.b>0.){
-  if(uv.a>0.){
-    fragColor=vec4(vec3(reflectColor.xyz*.4+beautyColor.xyz*.6),1);
+  if(visibility>0.){
+    fragColor=vec4(vec3(reflectColor.xyz*.3+beautyColor.xyz*.7),1);
   }else{
     fragColor=beautyColor;
   }

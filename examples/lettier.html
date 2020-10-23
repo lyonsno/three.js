@@ -81,8 +81,8 @@
 						addGeoAttributes(child.geometry)
 						child.material = createMtl({
 							map: origin_mtl.map,
-							// isWater: child.name === 'water',
-							isWater: false,
+							isWater: child.name === 'water',
+							// isWater: false,
 						})
 					}
 
