@@ -183,9 +183,11 @@ void main() {
   vec4 beautyColor=texture(beautyTexture,texCoord);
   vec4 reflectColor=texture(beautyTexture,uv.xy);
 
-  fragColor=reflectColor;return;
+  // fragColor=reflectColor;return;
 
-  if(reflectColor.a>0.){
+  // if(uv.b>0.&&uv.a>0.){
+  // if(uv.b>0.){
+  if(uv.a>0.){
     fragColor=vec4(vec3(reflectColor.xyz*.4+beautyColor.xyz*.6),1);
   }else{
     fragColor=beautyColor;
