@@ -32,6 +32,10 @@
 		const frustumSize = 30
 		var meshs = []
 
+		var p3d_ProjectionMatrix = { value: new THREE.Matrix4() }
+		var p3d_ModelViewMatrix = { value: new THREE.Matrix4() }
+		var p3d_NormalMatrix = { value: new THREE.Matrix3() }
+
 		main()
 		async function main() {
 			await init();
@@ -130,12 +134,18 @@
 					let geo = new THREE.PlaneBufferGeometry(1, 1)
 					window.materialSSR = new THREE.RawShaderMaterial({
 						uniforms: {
+							p3d_ModelViewMatrix,
+							p3d_ProjectionMatrix,
+							p3d_NormalMatrix,
 							normalTexture: { value: renderTarget.textures[2] },
 							positionTexture: { value: renderTarget.textures[3] },
 						},
 						vertexShader: vertexShader,
 						fragmentShader: fragmentShaderSSR,
 					})
+					// let materialSSR=new THREE.MeshBasicMaterial({
+					// 	color:'cyan',
+					// })
 					let mesh = new THREE.Mesh(geo, materialSSR)
 					scene2.add(mesh)
 					mesh.position.x = .5
@@ -242,7 +252,6 @@
 			let uniforms = {
 				trans_world_to_view: { value: null },
 				trans_view_to_world: { value: null },
-				p3d_NormalMatrix: { value: new THREE.Matrix3() },
 				p3d_Texture0: { value: p3d_Texture0 },
 				p3d_Texture1: { value: p3d_Texture1 },
 				p3d_Texture2: { value: p3d_Texture2 },
@@ -257,8 +266,9 @@
 						shininess: 1,
 					}
 				},
-				p3d_ProjectionMatrix: { value: new THREE.Matrix4() },
-				p3d_ModelViewMatrix: { value: new THREE.Matrix4() },
+				p3d_ModelViewMatrix,
+				p3d_ProjectionMatrix,
+				p3d_NormalMatrix,
 				isParticle: { value: new THREE.Vector2() },
 				p3d_LightSource: {
 					value: [o_p3d_LightSource],
@@ -294,13 +304,13 @@
 			meshs.forEach(child => {
 				let uniforms = child.material.uniforms
 
-				uniforms.p3d_ProjectionMatrix.value = camera.projectionMatrix
-				uniforms.p3d_ModelViewMatrix.value = child.modelViewMatrix
+				p3d_ModelViewMatrix.value = child.modelViewMatrix
 				// uniforms.p3d_ModelViewMatrix.value.getInverse(camera.modelViewMatrix)
+				p3d_ProjectionMatrix.value = camera.projectionMatrix
+				p3d_NormalMatrix.value = new THREE.Matrix3().setFromMatrix4(new THREE.Matrix4().extractRotation(camera.matrixWorldInverse))
 
 				uniforms.trans_world_to_view.value = camera.matrixWorldInverse
 				uniforms.trans_view_to_world.value = camera.matrixWorld
-				uniforms.p3d_NormalMatrix.value = new THREE.Matrix3().setFromMatrix4(new THREE.Matrix4().extractRotation(camera.matrixWorldInverse))
 
 				uniforms.p3d_LightSource.value[0].position.copy(new THREE.Vector4(.2, .4, .6, 0).applyMatrix4(child.modelViewMatrix))
 				// uniforms.p3d_LightSource.value[0].position.copy(new THREE.Vector4(0,0,1,0).applyMatrix4(child.modelViewMatrix))
