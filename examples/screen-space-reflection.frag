@@ -89,7 +89,7 @@ void main() {
   int hit0 = 0;
   int hit1 = 0;
 
-  float viewDistance = startView.y;
+  float viewDistance = -startView.z;
   float depth        = thickness;
 
   int i = 0;
@@ -110,8 +110,8 @@ void main() {
 
     search1 = clamp(search1, 0.0, 1.0);
 
-    viewDistance = (startView.y * endView.y) / mix(endView.y, startView.y, search1);
-    depth        = viewDistance - positionTo.y;
+    viewDistance = (startView.z * endView.z) / mix(-endView.z, -startView.z, search1);
+    depth        = viewDistance - -positionTo.z;
 
     if (depth > 0. && depth < thickness) {
       hit0 = 1;
@@ -124,6 +124,7 @@ void main() {
 
   search1 = search0 + ((search1 - search0) / 2.0);
 
+  // steps =0;
   steps *= hit0;
 
   for (i = 0; i < steps; ++i) {
@@ -131,8 +132,8 @@ void main() {
     uv.xy      = frag / texSize;
     positionTo = texture(positionTexture, uv.xy);
 
-    viewDistance = (startView.y * endView.y) / mix(endView.y, startView.y, search1);
-    depth        = viewDistance - positionTo.y;
+    viewDistance = (startView.z * endView.z) / mix(-endView.z, -startView.z, search1);
+    depth        = viewDistance - -positionTo.z;
 
     if (depth > 0. && depth < thickness) {
       hit1 = 1;
@@ -182,7 +183,7 @@ void main() {
   vec4 beautyColor=texture(beautyTexture,texCoord);
   vec4 reflectColor=texture(beautyTexture,uv.xy);
 
-  // fragColor=reflectColor;return;
+  fragColor=reflectColor;return;
 
   if(reflectColor.a>0.){
     fragColor=vec4(vec3(reflectColor.xyz*.4+beautyColor.xyz*.6),1);
