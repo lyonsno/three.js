@@ -12,7 +12,7 @@ var SSRShader = {
   defines: {
     MAX_STEP: 0,
     isPerspectiveCamera: true,
-    isDistanceAttenuation: true,
+    isDistanceAttenuation: false,
     isInfiniteThick: false,
     isNoise: false,
     isSelective: false,
@@ -30,7 +30,7 @@ var SSRShader = {
     "cameraProjectionMatrix": { value: new Matrix4() },
     "cameraInverseProjectionMatrix": { value: new Matrix4() },
     "opacity": { value: .5 },
-    "maxDistance": { value: 200 },
+    "maxDistance": { value: 2000 },
     "cameraRange": { value: 0 },
     "surfDist": { value: .007 },
     "thickTolerance": { value: .03 },
@@ -134,8 +134,6 @@ var SSRShader = {
 				vec3 viewIncidenceDir=vec3(0,0,-1);
 				vec3 viewReflectDir=reflect(viewIncidenceDir,viewNormal);
 			#endif
-			// float angleCompensation=(dot(viewIncidenceDir,viewReflectDir)+1.)/2.;
-			// vec3 d1viewPosition=viewPosition+viewReflectDir*(maxDistance*angleCompensation);
 			vec3 d1viewPosition=viewPosition+viewReflectDir*maxDistance;
 			#ifdef isPerspectiveCamera
 				if(d1viewPosition.z>-cameraNear){
@@ -145,6 +143,13 @@ var SSRShader = {
 				}
 			#endif
 			d1=viewPositionToXY(d1viewPosition);
+
+			float fresnelFactor             = dot(viewNormal, -viewIncidenceDir);
+			fresnelFactor             = max(fresnelFactor, 0.0);
+			fresnelFactor             = 1.0 - fresnelFactor;
+			float MAX_FRESNEL_POWER=2.;
+			fresnelFactor             = pow(fresnelFactor,MAX_FRESNEL_POWER);
+			fresnelFactor=clamp(fresnelFactor, 0.0, 1.0);
 
 			float totalLen=length(d1-d0);
 			float xLen=d1.x-d0.x;
@@ -186,6 +191,7 @@ var SSRShader = {
 					float attenuation=one_minus_s*one_minus_s;
 					op=opacity*attenuation;
 				#endif
+				op*=fresnelFactor;
 
 				if(away<sD){
 					vec3 vN=getViewNormal( uv );
