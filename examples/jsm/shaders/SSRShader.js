@@ -152,7 +152,7 @@ var SSRShader = {
 			float totalStep=max(abs(xLen),abs(yLen));
 			float xSpan=xLen/totalStep;
 			float ySpan=yLen/totalStep;
-			for(float i=0.;i<MAX_STEP;i++){
+			for(float i=1.;i<MAX_STEP;i++){
 				if(i>=totalStep) break;
 				vec2 xy=vec2(d0.x+i*xSpan,d0.y+i*ySpan);
 				if(xy.x<0.||xy.x>resolution.x||xy.y<0.||xy.y>resolution.y) break;
@@ -289,35 +289,43 @@ var SSRBlurShader = {
 
   ].join("\n"),
 
-  fragmentShader: [
+  fragmentShader: `
 
-    "uniform sampler2D tDiffuse;",
+    uniform sampler2D tDiffuse;
+    uniform vec2 resolution;
+    varying vec2 vUv;
+    void main() {
+			//reverse engineering from PhotoShop blur filter, then change coefficient
 
-    "uniform vec2 resolution;",
+    	vec2 texelSize = ( 1.0 / resolution );
 
-    "varying vec2 vUv;",
+			vec4 c=texture2D(tDiffuse,vUv);
 
-    "void main() {",
+			vec2 offset;
 
-    "	vec2 texelSize = ( 1.0 / resolution );",
-    "	vec4 result = vec4(0);",
+			offset=(vec2(-1,0))*texelSize;
+			vec4 cl=texture2D(tDiffuse,vUv+offset);
 
-    "	for ( int i = - 2; i <= 2; i ++ ) {",
+			offset=(vec2(1,0))*texelSize;
+			vec4 cr=texture2D(tDiffuse,vUv+offset);
 
-    "		for ( int j = - 2; j <= 2; j ++ ) {",
+			offset=(vec2(0,-1))*texelSize;
+			vec4 cb=texture2D(tDiffuse,vUv+offset);
 
-    "			vec2 offset = ( vec2( float( i ), float( j ) ) ) * texelSize;",
-    "			result += texture2D( tDiffuse, vUv + offset );",
+			offset=(vec2(0,1))*texelSize;
+			vec4 ct=texture2D(tDiffuse,vUv+offset);
 
-    "		}",
+			// float coeCenter=.5;
+			// float coeSide=.125;
+			float coeCenter=.2;
+			float coeSide=.2;
+			float a=c.a*coeCenter+cl.a*coeSide+cr.a*coeSide+cb.a*coeSide+ct.a*coeSide;
+			vec3 rgb=(c.rgb*c.a*coeCenter+cl.rgb*cl.a*coeSide+cr.rgb*cr.a*coeSide+cb.rgb*cb.a*coeSide+ct.rgb*ct.a*coeSide)/a;
+			gl_FragColor=vec4(rgb,a);
 
-    "	}",
+		}
+	`
 
-    "	gl_FragColor = vec4(  result / ( 25.0 ) ); // 25.0 = 5.0 * 5.0",
-
-    "}"
-
-  ].join("\n")
 
 };
 
