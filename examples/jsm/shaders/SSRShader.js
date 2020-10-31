@@ -57,7 +57,6 @@ var SSRShader = {
 		// precision highp float;
 		precision highp sampler2D;
 		varying vec2 vUv;
-		#define maxReflectRayLen 2000. ///todo: temp use, need calculated from maxDistance
 		uniform sampler2D tDepth;
 		uniform sampler2D tNormal;
 		uniform sampler2D tMetalness;
@@ -74,6 +73,9 @@ var SSRShader = {
 		uniform float thickTolerance;
 		uniform float noiseIntensity;
 		#include <packing>
+		float angle(vec3 a,vec3 b){
+			return acos(dot(normalize(a),normalize(b)));
+		}
 		float pointPlaneDistance(vec3 point,vec3 planePoint,vec3 planeNormal){
 			// https://mathworld.wolfram.com/Point-PlaneDistance.html
 			//// https://en.wikipedia.org/wiki/Plane_(geometry)
@@ -147,6 +149,9 @@ var SSRShader = {
 				vec3 viewIncidenceDir=vec3(0,0,-1);
 				vec3 viewReflectDir=reflect(viewIncidenceDir,viewNormal);
 			#endif
+
+			float maxReflectRayLen=maxDistance/dot(viewIncidenceDir,viewNormal);
+
 			vec3 d1viewPosition=viewPosition+viewReflectDir*maxReflectRayLen;
 			#ifdef isPerspectiveCamera
 				if(d1viewPosition.z>-cameraNear){
