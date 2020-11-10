@@ -20,6 +20,17 @@ var OrbitControls = function ( object, domElement ) {
 
 	var clock = new Clock();
 	var _dampingFactor;
+	var _deltaTime
+	function getNextDampingStep(now,destination){
+		debugger
+		let a=now
+		let b=destination
+		let r=1-scope.dampingFactor
+		let n=_deltaTime
+		let rn=Math.pow(r,n)
+		let result= b*(1-rn)+a*rn
+		return result
+	}
 
 	if ( domElement === undefined ) console.warn( 'THREE.OrbitControls: The second parameter "domElement" is now mandatory.' );
 	if ( domElement === document ) console.error( 'THREE.OrbitControls: "document" should not be used as the target "domElement". Please use "renderer.domElement" instead.' );
@@ -165,12 +176,14 @@ var OrbitControls = function ( object, domElement ) {
 			}
 
 			if ( scope.enableDamping ) {
-				var deltaTime = clock.getDelta();
-				_dampingFactor = scope.dampingFactor * deltaTime * 60;
-				_dampingFactor = Math.min(_dampingFactor, 1);
+				_deltaTime = clock.getDelta();
+				_dampingFactor=(getNextDampingStep(spherical.theta,sphericalDelta.theta)-spherical.theta)/sphericalDelta.theta
+				console.log(_dampingFactor)
 
 				spherical.theta += sphericalDelta.theta * _dampingFactor;
+				// spherical.theta=getNextDampingStep(spherical.theta,sphericalDelta.theta)
 				spherical.phi += sphericalDelta.phi * _dampingFactor;
+				// spherical.phi =getNextDampingStep(spherical.phi,sphericalDelta.phi)
 
 			} else {
 
