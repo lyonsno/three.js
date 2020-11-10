@@ -5,7 +5,8 @@ import {
 	Spherical,
 	TOUCH,
 	Vector2,
-	Vector3
+	Vector3,
+	Clock
 } from "../../../build/three.module.js";
 
 // This set of controls performs orbiting, dollying (zooming), and panning.
@@ -16,6 +17,9 @@ import {
 //    Pan - right mouse, or left mouse + ctrl/meta/shiftKey, or arrow keys / touch: two-finger move
 
 var OrbitControls = function ( object, domElement ) {
+
+	var clock = new Clock();
+	var _dampingFactor;
 
 	if ( domElement === undefined ) console.warn( 'THREE.OrbitControls: The second parameter "domElement" is now mandatory.' );
 	if ( domElement === document ) console.error( 'THREE.OrbitControls: "document" should not be used as the target "domElement". Please use "renderer.domElement" instead.' );
@@ -161,9 +165,12 @@ var OrbitControls = function ( object, domElement ) {
 			}
 
 			if ( scope.enableDamping ) {
+				var deltaTime = clock.getDelta();
+				_dampingFactor = scope.dampingFactor * deltaTime * 60;
+				_dampingFactor = Math.min(_dampingFactor, 1);
 
-				spherical.theta += sphericalDelta.theta * scope.dampingFactor;
-				spherical.phi += sphericalDelta.phi * scope.dampingFactor;
+				spherical.theta += sphericalDelta.theta * _dampingFactor;
+				spherical.phi += sphericalDelta.phi * _dampingFactor;
 
 			} else {
 
@@ -212,7 +219,7 @@ var OrbitControls = function ( object, domElement ) {
 
 			if ( scope.enableDamping === true ) {
 
-				scope.target.addScaledVector( panOffset, scope.dampingFactor );
+				scope.target.addScaledVector( panOffset, _dampingFactor );
 
 			} else {
 
@@ -231,10 +238,10 @@ var OrbitControls = function ( object, domElement ) {
 
 			if ( scope.enableDamping === true ) {
 
-				sphericalDelta.theta *= ( 1 - scope.dampingFactor );
-				sphericalDelta.phi *= ( 1 - scope.dampingFactor );
+				sphericalDelta.theta *= ( 1 - _dampingFactor );
+				sphericalDelta.phi *= ( 1 - _dampingFactor );
 
-				panOffset.multiplyScalar( 1 - scope.dampingFactor );
+				panOffset.multiplyScalar( 1 - _dampingFactor );
 
 			} else {
 

@@ -7,6 +7,9 @@
 
 THREE.OrbitControls = function ( object, domElement ) {
 
+	var clock = new THREE.Clock();
+	var _dampingFactor;
+
 	if ( domElement === undefined ) console.warn( 'THREE.OrbitControls: The second parameter "domElement" is now mandatory.' );
 	if ( domElement === document ) console.error( 'THREE.OrbitControls: "document" should not be used as the target "domElement". Please use "renderer.domElement" instead.' );
 
@@ -151,9 +154,12 @@ THREE.OrbitControls = function ( object, domElement ) {
 			}
 
 			if ( scope.enableDamping ) {
+				var deltaTime = clock.getDelta();
+				_dampingFactor = scope.dampingFactor * deltaTime * 60;
+				_dampingFactor = Math.min(_dampingFactor, 1);
 
-				spherical.theta += sphericalDelta.theta * scope.dampingFactor;
-				spherical.phi += sphericalDelta.phi * scope.dampingFactor;
+				spherical.theta += sphericalDelta.theta * _dampingFactor;
+				spherical.phi += sphericalDelta.phi * _dampingFactor;
 
 			} else {
 
@@ -202,7 +208,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 			if ( scope.enableDamping === true ) {
 
-				scope.target.addScaledVector( panOffset, scope.dampingFactor );
+				scope.target.addScaledVector( panOffset, _dampingFactor );
 
 			} else {
 
@@ -221,10 +227,10 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 			if ( scope.enableDamping === true ) {
 
-				sphericalDelta.theta *= ( 1 - scope.dampingFactor );
-				sphericalDelta.phi *= ( 1 - scope.dampingFactor );
+				sphericalDelta.theta *= ( 1 - _dampingFactor );
+				sphericalDelta.phi *= ( 1 - _dampingFactor );
 
-				panOffset.multiplyScalar( 1 - scope.dampingFactor );
+				panOffset.multiplyScalar( 1 - _dampingFactor );
 
 			} else {
 
