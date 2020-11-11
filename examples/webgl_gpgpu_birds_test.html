@@ -40,7 +40,7 @@
 			}
 
 			/* TEXTURE WIDTH FOR SIMULATION */
-			const WIDTH = 2;
+			const WIDTH = 3;
 
 			const BIRDS = WIDTH * WIDTH;
 
@@ -104,14 +104,15 @@
 				let c=new THREE.Color()
 				for ( let v = 0; v < triangles * 3; v ++ ) {
 
-					const i = ~ ~ ( v / 3 );
-					const x = ( i % WIDTH ) / WIDTH;
-					const y = ~ ~ ( i / WIDTH ) / WIDTH;
+					// const i = ~ ~ ( v / 3 );
+					// const x = ( i % WIDTH ) / WIDTH;
+					// const y = ~ ~ ( i / WIDTH ) / WIDTH;
 
-					// const i = Math.trunc( v / 3 );
-					// const {x,y}=vs.serial_to_xy(WIDTH,i)
+					const i = Math.trunc( v / 3 );
+					const {x,y}=vs.serial_to_xy(WIDTH,i)
 
-					console.log(i)
+					// console.log(i)
+					console.log(x,y,i)
 
 					switch(i%tri_per_bird){
 						case 0:
