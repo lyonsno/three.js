@@ -307,7 +307,7 @@
 			// Custom Geometry - using 3 triangles each. No UVs, no normals currently.
 			function BirdGeometry() {
 
-				const triangles = BIRDS * 3;
+				const triangles = BIRDS * 4;
 				const points = triangles * 3;
 
 				THREE.BufferGeometry.call( this );
@@ -341,25 +341,30 @@
 
 				for ( let f = 0; f < BIRDS; f ++ ) {
 
-					// Body
-					verts_push(
-						0, - 0, - 200,
-						0, 40, - 200,
-						0, 0, 300
-					);
-
-					// Left Wing
+					// top Left 
 					verts_push(
 						 200, 200, 200,
 						 200, 200,-200,
 						-200, 200,-200,
 					);
-
-					// Right Wing
+					// top Right 
 					verts_push(
 						 200, 200, 200,
 						-200, 200,-200,
 						-200, 200, 200,
+					);
+
+					// left btm 
+					verts_push(
+						 200, 200, 200,
+						 200,-200, 200,
+						 200,-200,-200,
+					);
+					// left top 
+					verts_push(
+						 200, 200, 200,
+						 200,-200,-200,
+						 200, 200,-200,
 					);
 
 				}
@@ -382,6 +387,9 @@
 						case 2:
 							c.setRGB(0,0,1)
 							break
+						case 3:
+							c.setRGB(1,1,0)
+							break
 						default:
 							c.setRGB(0,0,0)
 							break
@@ -395,7 +403,7 @@
 					references.array[ v * 2 ] = x;
 					references.array[ v * 2 + 1 ] = y;
 
-					birdVertex.array[ v ] = v % 9;
+					birdVertex.array[ v ] = v % 12;
 
 				}
 
