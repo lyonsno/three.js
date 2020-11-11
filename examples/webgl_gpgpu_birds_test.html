@@ -28,8 +28,8 @@
 
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
 
-			const BIRDS = 4;
-			const tri_per_bird=3
+			const BIRDS = 2;
+			const tri_per_bird=2
 
 			let vs={}
 			vs.serial_to_xy=function (width, index){ // :{x:x, y:y}
@@ -49,7 +49,7 @@
 				THREE.BufferGeometry.call( this );
 
 				const vertices = new THREE.BufferAttribute( new Float32Array( points * 3 ), 3 );
-				const bird_is = new THREE.BufferAttribute( new Float32Array( points * 3 ), 3 );
+				const bird_is = new THREE.BufferAttribute( new Float32Array( points * 3 ), 1 );
 
 				this.setAttribute( 'position', vertices );
 				this.setAttribute( 'bird_i', bird_is );
@@ -77,27 +77,19 @@
 
 					// Right Wing
 					verts_push(
-						 20,-10, 20,
-						-20,-10,-20,
-						-20,-10, 20,
+						 20, 20, 20,
+						-20, 20,-20,
+						-20, 20, 20,
 					);
-
-					if(tri_per_bird===3){
-						// Body
-						verts_push(
-							0, - 0, - 20,
-							0, 20, - 20,
-							0, 0, 30
-						);
-					}
 
 				}
 
 				for ( let v = 0; v < triangles * 3; v ++ ) {
 					if(v%3===0){
-						console.log('face')
+						// console.log('face')
 					}
-					let bird_i=~~(v/9)
+					let bird_i=~~(v/(tri_per_bird*3))
+					console.log(bird_i)
 
 					bird_is.array[v]=bird_i
 
@@ -110,8 +102,6 @@
 
 			let container;
 			let camera, scene, renderer;
-
-			const BOUNDS = 400, BOUNDS_HALF = BOUNDS / 2;
 
 			let birdUniforms;
 
