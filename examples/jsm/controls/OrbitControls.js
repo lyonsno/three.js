@@ -5,7 +5,8 @@ import {
 	Spherical,
 	TOUCH,
 	Vector2,
-	Vector3
+	Vector3,
+	Clock
 } from "../../../build/three.module.js";
 
 // This set of controls performs orbiting, dollying (zooming), and panning.
@@ -16,6 +17,8 @@ import {
 //    Pan - right mouse, or left mouse + ctrl/meta/shiftKey, or arrow keys / touch: two-finger move
 
 var OrbitControls = function ( object, domElement ) {
+
+	var clock = new Clock();
 
 	if ( domElement === undefined ) console.warn( 'THREE.OrbitControls: The second parameter "domElement" is now mandatory.' );
 	if ( domElement === document ) console.error( 'THREE.OrbitControls: "document" should not be used as the target "domElement". Please use "renderer.domElement" instead.' );
@@ -161,9 +164,10 @@ var OrbitControls = function ( object, domElement ) {
 			}
 
 			if ( scope.enableDamping ) {
+				var elapsedTime = clock.getElapsedTime();
 
-				spherical.theta += sphericalDelta.theta * scope.dampingFactor;
-				spherical.phi += sphericalDelta.phi * scope.dampingFactor;
+				spherical.theta = _spherical.theta+sphericalDelta.theta*(1-Math.pow(1-scope.dampingFactor,elapsedTime*60))
+				spherical.phi   = _spherical.phi  +sphericalDelta.phi  *(1-Math.pow(1-scope.dampingFactor,elapsedTime*60))
 
 			} else {
 
@@ -212,7 +216,7 @@ var OrbitControls = function ( object, domElement ) {
 
 			if ( scope.enableDamping === true ) {
 
-				scope.target.addScaledVector( panOffset, scope.dampingFactor );
+				// scope.target.addScaledVector( panOffset, scope.dampingFactor );
 
 			} else {
 
@@ -231,10 +235,10 @@ var OrbitControls = function ( object, domElement ) {
 
 			if ( scope.enableDamping === true ) {
 
-				sphericalDelta.theta *= ( 1 - scope.dampingFactor );
-				sphericalDelta.phi *= ( 1 - scope.dampingFactor );
+				// sphericalDelta.theta *= ( 1 - scope.dampingFactor );
+				// sphericalDelta.phi *= ( 1 - scope.dampingFactor );
 
-				panOffset.multiplyScalar( 1 - scope.dampingFactor );
+				// panOffset.multiplyScalar( 1 - scope.dampingFactor );
 
 			} else {
 
@@ -317,6 +321,7 @@ var OrbitControls = function ( object, domElement ) {
 
 	// current position in spherical coordinates
 	var spherical = new Spherical();
+	var _spherical = new Spherical();
 	var sphericalDelta = new Spherical();
 
 	var scale = 1;
@@ -350,12 +355,18 @@ var OrbitControls = function ( object, domElement ) {
 	function rotateLeft( angle ) {
 
 		sphericalDelta.theta -= angle;
+		sphericalDelta.theta -= spherical.theta-_spherical.theta
+		_spherical.theta=spherical.theta
+		clock.start()
 
 	}
 
 	function rotateUp( angle ) {
 
 		sphericalDelta.phi -= angle;
+		sphericalDelta.phi -= spherical.phi-_spherical.phi
+		_spherical.phi=spherical.phi
+		clock.start()
 
 	}
 
