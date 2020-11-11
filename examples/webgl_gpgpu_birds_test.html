@@ -79,8 +79,6 @@
 
 			import * as THREE from '../build/three.module.js';
 
-			import Stats from './jsm/libs/stats.module.js';
-			import { GUI } from './jsm/libs/dat.gui.module.js';
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
 
 			import { GPUComputationRenderer } from './jsm/misc/GPUComputationRenderer.js';
@@ -187,16 +185,10 @@
 			BirdGeometry.prototype = Object.create( THREE.BufferGeometry.prototype );
 
 
-			let container, stats;
+			let container;
 			let camera, scene, renderer;
-			let mouseX = 0, mouseY = 0;
-
-			let windowHalfX = window.innerWidth / 2;
-			let windowHalfY = window.innerHeight / 2;
 
 			const BOUNDS = 800, BOUNDS_HALF = BOUNDS / 2;
-
-			let last = performance.now();
 
 			let gpuCompute;
 			let positionVariable;
@@ -225,16 +217,8 @@
 
 				initComputeRenderer();
 
-				stats = new Stats();
-				container.appendChild( stats.dom );
-
-				container.style.touchAction = 'none';
-				container.addEventListener( 'pointermove', onPointerMove, false );
-
-				//
-
 				const controls = new OrbitControls( camera, renderer.domElement );
-				window.addEventListener( 'resize', onWindowResize, false );
+				// window.addEventListener( 'resize', onWindowResize, false );
 
 				initBirds();
 
@@ -258,12 +242,6 @@
 
 				const error = gpuCompute.init();
 
-				if ( error !== null ) {
-
-					console.error( error );
-
-				}
-
 			}
 
 			function initBirds() {
@@ -285,7 +263,7 @@
 				} );
 
 				const birdMesh = new THREE.Mesh( geometry, material );
-				birdMesh.rotation.y = Math.PI / 2;
+				// birdMesh.rotation.y = Math.PI / 2;
 				birdMesh.matrixAutoUpdate = false;
 				birdMesh.updateMatrix();
 
@@ -312,42 +290,15 @@
 
 			}
 
-			function onWindowResize() {
-
-				windowHalfX = window.innerWidth / 2;
-				windowHalfY = window.innerHeight / 2;
-
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
-
-				renderer.setSize( window.innerWidth, window.innerHeight );
-
-			}
-
-			function onPointerMove( event ) {
-
-				if ( event.isPrimary === false ) return;
-
-				mouseX = event.clientX - windowHalfX;
-				mouseY = event.clientY - windowHalfY;
-
-			}
-
-			//
-
 			function animate() {
 
 				requestAnimationFrame( animate );
 
 				render();
-				stats.update();
 
 			}
 
 			function render() {
-
-				mouseX = 10000;
-				mouseY = 10000;
 
 				gpuCompute.compute();
 
