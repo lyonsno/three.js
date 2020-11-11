@@ -85,6 +85,8 @@
 
 			import { GPUComputationRenderer } from './jsm/misc/GPUComputationRenderer.js';
 
+			const tri_per_bird=3
+
 			/* TEXTURE WIDTH FOR SIMULATION */
 			const WIDTH = 2;
 
@@ -93,7 +95,7 @@
 			// Custom Geometry - using 3 triangles each. No UVs, no normals currently.
 			function BirdGeometry() {
 
-				const triangles = BIRDS * 3;
+				const triangles = BIRDS * tri_per_bird;
 				const points = triangles * 3;
 
 				THREE.BufferGeometry.call( this );
@@ -132,17 +134,19 @@
 
 					// Right Wing
 					verts_push(
-						 200, 200, 200,
-						-200, 200,-200,
-						-200, 200, 200,
+						 200,-200, 200,
+						-200,-200,-200,
+						-200,-200, 200,
 					);
 
-					// Body
-					verts_push(
-						0, - 0, - 200,
-						0, 40, - 200,
-						0, 0, 300
-					);
+					if(tri_per_bird===3){
+						// Body
+						verts_push(
+							0, - 0, - 200,
+							0, 40, - 200,
+							0, 0, 300
+						);
+					}
 
 				}
 
@@ -154,7 +158,7 @@
 					const x = ( i % WIDTH ) / WIDTH;
 					const y = ~ ~ ( i / WIDTH ) / WIDTH;
 
-					switch(i%3){
+					switch(i%tri_per_bird){
 						case 0:
 							c.setRGB(1,0,0)
 							break
