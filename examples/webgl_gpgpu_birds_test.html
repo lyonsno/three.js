@@ -28,6 +28,7 @@
 
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
 
+			const BIRDS = 4;
 			const tri_per_bird=3
 
 			let vs={}
@@ -37,10 +38,7 @@
 				return {x:x, y:y}
 			}
 
-			/* TEXTURE WIDTH FOR SIMULATION */
-			const WIDTH = 2;
 
-			const BIRDS = WIDTH * WIDTH;
 
 			// Custom Geometry - using 3 triangles each. No UVs, no normals currently.
 			function BirdGeometry() {
@@ -116,7 +114,7 @@
 			const BOUNDS = 400, BOUNDS_HALF = BOUNDS / 2;
 
 			let birdUniforms;
-			
+
 			init();
 			animate();
 
