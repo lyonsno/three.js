@@ -284,6 +284,7 @@
 				// Fake colors for now
 				float z2 = 0.2 + ( 1000. - z ) / 1000. * vColor.x;
 				gl_FragColor = vec4( z2, z2, z2, 1. );
+				gl_FragColor = vColor;
 
 			}
 
@@ -299,7 +300,7 @@
 			import { GPUComputationRenderer } from './jsm/misc/GPUComputationRenderer.js';
 
 			/* TEXTURE WIDTH FOR SIMULATION */
-			const WIDTH = 32;
+			const WIDTH = 2;
 
 			const BIRDS = WIDTH * WIDTH;
 
@@ -336,43 +337,56 @@
 
 				}
 
-				const wingsSpan = 20;
+				const wingsSpan = 200;
 
 				for ( let f = 0; f < BIRDS; f ++ ) {
 
 					// Body
 					verts_push(
-						0, - 0, - 20,
-						0, 4, - 20,
-						0, 0, 30
+						0, - 0, - 200,
+						0, 40, - 200,
+						0, 0, 300
 					);
 
 					// Left Wing
 					verts_push(
-						0, 0, - 15,
-						- wingsSpan, 0, 0,
-						0, 0, 15
+						0, 0, 150,
+						wingsSpan, 0, 0,
+						0, 0, - 150
 					);
 
 					// Right Wing
 					verts_push(
-						0, 0, 15,
-						wingsSpan, 0, 0,
-						0, 0, - 15
+						0, 0, - 150,
+						- wingsSpan, 0, 0,
+						0, 0, 150
 					);
 
 				}
 
+				let c=new THREE.Color()
 				for ( let v = 0; v < triangles * 3; v ++ ) {
 
 					const i = ~ ~ ( v / 3 );
+					// console.log(i)
 					const x = ( i % WIDTH ) / WIDTH;
 					const y = ~ ~ ( i / WIDTH ) / WIDTH;
 
-					const c = new THREE.Color(
-						0x444444 +
-						~ ~ ( v / 9 ) / BIRDS * 0x666666
-					);
+					switch(i%3){
+						case 0:
+							c.setRGB(1,0,0)
+							break
+						case 1:
+							c.setRGB(0,1,0)
+							break
+						case 2:
+							c.setRGB(0,0,1)
+							break
+						default:
+							c.setRGB(0,0,0)
+							break
+
+					}
 
 					birdColors.array[ v * 3 + 0 ] = c.r;
 					birdColors.array[ v * 3 + 1 ] = c.g;
