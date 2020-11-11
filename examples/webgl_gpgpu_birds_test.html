@@ -22,62 +22,6 @@
 			Move mouse to disturb birds.
 		</div>
 
-		<!--
-		TODO: If you're reading this, you may wish to improve this example by
-			- Create a better shading for the birds?
-
-		-->
-
-		<!-- shader for bird's position -->
-		<script id="fragmentShaderPosition" type="x-shader/x-fragment">
-
-			void main()	{
-
-				vec2 uv = gl_FragCoord.xy / resolution.xy;
-				vec4 tmpPos = texture2D( texturePosition, uv );
-				vec3 position = tmpPos.xyz;
-				gl_FragColor = vec4( position , 1 );
-
-			}
-
-		</script>
-
-		<script type="x-shader/x-vertex" id="birdVS">
-
-			attribute vec2 reference;
-
-			attribute float index;
-			attribute vec3 birdColor;
-
-			uniform sampler2D texturePosition;
-
-			varying vec4 vColor;
-
-			void main() {
-
-				vec4 tmpPos = texture2D( texturePosition, reference );
-				vec3 pos = tmpPos.xyz;
-
-				vColor = vec4( birdColor, 1.0 );
-				//vColor = vec4( index/12.,0,0, 1.0 );
-				gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos,1);
-				//gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos+vec3(reference*50.,0),1);
-			}
-
-		</script>
-
-		<!-- bird geometry shader -->
-		<script type="x-shader/x-fragment" id="birdFS">
-
-			varying vec4 vColor;
-
-			void main() {
-				gl_FragColor = vColor;
-
-			}
-
-		</script>
-
 		<script type="module">
 
 			import * as THREE from '../build/three.module.js';
@@ -249,7 +193,16 @@
 				const dtPosition = gpuCompute.createTexture();
 				fillPositionTexture( dtPosition );
 
-				positionVariable = gpuCompute.addVariable( "texturePosition", document.getElementById( 'fragmentShaderPosition' ).textContent, dtPosition );
+				positionVariable = gpuCompute.addVariable( "texturePosition", `
+					void main()	{
+
+						vec2 uv = gl_FragCoord.xy / resolution.xy;
+						vec4 tmpPos = texture2D( texturePosition, uv );
+						vec3 position = tmpPos.xyz;
+						gl_FragColor = vec4( position , 1 );
+
+					}
+				`, dtPosition );
 
 				gpuCompute.setVariableDependencies( positionVariable, [ positionVariable ] );
 
@@ -275,8 +228,35 @@
 				// THREE.ShaderMaterial
 				const material = new THREE.ShaderMaterial( {
 					uniforms: birdUniforms,
-					vertexShader: document.getElementById( 'birdVS' ).textContent,
-					fragmentShader: document.getElementById( 'birdFS' ).textContent,
+					vertexShader: `
+						attribute vec2 reference;
+
+						attribute float index;
+						attribute vec3 birdColor;
+
+						uniform sampler2D texturePosition;
+
+						varying vec4 vColor;
+
+						void main() {
+
+							vec4 tmpPos = texture2D( texturePosition, reference );
+							vec3 pos = tmpPos.xyz;
+
+							vColor = vec4( birdColor, 1.0 );
+							//vColor = vec4( index/12.,0,0, 1.0 );
+							gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos,1);
+							//gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos+vec3(reference*50.,0),1);
+						}
+					`,
+					fragmentShader: `
+						varying vec4 vColor;
+
+						void main() {
+							gl_FragColor = vColor;
+
+						}
+					`,
 					side: THREE.DoubleSide
 
 				} );
