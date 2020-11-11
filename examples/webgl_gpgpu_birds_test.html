@@ -59,6 +59,7 @@
 
 				vColor = vec4( birdColor, 1.0 );
 				gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos,1);
+				//gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos+vec3(reference*50.,0),1);
 			}
 
 		</script>
@@ -129,9 +130,9 @@
 
 					// Right Wing
 					verts_push(
-						 200,-200, 200,
-						-200,-200,-200,
-						-200,-200, 200,
+						 200,-100, 200,
+						-200,-100,-200,
+						-200,-100, 200,
 					);
 
 					if(tri_per_bird===3){
@@ -247,6 +248,7 @@
 			function initBirds() {
 
 				const geometry = new BirdGeometry();
+				console.log(geometry)
 
 				// For Vertex and Fragment
 				birdUniforms = {
