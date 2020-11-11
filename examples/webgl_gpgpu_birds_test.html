@@ -28,8 +28,6 @@
 
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
 
-			import { GPUComputationRenderer } from './jsm/misc/GPUComputationRenderer.js';
-
 			const tri_per_bird=3
 
 			let vs={}
@@ -40,7 +38,7 @@
 			}
 
 			/* TEXTURE WIDTH FOR SIMULATION */
-			const WIDTH = 3;
+			const WIDTH = 2;
 
 			const BIRDS = WIDTH * WIDTH;
 
@@ -53,14 +51,10 @@
 				THREE.BufferGeometry.call( this );
 
 				const vertices = new THREE.BufferAttribute( new Float32Array( points * 3 ), 3 );
-				const indexs = new THREE.BufferAttribute( new Float32Array( points * 3 ), 3 );
-				const birdColors = new THREE.BufferAttribute( new Float32Array( points * 3 ), 3 );
-				const references = new THREE.BufferAttribute( new Float32Array( points * 2 ), 2 );
+				const bird_is = new THREE.BufferAttribute( new Float32Array( points * 3 ), 3 );
 
 				this.setAttribute( 'position', vertices );
-				this.setAttribute( 'index', indexs );
-				this.setAttribute( 'birdColor', birdColors );
-				this.setAttribute( 'reference', references );
+				this.setAttribute( 'bird_i', bird_is );
 
 				let v = 0;
 
@@ -78,70 +72,38 @@
 
 					// Left Wing
 					verts_push(
-						 200, 200, 200,
-						 200, 200,-200,
-						-200, 200,-200,
+						 20, 20, 20,
+						 20, 20,-20,
+						-20, 20,-20,
 					);
 
 					// Right Wing
 					verts_push(
-						 200,-100, 200,
-						-200,-100,-200,
-						-200,-100, 200,
+						 20,-10, 20,
+						-20,-10,-20,
+						-20,-10, 20,
 					);
 
 					if(tri_per_bird===3){
 						// Body
 						verts_push(
-							0, - 0, - 200,
-							0, 200, - 200,
-							0, 0, 300
+							0, - 0, - 20,
+							0, 20, - 20,
+							0, 0, 30
 						);
 					}
 
 				}
 
-				let c=new THREE.Color()
 				for ( let v = 0; v < triangles * 3; v ++ ) {
-
-					// const i = ~ ~ ( v / 3 );
-					// const x = ( i % WIDTH ) / WIDTH;
-					// const y = ~ ~ ( i / WIDTH ) / WIDTH;
-
-					const i = Math.trunc( v / 3 );
-					const {x,y}=vs.serial_to_xy(WIDTH,i)
-
-					// console.log(i)
-					console.log(x,y,i)
-
-					switch(i%tri_per_bird){
-						case 0:
-							c.setRGB(1,0,0)
-							break
-						case 1:
-							c.setRGB(0,1,0)
-							break
-						case 2:
-							c.setRGB(0,0,1)
-							break
-						default:
-							c.setRGB(0,0,0)
-							break
-
+					if(v%3===0){
+						console.log('face')
 					}
+					let bird_i=~~(v/9)
 
-					indexs.array[v]=i
-
-					birdColors.array[ v * 3 + 0 ] = c.r;
-					birdColors.array[ v * 3 + 1 ] = c.g;
-					birdColors.array[ v * 3 + 2 ] = c.b;
-
-					references.array[ v * 2 ] = x;
-					references.array[ v * 2 + 1 ] = y;
+					bird_is.array[v]=bird_i
 
 				}
-
-				this.scale( 0.2, 0.2, 0.2 );
 
 			}
 
@@ -151,13 +113,10 @@
 			let container;
 			let camera, scene, renderer;
 
-			const BOUNDS = 800, BOUNDS_HALF = BOUNDS / 2;
+			const BOUNDS = 400, BOUNDS_HALF = BOUNDS / 2;
 
-			let gpuCompute;
-			let positionVariable;
-			let positionUniforms;
 			let birdUniforms;
-
+			
 			init();
 			animate();
 
@@ -167,52 +126,23 @@
 				document.body.appendChild( container );
 
 				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 3000 );
-				camera.position.z = 850;
+				camera.position.z = 450;
 
 				scene = new THREE.Scene();
 				scene.background = new THREE.Color( 0xffffff );
 				scene.fog = new THREE.Fog( 0xffffff, 100, 1000 );
 
-				renderer = new THREE.WebGLRenderer();
+				renderer = new THREE.WebGLRenderer({
+					antialias:true,
+				});
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				container.appendChild( renderer.domElement );
-
-				initComputeRenderer();
 
 				const controls = new OrbitControls( camera, renderer.domElement );
 				// window.addEventListener( 'resize', onWindowResize, false );
 
 				initBirds();
-
-			}
-
-			function initComputeRenderer() {
-
-				gpuCompute = new GPUComputationRenderer( WIDTH, WIDTH, renderer );
-
-				const dtPosition = gpuCompute.createTexture();
-				fillPositionTexture( dtPosition );
-
-				positionVariable = gpuCompute.addVariable( "texturePosition", `
-					void main()	{
-
-						vec2 uv = gl_FragCoord.xy / resolution.xy;
-						vec4 tmpPos = texture2D( texturePosition, uv );
-						vec3 position = tmpPos.xyz;
-						gl_FragColor = vec4( position , 1 );
-
-					}
-				`, dtPosition );
-
-				gpuCompute.setVariableDependencies( positionVariable, [ positionVariable ] );
-
-				positionUniforms = positionVariable.material.uniforms;
-
-				positionVariable.wrapS = THREE.RepeatWrapping;
-				positionVariable.wrapT = THREE.RepeatWrapping;
-
-				const error = gpuCompute.init();
 
 			}
 
@@ -223,38 +153,24 @@
 
 				// For Vertex and Fragment
 				birdUniforms = {
-					"texturePosition": { value: null },
 				};
 
 				// THREE.ShaderMaterial
 				const material = new THREE.ShaderMaterial( {
 					uniforms: birdUniforms,
 					vertexShader: `
-						attribute vec2 reference;
 
-						attribute float index;
-						attribute vec3 birdColor;
-
-						uniform sampler2D texturePosition;
-
-						varying vec4 vColor;
+						attribute float bird_i;
 
 						void main() {
 
-							vec4 tmpPos = texture2D( texturePosition, reference );
-							vec3 pos = tmpPos.xyz;
-
-							vColor = vec4( birdColor, 1.0 );
-							//vColor = vec4( index/12.,0,0, 1.0 );
-							gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos,1);
-							//gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos+vec3(reference*50.,0),1);
+							gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+bird_i*50.,1);
 						}
 					`,
 					fragmentShader: `
-						varying vec4 vColor;
 
 						void main() {
-							gl_FragColor = vColor;
+							gl_FragColor = vec4(1,0,0,1);
 
 						}
 					`,
@@ -263,30 +179,10 @@
 				} );
 
 				const birdMesh = new THREE.Mesh( geometry, material );
-				// birdMesh.rotation.y = Math.PI / 2;
-				birdMesh.matrixAutoUpdate = false;
-				birdMesh.updateMatrix();
+				// birdMesh.matrixAutoUpdate = false;
+				// birdMesh.updateMatrix();
 
 				scene.add( birdMesh );
-
-			}
-
-			function fillPositionTexture( texture ) {
-
-				const theArray = texture.image.data;
-
-				for ( let k = 0, kl = theArray.length; k < kl; k += 4 ) {
-
-					const x = Math.random() * BOUNDS - BOUNDS_HALF;
-					const y = Math.random() * BOUNDS - BOUNDS_HALF;
-					const z = Math.random() * BOUNDS - BOUNDS_HALF;
-
-					theArray[ k + 0 ] = x;
-					theArray[ k + 1 ] = y;
-					theArray[ k + 2 ] = z;
-					theArray[ k + 3 ] = 1;
-
-				}
 
 			}
 
@@ -299,10 +195,6 @@
 			}
 
 			function render() {
-
-				gpuCompute.compute();
-
-				birdUniforms[ "texturePosition" ].value = gpuCompute.getCurrentRenderTarget( positionVariable ).texture;
 
 				renderer.render( scene, camera );
 
