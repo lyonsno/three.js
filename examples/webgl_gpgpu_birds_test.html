@@ -31,8 +31,6 @@
 		<!-- shader for bird's position -->
 		<script id="fragmentShaderPosition" type="x-shader/x-fragment">
 
-			uniform float delta;
-
 			void main()	{
 
 				vec2 uv = gl_FragCoord.xy / resolution.xy;
@@ -245,12 +243,6 @@
 
 				gpuCompute = new GPUComputationRenderer( WIDTH, WIDTH, renderer );
 
-				if ( isSafari() ) {
-
-					gpuCompute.setDataType( THREE.HalfFloatType );
-
-				}
-
 				const dtPosition = gpuCompute.createTexture();
 				fillPositionTexture( dtPosition );
 
@@ -260,7 +252,6 @@
 
 				positionUniforms = positionVariable.material.uniforms;
 
-				positionUniforms[ "delta" ] = { value: 0.0 };
 				positionVariable.wrapS = THREE.RepeatWrapping;
 				positionVariable.wrapT = THREE.RepeatWrapping;
 
@@ -274,21 +265,13 @@
 
 			}
 
-			function isSafari() {
-
-				return !! navigator.userAgent.match( /Safari/i ) && ! navigator.userAgent.match( /Chrome/i );
-
-			}
-
 			function initBirds() {
 
 				const geometry = new BirdGeometry();
 
 				// For Vertex and Fragment
 				birdUniforms = {
-					"color": { value: new THREE.Color( 0xff2200 ) },
 					"texturePosition": { value: null },
-					"delta": { value: 0.0 }
 				};
 
 				// THREE.ShaderMaterial
@@ -361,15 +344,6 @@
 			}
 
 			function render() {
-
-				const now = performance.now();
-				let delta = ( now - last ) / 1000;
-
-				if ( delta > 1 ) delta = 1; // safety cap on large deltas
-				last = now;
-
-				positionUniforms[ "delta" ].value = delta;
-				birdUniforms[ "delta" ].value = delta;
 
 				mouseX = 10000;
 				mouseY = 10000;
