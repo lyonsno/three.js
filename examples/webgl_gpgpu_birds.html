@@ -31,6 +31,7 @@
 		<!-- shader for bird's position -->
 		<script id="fragmentShaderPosition" type="x-shader/x-fragment">
 
+			uniform float time;
 			uniform float delta;
 
 			void main()	{
@@ -55,6 +56,7 @@
 		<!-- shader for bird's velocity -->
 		<script id="fragmentShaderVelocity" type="x-shader/x-fragment">
 
+			uniform float time;
 			uniform float testing;
 			uniform float delta; // about 0.016
 			uniform float separationDistance; // 20
@@ -130,6 +132,10 @@
 					velocity += normalize( dir ) * f;
 					limit += 5.0;
 				}
+
+
+				// if (testing == 0.0) {}
+				// if ( rand( uv + time ) < freedomFactor ) {}
 
 
 				// Attract flocks to the center
@@ -220,6 +226,8 @@
 
 			varying vec4 vColor;
 			varying float z;
+
+			uniform float time;
 
 			void main() {
 
@@ -496,7 +504,9 @@
 				positionUniforms = positionVariable.material.uniforms;
 				velocityUniforms = velocityVariable.material.uniforms;
 
+				positionUniforms[ "time" ] = { value: 0.0 };
 				positionUniforms[ "delta" ] = { value: 0.0 };
+				velocityUniforms[ "time" ] = { value: 1.0 };
 				velocityUniforms[ "delta" ] = { value: 0.0 };
 				velocityUniforms[ "testing" ] = { value: 1.0 };
 				velocityUniforms[ "separationDistance" ] = { value: 1.0 };
@@ -536,6 +546,7 @@
 					"color": { value: new THREE.Color( 0xff2200 ) },
 					"texturePosition": { value: null },
 					"textureVelocity": { value: null },
+					"time": { value: 1.0 },
 					"delta": { value: 0.0 }
 				};
 
@@ -635,8 +646,11 @@
 				if ( delta > 1 ) delta = 1; // safety cap on large deltas
 				last = now;
 
+				positionUniforms[ "time" ].value = now;
 				positionUniforms[ "delta" ].value = delta;
+				velocityUniforms[ "time" ].value = now;
 				velocityUniforms[ "delta" ].value = delta;
+				birdUniforms[ "time" ].value = now;
 				birdUniforms[ "delta" ].value = delta;
 
 				velocityUniforms[ "predator" ].value.set( 0.5 * mouseX / windowHalfX, - 0.5 * mouseY / windowHalfY, 0 );
