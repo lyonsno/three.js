@@ -30,7 +30,7 @@
 
 			import { GPUComputationRenderer } from './jsm/misc/GPUComputationRenderer.js';
 
-			const tri_per_bird=5
+			const tri_per_bird=4
 			const WIDTH = 2;
 			/** tri_per_bird and WIDTH must be one even one odd */
 
@@ -124,10 +124,10 @@
 				for ( let v = 0; v < triangles * 3; v ++ ) {
 					
 					const tri_i = ~ ~ ( v / 3 );
-					const x = ( tri_i % WIDTH ) / WIDTH;
-					const y = ~ ~ ( tri_i / WIDTH ) / WIDTH;
 					
 					let bird_i=~~(tri_i/tri_per_bird)
+					const x = ( bird_i % WIDTH ) / WIDTH;
+					const y = ~ ~ ( bird_i / WIDTH ) / WIDTH;
 
 					// const tri_i = Math.trunc( v / 3 );
 					// const {x,y}=vs.serial_to_xy(WIDTH,tri_i)
