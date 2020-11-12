@@ -30,7 +30,7 @@
 
 			import { GPUComputationRenderer } from './jsm/misc/GPUComputationRenderer.js';
 
-			const tri_per_bird=4
+			const tri_per_bird=5
 
 			let vs={}
 			vs.serial_to_xy=function (width, index){ // :{x:x, y:y}
@@ -108,6 +108,15 @@
 						);
 					}
 
+					if(tri_per_bird>=5){
+						// Body
+						verts_push(
+							200, - 0, - 200,
+							200, 200, - 200,
+							200, 0, 300
+						);
+					}
+
 				}
 
 				let c=new THREE.Color()
@@ -136,6 +145,9 @@
 							break
 						case 3:
 							c.setRGB(1,1,0)
+							break
+						case 3:
+							c.setRGB(0,1,1)
 							break
 						default:
 							c.setRGB(0,0,0)
@@ -259,8 +271,8 @@
 
 							vColor = vec4( birdColor, 1.0 );
 							//vColor = vec4( index/12.,0,0, 1.0 );
-							gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+index*100.,1);
-							// gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos,1);
+							// gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+index*100.,1);
+							gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos,1);
 							//gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos+vec3(reference*50.,0),1);
 						}
 					`,
