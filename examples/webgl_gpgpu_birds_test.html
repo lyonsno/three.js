@@ -31,6 +31,8 @@
 			import { GPUComputationRenderer } from './jsm/misc/GPUComputationRenderer.js';
 
 			const tri_per_bird=5
+			const WIDTH = 2;
+			/** tri_per_bird and WIDTH must be one even one odd */
 
 			let vs={}
 			vs.serial_to_xy=function (width, index){ // :{x:x, y:y}
@@ -40,7 +42,6 @@
 			}
 
 			/* TEXTURE WIDTH FOR SIMULATION */
-			const WIDTH = 2;
 
 			const BIRDS = WIDTH * WIDTH;
 
