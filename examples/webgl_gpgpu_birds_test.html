@@ -30,7 +30,7 @@
 
 			import { GPUComputationRenderer } from './jsm/misc/GPUComputationRenderer.js';
 
-			const tri_per_bird=3
+			const tri_per_bird=2
 
 			let vs={}
 			vs.serial_to_xy=function (width, index){ // :{x:x, y:y}
@@ -53,7 +53,7 @@
 				THREE.BufferGeometry.call( this );
 
 				const vertices = new THREE.BufferAttribute( new Float32Array( points * 3 ), 3 );
-				const indexs = new THREE.BufferAttribute( new Float32Array( points * 3 ), 3 );
+				const indexs = new THREE.BufferAttribute( new Float32Array( points * 3 ), 1 );
 				const birdColors = new THREE.BufferAttribute( new Float32Array( points * 3 ), 3 );
 				const references = new THREE.BufferAttribute( new Float32Array( points * 2 ), 2 );
 
@@ -85,9 +85,9 @@
 
 					// Right Wing
 					verts_push(
-						 200,-100, 200,
-						-200,-100,-200,
-						-200,-100, 200,
+						 200, 200, 200,
+						-200, 200,-200,
+						-200, 200, 200,
 					);
 
 					if(tri_per_bird===3){
@@ -103,17 +103,19 @@
 
 				let c=new THREE.Color()
 				for ( let v = 0; v < triangles * 3; v ++ ) {
+					
+					const tri_i = ~ ~ ( v / 3 );
+					const x = ( tri_i % WIDTH ) / WIDTH;
+					const y = ~ ~ ( tri_i / WIDTH ) / WIDTH;
+					
+					let bird_i=~~(tri_i/tri_per_bird)
 
-					const i = ~ ~ ( v / 3 );
-					const x = ( i % WIDTH ) / WIDTH;
-					const y = ~ ~ ( i / WIDTH ) / WIDTH;
+					// const tri_i = Math.trunc( v / 3 );
+					// const {x,y}=vs.serial_to_xy(WIDTH,tri_i)
 
-					// const i = Math.trunc( v / 3 );
-					// const {x,y}=vs.serial_to_xy(WIDTH,i)
+					console.log(tri_i)
 
-					console.log(i)
-
-					switch(i%tri_per_bird){
+					switch(tri_i%tri_per_bird){
 						case 0:
 							c.setRGB(1,0,0)
 							break
@@ -129,7 +131,7 @@
 
 					}
 
-					indexs.array[v]=i
+					indexs.array[v]=bird_i
 
 					birdColors.array[ v * 3 + 0 ] = c.r;
 					birdColors.array[ v * 3 + 1 ] = c.g;
@@ -245,7 +247,8 @@
 
 							vColor = vec4( birdColor, 1.0 );
 							//vColor = vec4( index/12.,0,0, 1.0 );
-							gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos,1);
+							gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+index*100.,1);
+							// gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos,1);
 							//gl_Position = projectionMatrix *  modelViewMatrix * vec4(position+pos+vec3(reference*50.,0),1);
 						}
 					`,
