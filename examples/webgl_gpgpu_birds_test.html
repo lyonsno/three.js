@@ -30,7 +30,7 @@
 
 			import { GPUComputationRenderer } from './jsm/misc/GPUComputationRenderer.js';
 
-			const tri_per_bird=2
+			const tri_per_bird=4
 
 			let vs={}
 			vs.serial_to_xy=function (width, index){ // :{x:x, y:y}
@@ -90,12 +90,21 @@
 						-200, 200, 200,
 					);
 
-					if(tri_per_bird===3){
+					if(tri_per_bird>=3){
 						// Body
 						verts_push(
 							0, - 0, - 200,
 							0, 200, - 200,
 							0, 0, 300
+						);
+					}
+
+					if(tri_per_bird>=4){
+						// Body
+						verts_push(
+							100, - 0, - 200,
+							100, 200, - 200,
+							100, 0, 300
 						);
 					}
 
@@ -124,6 +133,9 @@
 							break
 						case 2:
 							c.setRGB(0,0,1)
+							break
+						case 3:
+							c.setRGB(1,1,0)
 							break
 						default:
 							c.setRGB(0,0,0)
