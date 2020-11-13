@@ -237,10 +237,10 @@
 
 				vec3 newPosition = position;
 
-				if ( birdVertex == 4.0 || birdVertex == 7.0 ) {
-					// flap wings
-					newPosition.y = sin( tmpPos.w ) * 5.;
-				}
+				//if ( birdVertex == 4.0 || birdVertex == 7.0 ) {
+				//	// flap wings
+				//	newPosition.y = sin( tmpPos.w ) * 5.;
+				//}
 
 				newPosition = mat3( modelMatrix ) * newPosition;
 
@@ -314,7 +314,7 @@
 			// Custom Geometry - using 3 triangles each. No UVs, no normals currently.
 			function BirdGeometry() {
 
-				const trianglesPerBird = 3;
+				const trianglesPerBird = 4;
 				const triangles = BIRDS * trianglesPerBird;
 				const points = triangles * 3;
 
@@ -349,25 +349,29 @@
 
 				for ( let f = 0; f < BIRDS; f ++ ) {
 
-					// Body
+					//top left
 					verts_push(
-						0, - 0, - 20,
-						0, 4, - 20,
-						0, 0, 30
+						20,20,20,
+						20,20,-20,
+						-20,20,-20,
 					);
-
-					// Right Wing
+					//top right
 					verts_push(
-						0, 0, - 15,
-						- wingsSpan, 0, 0,
-						0, 0, 15
+						20,20,20,
+						-20,20,-20,
+						-20,20,20,
 					);
-
-					// Left Wing
+					//left btm
 					verts_push(
-						0, 0, 15,
-						wingsSpan, 0, 0,
-						0, 0, - 15
+						20,20,20,
+						20,-20,20,
+						20,-20,-20,
+					);
+					//left top
+					verts_push(
+						20,20,20,
+						20,-20,-20,
+						20,20,-20,
 					);
 
 				}
