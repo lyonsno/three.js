@@ -96,7 +96,7 @@ var UnrealBloomPass = function ( resolution, strength, radius, threshold ) {
 	for ( var i = 0; i < this.nMips; i ++ ) {
 
 		this.separableBlurMaterials.push( this.getSeperableBlurMaterial( kernelSizeArray[ i ] ) );
-
+debugger
 		this.separableBlurMaterials[ i ].uniforms[ "texSize" ].value = new Vector2( resx, resy );
 
 		resx = Math.round( resx / 2 );
@@ -179,6 +179,8 @@ UnrealBloomPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 	},
 
 	setSize: function ( width, height ) {
+		// width/=devicePixelRatio
+		// height/=devicePixelRatio
 
 		var resx = Math.round( width / 2 );
 		var resy = Math.round( height / 2 );
@@ -189,7 +191,7 @@ UnrealBloomPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 
 			this.renderTargetsHorizontal[ i ].setSize( resx, resy );
 			this.renderTargetsVertical[ i ].setSize( resx, resy );
-
+debugger
 			this.separableBlurMaterials[ i ].uniforms[ "texSize" ].value = new Vector2( resx, resy );
 
 			resx = Math.round( resx / 2 );

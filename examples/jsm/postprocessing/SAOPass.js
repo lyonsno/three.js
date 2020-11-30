@@ -136,6 +136,7 @@ var SAOPass = function ( scene, camera, depthTexture, useNormals, resolution ) {
 	this.vBlurMaterial.uniforms[ 'tDiffuse' ].value = this.saoRenderTarget.texture;
 	this.vBlurMaterial.uniforms[ 'tDepth' ].value = ( this.supportsDepthTextureExtension ) ? depthTexture : this.depthRenderTarget.texture;
 	this.vBlurMaterial.uniforms[ 'size' ].value.set( this.resolution.x, this.resolution.y );
+	debugger
 	this.vBlurMaterial.blending = NoBlending;
 
 	this.hBlurMaterial = new ShaderMaterial( {
@@ -409,6 +410,7 @@ SAOPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		this.saoMaterial.needsUpdate = true;
 
 		this.vBlurMaterial.uniforms[ 'size' ].value.set( width, height );
+		debugger
 		this.vBlurMaterial.needsUpdate = true;
 
 		this.hBlurMaterial.uniforms[ 'size' ].value.set( width, height );

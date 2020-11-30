@@ -23,7 +23,10 @@
 			Model: <a href="https://blog.sketchfab.com/art-spotlight-primary-ion-drive/" target="_blank" rel="noopener">Primary Ion Drive</a> by
 			<a href="http://mjmurdock.com/" target="_blank" rel="noopener">Mike Murdock</a>, CC Attribution.
 		</div>
-
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vConsole/3.3.4/vconsole.min.js"></script>
+		<script>
+			var vConsole = new VConsole();
+		</script>
 		<script type="module">
 
 			import * as THREE from '../build/three.module.js';
@@ -68,7 +71,7 @@
 
 				camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 100 );
 				camera.position.set( - 5, 2.5, - 3.5 );
-				camera.position.set( 0,5,0);
+				camera.position.set( 0,10,0);
 				scene.add( camera );
 
 				const controls = new OrbitControls( camera, renderer.domElement );
@@ -89,6 +92,7 @@
 				bloomPass.radius = params.bloomRadius;
 
 				composer = new EffectComposer( renderer );
+				// composer.setSize( window.innerWidth, window.innerHeight );
 				composer.addPass( renderScene );
 				composer.addPass( bloomPass );
 
@@ -152,6 +156,7 @@
 			}
 
 			function onWindowResize() {
+				debugger
 
 				const width = window.innerWidth;
 				const height = window.innerHeight;
