@@ -92,34 +92,21 @@
 				composer.addPass( renderScene );
 				composer.addPass( bloomPass );
 
-				new GLTFLoader().load( 'models/gltf/PrimaryIonDrive.glb', function ( gltf ) {
-
-					const model = gltf.scene;
-
-					// scene.add( model );
-
-					let geo=new THREE.BoxBufferGeometry()
-					let mtl=new THREE.MeshBasicMaterial({color:'gray'})
-					let cube=new THREE.Mesh(geo,mtl)
-					let cube2=new THREE.Mesh(geo,mtl)
-					let cube3=new THREE.Mesh(geo,mtl)
-					let cube4=new THREE.Mesh(geo,mtl)
-					cube.position.set(-.5,0,-.5)
-					cube2.position.set(.5,0,.5)
-					cube3.position.set(.6,0,-.6)
-					cube4.position.set(-.6,0,.6)
-					scene.add(cube)
-					scene.add(cube2)
-					scene.add(cube3)
-					scene.add(cube4)
-
-					mixer = new THREE.AnimationMixer( model );
-					const clip = gltf.animations[ 0 ];
-					mixer.clipAction( clip.optimize() ).play();
-
-					animate();
-
-				} );
+				let geo=new THREE.BoxBufferGeometry()
+				let mtl=new THREE.MeshBasicMaterial({color:'gray'})
+				let cube=new THREE.Mesh(geo,mtl)
+				let cube2=new THREE.Mesh(geo,mtl)
+				let cube3=new THREE.Mesh(geo,mtl)
+				let cube4=new THREE.Mesh(geo,mtl)
+				cube.position.set(-.5,0,-.5)
+				cube2.position.set(.5,0,.5)
+				cube3.position.set(.6,0,-.6)
+				cube4.position.set(-.6,0,.6)
+				scene.add(cube)
+				scene.add(cube2)
+				scene.add(cube3)
+				scene.add(cube4)
+				animate();
 
 				const gui = new GUI();
 
@@ -168,9 +155,9 @@
 
 				requestAnimationFrame( animate );
 
-				const delta = clock.getDelta();
+				// const delta = clock.getDelta();
 
-				mixer.update( delta );
+				// mixer.update( delta );
 
 				stats.update();
 
