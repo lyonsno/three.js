@@ -42,7 +42,7 @@
 
 			const params = {
 				exposure: 1,
-				bloomStrength: 1.5,
+				bloomStrength: 3,
 				bloomThreshold: 0,
 				bloomRadius: 0
 			};
@@ -68,6 +68,7 @@
 
 				camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 100 );
 				camera.position.set( - 5, 2.5, - 3.5 );
+				camera.position.set( 0,5,0);
 				scene.add( camera );
 
 				const controls = new OrbitControls( camera, renderer.domElement );
@@ -95,7 +96,22 @@
 
 					const model = gltf.scene;
 
-					scene.add( model );
+					// scene.add( model );
+
+					let geo=new THREE.BoxBufferGeometry()
+					let mtl=new THREE.MeshBasicMaterial({color:'gray'})
+					let cube=new THREE.Mesh(geo,mtl)
+					let cube2=new THREE.Mesh(geo,mtl)
+					let cube3=new THREE.Mesh(geo,mtl)
+					let cube4=new THREE.Mesh(geo,mtl)
+					cube.position.set(-.5,0,-.5)
+					cube2.position.set(.5,0,.5)
+					cube3.position.set(.6,0,-.6)
+					cube4.position.set(-.6,0,.6)
+					scene.add(cube)
+					scene.add(cube2)
+					scene.add(cube3)
+					scene.add(cube4)
 
 					mixer = new THREE.AnimationMixer( model );
 					const clip = gltf.animations[ 0 ];
