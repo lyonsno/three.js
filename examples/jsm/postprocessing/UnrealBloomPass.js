@@ -32,7 +32,7 @@ var UnrealBloomPass = function ( resolution, strength, radius, threshold ) {
 	this.radius = radius;
 	this.threshold = threshold;
 	this.resolution = ( resolution !== undefined ) ? new Vector2( resolution.x, resolution.y ) : new Vector2( 256, 256 );
-	this.resolution = new Resizer(this, this.resolution.x, this.resolution.y, 1);
+	this.resizer = new Resizer(this, this.resolution.x, this.resolution.y, 1);
 
 	// create color only once here, reuse it later inside the render function
 	this.clearColor = new Color( 0, 0, 0 );
@@ -182,10 +182,9 @@ UnrealBloomPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 
 	setSize: function ( width, height ) {
 
-		const resolution = this.resolution;
-		resolution.base.set(width, height);
-		width = resolution.width
-		height = resolution.height
+		this.resizer.base.set(width, height);
+		width = this.resizer.width
+		height = this.resizer.height
 
 		var resx = Math.round( width / 2 );
 		var resy = Math.round( height / 2 );
@@ -197,7 +196,7 @@ UnrealBloomPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 			this.renderTargetsHorizontal[ i ].setSize( resx, resy );
 			this.renderTargetsVertical[ i ].setSize( resx, resy );
 
-			this.separableBlurMaterials[ i ].uniforms[ "texSize" ].value = new Vector2( resx , resy );
+			this.separableBlurMaterials[ i ].uniforms[ "texSize" ].value = new Vector2( resx, resy );
 
 			resx = Math.round( resx / 2 );
 			resy = Math.round( resy / 2 );
