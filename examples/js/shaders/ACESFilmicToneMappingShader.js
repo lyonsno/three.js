@@ -1,89 +1,103 @@
 /**
- * ACES Filmic Tone Mapping Shader by Stephen Hill
- * source: https://github.com/selfshadow/ltc_code/blob/master/webgl/shaders/ltc/ltc_blit.fs
- *
- * this implementation of ACES is modified to accommodate a brighter viewing environment.
- * the scale factor of 1/0.6 is subjective. see discussion in #19621.
+ * Generated from 'examples/jsm/shaders/ACESFilmicToneMappingShader.js'
  */
 
-THREE.ACESFilmicToneMappingShader = {
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.THREE = global.THREE || {}));
+}(this, (function (exports) { 'use strict';
 
-	uniforms: {
+	/**
+	 * ACES Filmic Tone Mapping Shader by Stephen Hill
+	 * source: https://github.com/selfshadow/ltc_code/blob/master/webgl/shaders/ltc/ltc_blit.fs
+	 *
+	 * this implementation of ACES is modified to accommodate a brighter viewing environment.
+	 * the scale factor of 1/0.6 is subjective. see discussion in #19621.
+	 */
 
-		'tDiffuse': { value: null },
-		'exposure': { value: 1.0 }
+	var ACESFilmicToneMappingShader = {
 
-	},
+		uniforms: {
 
-	vertexShader: [
+			'tDiffuse': { value: null },
+			'exposure': { value: 1.0 }
 
-		'varying vec2 vUv;',
+		},
 
-		'void main() {',
+		vertexShader: [
 
-		'	vUv = uv;',
-		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
+			'varying vec2 vUv;',
 
-		'}'
+			'void main() {',
 
-	].join( '\n' ),
+			'	vUv = uv;',
+			'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
 
-	fragmentShader: [
+			'}'
 
-		'#define saturate(a) clamp( a, 0.0, 1.0 )',
+		].join( '\n' ),
 
-		'uniform sampler2D tDiffuse;',
+		fragmentShader: [
 
-		'uniform float exposure;',
+			'#define saturate(a) clamp( a, 0.0, 1.0 )',
 
-		'varying vec2 vUv;',
+			'uniform sampler2D tDiffuse;',
 
-		'vec3 RRTAndODTFit( vec3 v ) {',
+			'uniform float exposure;',
 
-		'	vec3 a = v * ( v + 0.0245786 ) - 0.000090537;',
-		'	vec3 b = v * ( 0.983729 * v + 0.4329510 ) + 0.238081;',
-		'	return a / b;',
+			'varying vec2 vUv;',
 
-		'}',
+			'vec3 RRTAndODTFit( vec3 v ) {',
 
-		'vec3 ACESFilmicToneMapping( vec3 color ) {',
+			'	vec3 a = v * ( v + 0.0245786 ) - 0.000090537;',
+			'	vec3 b = v * ( 0.983729 * v + 0.4329510 ) + 0.238081;',
+			'	return a / b;',
 
-		// sRGB => XYZ => D65_2_D60 => AP1 => RRT_SAT
-		'	const mat3 ACESInputMat = mat3(',
-		'		vec3( 0.59719, 0.07600, 0.02840 ),', // transposed from source
-		'		vec3( 0.35458, 0.90834, 0.13383 ),',
-		'		vec3( 0.04823, 0.01566, 0.83777 )',
-		'	);',
+			'}',
 
-		// ODT_SAT => XYZ => D60_2_D65 => sRGB
-		'	const mat3 ACESOutputMat = mat3(',
-		'		vec3(  1.60475, -0.10208, -0.00327 ),', // transposed from source
-		'		vec3( -0.53108,  1.10813, -0.07276 ),',
-		'		vec3( -0.07367, -0.00605,  1.07602 )',
-		'	);',
+			'vec3 ACESFilmicToneMapping( vec3 color ) {',
 
-		'	color = ACESInputMat * color;',
+			// sRGB => XYZ => D65_2_D60 => AP1 => RRT_SAT
+			'	const mat3 ACESInputMat = mat3(',
+			'		vec3( 0.59719, 0.07600, 0.02840 ),', // transposed from source
+			'		vec3( 0.35458, 0.90834, 0.13383 ),',
+			'		vec3( 0.04823, 0.01566, 0.83777 )',
+			'	);',
 
-		// Apply RRT and ODT
-		'	color = RRTAndODTFit( color );',
+			// ODT_SAT => XYZ => D60_2_D65 => sRGB
+			'	const mat3 ACESOutputMat = mat3(',
+			'		vec3(  1.60475, -0.10208, -0.00327 ),', // transposed from source
+			'		vec3( -0.53108,  1.10813, -0.07276 ),',
+			'		vec3( -0.07367, -0.00605,  1.07602 )',
+			'	);',
 
-		'	color = ACESOutputMat * color;',
+			'	color = ACESInputMat * color;',
 
-		// Clamp to [0, 1]
-		'	return saturate( color );',
+			// Apply RRT and ODT
+			'	color = RRTAndODTFit( color );',
 
-		'}',
+			'	color = ACESOutputMat * color;',
 
-		'void main() {',
+			// Clamp to [0, 1]
+			'	return saturate( color );',
 
-		'	vec4 tex = texture2D( tDiffuse, vUv );',
+			'}',
 
-		'	tex.rgb *= exposure / 0.6;', // pre-exposed, outside of the tone mapping function
+			'void main() {',
 
-		'	gl_FragColor = vec4( ACESFilmicToneMapping( tex.rgb ), tex.a );',
+			'	vec4 tex = texture2D( tDiffuse, vUv );',
 
-		'}'
+			'	tex.rgb *= exposure / 0.6;', // pre-exposed, outside of the tone mapping function
 
-	].join( '\n' )
+			'	gl_FragColor = vec4( ACESFilmicToneMapping( tex.rgb ), tex.a );',
 
-};
+			'}'
+
+		].join( '\n' )
+
+	};
+
+	exports.ACESFilmicToneMappingShader = ACESFilmicToneMappingShader;
+
+})));

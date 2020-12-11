@@ -1,56 +1,70 @@
 /**
- * Brightness and contrast adjustment
- * https://github.com/evanw/glfx.js
- * brightness: -1 to 1 (-1 is solid black, 0 is no change, and 1 is solid white)
- * contrast: -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)
+ * Generated from 'examples/jsm/shaders/BrightnessContrastShader.js'
  */
 
-THREE.BrightnessContrastShader = {
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.THREE = global.THREE || {}));
+}(this, (function (exports) { 'use strict';
 
-	uniforms: {
+	/**
+	 * Brightness and contrast adjustment
+	 * https://github.com/evanw/glfx.js
+	 * brightness: -1 to 1 (-1 is solid black, 0 is no change, and 1 is solid white)
+	 * contrast: -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)
+	 */
 
-		"tDiffuse": { value: null },
-		"brightness": { value: 0 },
-		"contrast": { value: 0 }
+	var BrightnessContrastShader = {
 
-	},
+		uniforms: {
 
-	vertexShader: [
+			"tDiffuse": { value: null },
+			"brightness": { value: 0 },
+			"contrast": { value: 0 }
 
-		"varying vec2 vUv;",
+		},
 
-		"void main() {",
+		vertexShader: [
 
-		"	vUv = uv;",
+			"varying vec2 vUv;",
 
-		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+			"void main() {",
 
-		"}"
+			"	vUv = uv;",
 
-	].join( "\n" ),
+			"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-	fragmentShader: [
+			"}"
 
-		"uniform sampler2D tDiffuse;",
-		"uniform float brightness;",
-		"uniform float contrast;",
+		].join( "\n" ),
 
-		"varying vec2 vUv;",
+		fragmentShader: [
 
-		"void main() {",
+			"uniform sampler2D tDiffuse;",
+			"uniform float brightness;",
+			"uniform float contrast;",
 
-		"	gl_FragColor = texture2D( tDiffuse, vUv );",
+			"varying vec2 vUv;",
 
-		"	gl_FragColor.rgb += brightness;",
+			"void main() {",
 
-		"	if (contrast > 0.0) {",
-		"		gl_FragColor.rgb = (gl_FragColor.rgb - 0.5) / (1.0 - contrast) + 0.5;",
-		"	} else {",
-		"		gl_FragColor.rgb = (gl_FragColor.rgb - 0.5) * (1.0 + contrast) + 0.5;",
-		"	}",
+			"	gl_FragColor = texture2D( tDiffuse, vUv );",
 
-		"}"
+			"	gl_FragColor.rgb += brightness;",
 
-	].join( "\n" )
+			"	if (contrast > 0.0) {",
+			"		gl_FragColor.rgb = (gl_FragColor.rgb - 0.5) / (1.0 - contrast) + 0.5;",
+			"	} else {",
+			"		gl_FragColor.rgb = (gl_FragColor.rgb - 0.5) * (1.0 + contrast) + 0.5;",
+			"	}",
 
-};
+			"}"
+
+		].join( "\n" )
+
+	};
+
+	exports.BrightnessContrastShader = BrightnessContrastShader;
+
+})));

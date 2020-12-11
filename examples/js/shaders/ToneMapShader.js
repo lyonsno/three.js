@@ -1,75 +1,89 @@
 /**
- * Full-screen tone-mapping shader based on http://www.cis.rit.edu/people/faculty/ferwerda/publications/sig02_paper.pdf
+ * Generated from 'examples/jsm/shaders/ToneMapShader.js'
  */
 
-THREE.ToneMapShader = {
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.THREE = global.THREE || {}));
+}(this, (function (exports) { 'use strict';
 
-	uniforms: {
+	/**
+	 * Full-screen tone-mapping shader based on http://www.cis.rit.edu/people/faculty/ferwerda/publications/sig02_paper.pdf
+	 */
 
-		"tDiffuse": { value: null },
-		"averageLuminance": { value: 1.0 },
-		"luminanceMap": { value: null },
-		"maxLuminance": { value: 16.0 },
-		"minLuminance": { value: 0.01 },
-		"middleGrey": { value: 0.6 }
-	},
+	var ToneMapShader = {
 
-	vertexShader: [
+		uniforms: {
 
-		"varying vec2 vUv;",
+			"tDiffuse": { value: null },
+			"averageLuminance": { value: 1.0 },
+			"luminanceMap": { value: null },
+			"maxLuminance": { value: 16.0 },
+			"minLuminance": { value: 0.01 },
+			"middleGrey": { value: 0.6 }
+		},
 
-		"void main() {",
+		vertexShader: [
 
-		"	vUv = uv;",
-		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+			"varying vec2 vUv;",
 
-		"}"
+			"void main() {",
 
-	].join( "\n" ),
+			"	vUv = uv;",
+			"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-	fragmentShader: [
+			"}"
 
-		"#include <common>",
+		].join( "\n" ),
 
-		"uniform sampler2D tDiffuse;",
+		fragmentShader: [
 
-		"varying vec2 vUv;",
+			"#include <common>",
 
-		"uniform float middleGrey;",
-		"uniform float minLuminance;",
-		"uniform float maxLuminance;",
-		"#ifdef ADAPTED_LUMINANCE",
-		"	uniform sampler2D luminanceMap;",
-		"#else",
-		"	uniform float averageLuminance;",
-		"#endif",
+			"uniform sampler2D tDiffuse;",
 
-		"vec3 ToneMap( vec3 vColor ) {",
-		"	#ifdef ADAPTED_LUMINANCE",
-		// Get the calculated average luminance
-		"		float fLumAvg = texture2D(luminanceMap, vec2(0.5, 0.5)).r;",
-		"	#else",
-		"		float fLumAvg = averageLuminance;",
-		"	#endif",
+			"varying vec2 vUv;",
 
-		// Calculate the luminance of the current pixel
-		"	float fLumPixel = linearToRelativeLuminance( vColor );",
+			"uniform float middleGrey;",
+			"uniform float minLuminance;",
+			"uniform float maxLuminance;",
+			"#ifdef ADAPTED_LUMINANCE",
+			"	uniform sampler2D luminanceMap;",
+			"#else",
+			"	uniform float averageLuminance;",
+			"#endif",
 
-		// Apply the modified operator (Eq. 4)
-		"	float fLumScaled = (fLumPixel * middleGrey) / max( minLuminance, fLumAvg );",
+			"vec3 ToneMap( vec3 vColor ) {",
+			"	#ifdef ADAPTED_LUMINANCE",
+			// Get the calculated average luminance
+			"		float fLumAvg = texture2D(luminanceMap, vec2(0.5, 0.5)).r;",
+			"	#else",
+			"		float fLumAvg = averageLuminance;",
+			"	#endif",
 
-		"	float fLumCompressed = (fLumScaled * (1.0 + (fLumScaled / (maxLuminance * maxLuminance)))) / (1.0 + fLumScaled);",
-		"	return fLumCompressed * vColor;",
-		"}",
+			// Calculate the luminance of the current pixel
+			"	float fLumPixel = linearToRelativeLuminance( vColor );",
 
-		"void main() {",
+			// Apply the modified operator (Eq. 4)
+			"	float fLumScaled = (fLumPixel * middleGrey) / max( minLuminance, fLumAvg );",
 
-		"	vec4 texel = texture2D( tDiffuse, vUv );",
+			"	float fLumCompressed = (fLumScaled * (1.0 + (fLumScaled / (maxLuminance * maxLuminance)))) / (1.0 + fLumScaled);",
+			"	return fLumCompressed * vColor;",
+			"}",
 
-		"	gl_FragColor = vec4( ToneMap( texel.xyz ), texel.w );",
+			"void main() {",
 
-		"}"
+			"	vec4 texel = texture2D( tDiffuse, vUv );",
 
-	].join( "\n" )
+			"	gl_FragColor = vec4( ToneMap( texel.xyz ), texel.w );",
 
-};
+			"}"
+
+		].join( "\n" )
+
+	};
+
+	exports.ToneMapShader = ToneMapShader;
+
+})));

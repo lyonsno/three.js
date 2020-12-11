@@ -1,67 +1,81 @@
 /**
- * Hue and saturation adjustment
- * https://github.com/evanw/glfx.js
- * hue: -1 to 1 (-1 is 180 degrees in the negative direction, 0 is no change, etc.
- * saturation: -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)
+ * Generated from 'examples/jsm/shaders/HueSaturationShader.js'
  */
 
-THREE.HueSaturationShader = {
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.THREE = global.THREE || {}));
+}(this, (function (exports) { 'use strict';
 
-	uniforms: {
+	/**
+	 * Hue and saturation adjustment
+	 * https://github.com/evanw/glfx.js
+	 * hue: -1 to 1 (-1 is 180 degrees in the negative direction, 0 is no change, etc.
+	 * saturation: -1 to 1 (-1 is solid gray, 0 is no change, and 1 is maximum contrast)
+	 */
 
-		"tDiffuse": { value: null },
-		"hue": { value: 0 },
-		"saturation": { value: 0 }
+	var HueSaturationShader = {
 
-	},
+		uniforms: {
 
-	vertexShader: [
+			"tDiffuse": { value: null },
+			"hue": { value: 0 },
+			"saturation": { value: 0 }
 
-		"varying vec2 vUv;",
+		},
 
-		"void main() {",
+		vertexShader: [
 
-		"	vUv = uv;",
+			"varying vec2 vUv;",
 
-		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+			"void main() {",
 
-		"}"
+			"	vUv = uv;",
 
-	].join( "\n" ),
+			"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-	fragmentShader: [
+			"}"
 
-		"uniform sampler2D tDiffuse;",
-		"uniform float hue;",
-		"uniform float saturation;",
+		].join( "\n" ),
 
-		"varying vec2 vUv;",
+		fragmentShader: [
 
-		"void main() {",
+			"uniform sampler2D tDiffuse;",
+			"uniform float hue;",
+			"uniform float saturation;",
 
-		"	gl_FragColor = texture2D( tDiffuse, vUv );",
+			"varying vec2 vUv;",
 
-		// hue
-		"	float angle = hue * 3.14159265;",
-		"	float s = sin(angle), c = cos(angle);",
-		"	vec3 weights = (vec3(2.0 * c, -sqrt(3.0) * s - c, sqrt(3.0) * s - c) + 1.0) / 3.0;",
-		"	float len = length(gl_FragColor.rgb);",
-		"	gl_FragColor.rgb = vec3(",
-		"		dot(gl_FragColor.rgb, weights.xyz),",
-		"		dot(gl_FragColor.rgb, weights.zxy),",
-		"		dot(gl_FragColor.rgb, weights.yzx)",
-		"	);",
+			"void main() {",
 
-		// saturation
-		"	float average = (gl_FragColor.r + gl_FragColor.g + gl_FragColor.b) / 3.0;",
-		"	if (saturation > 0.0) {",
-		"		gl_FragColor.rgb += (average - gl_FragColor.rgb) * (1.0 - 1.0 / (1.001 - saturation));",
-		"	} else {",
-		"		gl_FragColor.rgb += (average - gl_FragColor.rgb) * (-saturation);",
-		"	}",
+			"	gl_FragColor = texture2D( tDiffuse, vUv );",
 
-		"}"
+			// hue
+			"	float angle = hue * 3.14159265;",
+			"	float s = sin(angle), c = cos(angle);",
+			"	vec3 weights = (vec3(2.0 * c, -sqrt(3.0) * s - c, sqrt(3.0) * s - c) + 1.0) / 3.0;",
+			"	float len = length(gl_FragColor.rgb);",
+			"	gl_FragColor.rgb = vec3(",
+			"		dot(gl_FragColor.rgb, weights.xyz),",
+			"		dot(gl_FragColor.rgb, weights.zxy),",
+			"		dot(gl_FragColor.rgb, weights.yzx)",
+			"	);",
 
-	].join( "\n" )
+			// saturation
+			"	float average = (gl_FragColor.r + gl_FragColor.g + gl_FragColor.b) / 3.0;",
+			"	if (saturation > 0.0) {",
+			"		gl_FragColor.rgb += (average - gl_FragColor.rgb) * (1.0 - 1.0 / (1.001 - saturation));",
+			"	} else {",
+			"		gl_FragColor.rgb += (average - gl_FragColor.rgb) * (-saturation);",
+			"	}",
 
-};
+			"}"
+
+		].join( "\n" )
+
+	};
+
+	exports.HueSaturationShader = HueSaturationShader;
+
+})));

@@ -1,72 +1,86 @@
 /**
- * Based on Nvidia Cg tutorial
+ * Generated from 'examples/jsm/shaders/FresnelShader.js'
  */
 
-THREE.FresnelShader = {
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.THREE = global.THREE || {}));
+}(this, (function (exports) { 'use strict';
 
-	uniforms: {
+	/**
+	 * Based on Nvidia Cg tutorial
+	 */
 
-		"mRefractionRatio": { value: 1.02 },
-		"mFresnelBias": { value: 0.1 },
-		"mFresnelPower": { value: 2.0 },
-		"mFresnelScale": { value: 1.0 },
-		"tCube": { value: null }
+	var FresnelShader = {
 
-	},
+		uniforms: {
 
-	vertexShader: [
+			"mRefractionRatio": { value: 1.02 },
+			"mFresnelBias": { value: 0.1 },
+			"mFresnelPower": { value: 2.0 },
+			"mFresnelScale": { value: 1.0 },
+			"tCube": { value: null }
 
-		"uniform float mRefractionRatio;",
-		"uniform float mFresnelBias;",
-		"uniform float mFresnelScale;",
-		"uniform float mFresnelPower;",
+		},
 
-		"varying vec3 vReflect;",
-		"varying vec3 vRefract[3];",
-		"varying float vReflectionFactor;",
+		vertexShader: [
 
-		"void main() {",
+			"uniform float mRefractionRatio;",
+			"uniform float mFresnelBias;",
+			"uniform float mFresnelScale;",
+			"uniform float mFresnelPower;",
 
-		"	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
-		"	vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
+			"varying vec3 vReflect;",
+			"varying vec3 vRefract[3];",
+			"varying float vReflectionFactor;",
 
-		"	vec3 worldNormal = normalize( mat3( modelMatrix[0].xyz, modelMatrix[1].xyz, modelMatrix[2].xyz ) * normal );",
+			"void main() {",
 
-		"	vec3 I = worldPosition.xyz - cameraPosition;",
+			"	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+			"	vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
 
-		"	vReflect = reflect( I, worldNormal );",
-		"	vRefract[0] = refract( normalize( I ), worldNormal, mRefractionRatio );",
-		"	vRefract[1] = refract( normalize( I ), worldNormal, mRefractionRatio * 0.99 );",
-		"	vRefract[2] = refract( normalize( I ), worldNormal, mRefractionRatio * 0.98 );",
-		"	vReflectionFactor = mFresnelBias + mFresnelScale * pow( 1.0 + dot( normalize( I ), worldNormal ), mFresnelPower );",
+			"	vec3 worldNormal = normalize( mat3( modelMatrix[0].xyz, modelMatrix[1].xyz, modelMatrix[2].xyz ) * normal );",
 
-		"	gl_Position = projectionMatrix * mvPosition;",
+			"	vec3 I = worldPosition.xyz - cameraPosition;",
 
-		"}"
+			"	vReflect = reflect( I, worldNormal );",
+			"	vRefract[0] = refract( normalize( I ), worldNormal, mRefractionRatio );",
+			"	vRefract[1] = refract( normalize( I ), worldNormal, mRefractionRatio * 0.99 );",
+			"	vRefract[2] = refract( normalize( I ), worldNormal, mRefractionRatio * 0.98 );",
+			"	vReflectionFactor = mFresnelBias + mFresnelScale * pow( 1.0 + dot( normalize( I ), worldNormal ), mFresnelPower );",
 
-	].join( "\n" ),
+			"	gl_Position = projectionMatrix * mvPosition;",
 
-	fragmentShader: [
+			"}"
 
-		"uniform samplerCube tCube;",
+		].join( "\n" ),
 
-		"varying vec3 vReflect;",
-		"varying vec3 vRefract[3];",
-		"varying float vReflectionFactor;",
+		fragmentShader: [
 
-		"void main() {",
+			"uniform samplerCube tCube;",
 
-		"	vec4 reflectedColor = textureCube( tCube, vec3( -vReflect.x, vReflect.yz ) );",
-		"	vec4 refractedColor = vec4( 1.0 );",
+			"varying vec3 vReflect;",
+			"varying vec3 vRefract[3];",
+			"varying float vReflectionFactor;",
 
-		"	refractedColor.r = textureCube( tCube, vec3( -vRefract[0].x, vRefract[0].yz ) ).r;",
-		"	refractedColor.g = textureCube( tCube, vec3( -vRefract[1].x, vRefract[1].yz ) ).g;",
-		"	refractedColor.b = textureCube( tCube, vec3( -vRefract[2].x, vRefract[2].yz ) ).b;",
+			"void main() {",
 
-		"	gl_FragColor = mix( refractedColor, reflectedColor, clamp( vReflectionFactor, 0.0, 1.0 ) );",
+			"	vec4 reflectedColor = textureCube( tCube, vec3( -vReflect.x, vReflect.yz ) );",
+			"	vec4 refractedColor = vec4( 1.0 );",
 
-		"}"
+			"	refractedColor.r = textureCube( tCube, vec3( -vRefract[0].x, vRefract[0].yz ) ).r;",
+			"	refractedColor.g = textureCube( tCube, vec3( -vRefract[1].x, vRefract[1].yz ) ).g;",
+			"	refractedColor.b = textureCube( tCube, vec3( -vRefract[2].x, vRefract[2].yz ) ).b;",
 
-	].join( "\n" )
+			"	gl_FragColor = mix( refractedColor, reflectedColor, clamp( vReflectionFactor, 0.0, 1.0 ) );",
 
-};
+			"}"
+
+		].join( "\n" )
+
+	};
+
+	exports.FresnelShader = FresnelShader;
+
+})));

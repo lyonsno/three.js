@@ -1,18 +1,32 @@
-THREE.Line2 = function ( geometry, material ) {
+/**
+ * Generated from 'examples/jsm/lines/Line2.js'
+ */
 
-	if ( geometry === undefined ) geometry = new THREE.LineGeometry();
-	if ( material === undefined ) material = new THREE.LineMaterial( { color: Math.random() * 0xffffff } );
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('..\\LineSegments2.js'), require('..\\LineGeometry.js'), require('..\\LineMaterial.js')) :
+	typeof define === 'function' && define.amd ? define(['exports', '..\\LineSegments2', '..\\LineGeometry', '..\\LineMaterial'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.THREE = global.THREE || {}, global.THREE, global.THREE, global.THREE));
+}(this, (function (exports, LineSegments2_js, LineGeometry_js, LineMaterial_js) { 'use strict';
 
-	THREE.LineSegments2.call( this, geometry, material );
+	var Line2 = function ( geometry, material ) {
 
-	this.type = 'Line2';
+		if ( geometry === undefined ) geometry = new LineGeometry_js.LineGeometry();
+		if ( material === undefined ) material = new LineMaterial_js.LineMaterial( { color: Math.random() * 0xffffff } );
 
-};
+		LineSegments2_js.LineSegments2.call( this, geometry, material );
 
-THREE.Line2.prototype = Object.assign( Object.create( THREE.LineSegments2.prototype ), {
+		this.type = 'Line2';
 
-	constructor: THREE.Line2,
+	};
 
-	isLine2: true
+	Line2.prototype = Object.assign( Object.create( LineSegments2_js.LineSegments2.prototype ), {
 
-} );
+		constructor: Line2,
+
+		isLine2: true
+
+	} );
+
+	exports.Line2 = Line2;
+
+})));

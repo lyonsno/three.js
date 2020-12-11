@@ -1,45 +1,59 @@
 /**
- * Pixelation shader
+ * Generated from 'examples/jsm/shaders/PixelShader.js'
  */
 
-THREE.PixelShader = {
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.THREE = global.THREE || {}));
+}(this, (function (exports) { 'use strict';
 
-	uniforms: {
+	/**
+	 * Pixelation shader
+	 */
 
-		"tDiffuse": { value: null },
-		"resolution": { value: null },
-		"pixelSize": { value: 1. },
+	var PixelShader = {
 
-	},
+		uniforms: {
 
-	vertexShader: [
+			"tDiffuse": { value: null },
+			"resolution": { value: null },
+			"pixelSize": { value: 1. },
 
-		"varying highp vec2 vUv;",
+		},
 
-		"void main() {",
+		vertexShader: [
 
-		"vUv = uv;",
-		"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+			"varying highp vec2 vUv;",
 
-		"}"
+			"void main() {",
 
-	].join( "\n" ),
+			"vUv = uv;",
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-	fragmentShader: [
+			"}"
 
-		"uniform sampler2D tDiffuse;",
-		"uniform float pixelSize;",
-		"uniform vec2 resolution;",
+		].join( "\n" ),
 
-		"varying highp vec2 vUv;",
+		fragmentShader: [
 
-		"void main(){",
+			"uniform sampler2D tDiffuse;",
+			"uniform float pixelSize;",
+			"uniform vec2 resolution;",
 
-		"vec2 dxy = pixelSize / resolution;",
-		"vec2 coord = dxy * floor( vUv / dxy );",
-		"gl_FragColor = texture2D(tDiffuse, coord);",
+			"varying highp vec2 vUv;",
 
-		"}"
+			"void main(){",
 
-	].join( "\n" )
-};
+			"vec2 dxy = pixelSize / resolution;",
+			"vec2 coord = dxy * floor( vUv / dxy );",
+			"gl_FragColor = texture2D(tDiffuse, coord);",
+
+			"}"
+
+		].join( "\n" )
+	};
+
+	exports.PixelShader = PixelShader;
+
+})));

@@ -1,45 +1,59 @@
 /**
- * Technicolor Shader
- * Simulates the look of the two-strip technicolor process popular in early 20th century films.
- * More historical info here: http://www.widescreenmuseum.com/oldcolor/technicolor1.htm
- * Demo here: http://charliehoey.com/technicolor_shader/shader_test.html
+ * Generated from 'examples/jsm/shaders/TechnicolorShader.js'
  */
 
-THREE.TechnicolorShader = {
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.THREE = global.THREE || {}));
+}(this, (function (exports) { 'use strict';
 
-	uniforms: {
+	/**
+	 * Technicolor Shader
+	 * Simulates the look of the two-strip technicolor process popular in early 20th century films.
+	 * More historical info here: http://www.widescreenmuseum.com/oldcolor/technicolor1.htm
+	 * Demo here: http://charliehoey.com/technicolor_shader/shader_test.html
+	 */
 
-		"tDiffuse": { value: null }
+	var TechnicolorShader = {
 
-	},
+		uniforms: {
 
-	vertexShader: [
+			"tDiffuse": { value: null }
 
-		"varying vec2 vUv;",
+		},
 
-		"void main() {",
+		vertexShader: [
 
-		"	vUv = uv;",
-		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+			"varying vec2 vUv;",
 
-		"}"
+			"void main() {",
 
-	].join( "\n" ),
+			"	vUv = uv;",
+			"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-	fragmentShader: [
+			"}"
 
-		"uniform sampler2D tDiffuse;",
-		"varying vec2 vUv;",
+		].join( "\n" ),
 
-		"void main() {",
+		fragmentShader: [
 
-		"	vec4 tex = texture2D( tDiffuse, vec2( vUv.x, vUv.y ) );",
-		"	vec4 newTex = vec4(tex.r, (tex.g + tex.b) * .5, (tex.g + tex.b) * .5, 1.0);",
+			"uniform sampler2D tDiffuse;",
+			"varying vec2 vUv;",
 
-		"	gl_FragColor = newTex;",
+			"void main() {",
 
-		"}"
+			"	vec4 tex = texture2D( tDiffuse, vec2( vUv.x, vUv.y ) );",
+			"	vec4 newTex = vec4(tex.r, (tex.g + tex.b) * .5, (tex.g + tex.b) * .5, 1.0);",
 
-	].join( "\n" )
+			"	gl_FragColor = newTex;",
 
-};
+			"}"
+
+		].join( "\n" )
+
+	};
+
+	exports.TechnicolorShader = TechnicolorShader;
+
+})));
