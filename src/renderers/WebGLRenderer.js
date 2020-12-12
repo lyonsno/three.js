@@ -395,7 +395,7 @@ function WebGLRenderer( parameters ) {
 
 		}
 
-		return target.set( _width, _height );
+		return target.set( _canvas.width, _canvas.height );
 
 	};
 
