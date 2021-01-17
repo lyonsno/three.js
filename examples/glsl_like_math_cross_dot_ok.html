@@ -15,7 +15,6 @@
 		class Vec3 extends THREE.Vector3 {
 			static state = 'x'
 			static re_xs = []
-			static index_x = 0
 			static index_y = 0
 			static index_z = 0
 			constructor(x = 0, y = 0, z = 0) {
@@ -34,7 +33,6 @@
 			Vec3.state = 'y'; result.y = fn();
 			Vec3.state = 'z'; result.z = fn();
 			Vec3.re_xs = []
-			Vec3.index_x = 0
 			Vec3.index_y = 0
 			Vec3.index_z = 0
 			return result
@@ -43,7 +41,6 @@
 			if (Vec3.state === 'x') {
 				let re_dot = a.clone().dot(b)
 				Vec3.re_xs.push(re_dot)
-				Vec3.index_x++
 				return re_dot
 			} else if (Vec3.state === 'y') {
 				return Vec3.re_xs[Vec3.index_y++]
@@ -55,7 +52,6 @@
 			if (Vec3.state === 'x') {
 				let re_cross = a.clone().cross(b)
 				Vec3.re_xs.push(re_cross)
-				Vec3.index_x++
 				return re_cross
 			} else if (Vec3.state === 'y') {
 				return Vec3.re_xs[Vec3.index_y++]
