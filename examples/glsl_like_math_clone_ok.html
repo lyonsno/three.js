@@ -15,26 +15,21 @@
 		class Vec3 {
 			static state = null
 			constructor(x = 0, y = 0, z = 0) {
-				console.log('constructor')
 				this.x = x; this.y = y; this.z = z;
 			}
 			valueOf() {
 				if (Vec3.state) {
-					console.log('valueOf state')
 					return this[Vec3.state]
 				} else {
-					console.log('valueOf else')
 					debugger
 					return vec3(this.x, this.y, this.z)
 				}
 			}
 		}
 		function vec3(x, y, z) {
-			console.log('fn vec3')
 			return new Vec3(x, y, z)
 		}
 		function calc(fn) {
-			console.log('fn calc')
 			let result = vec3()
 			Vec3.state = 'x'; result.x = fn();
 			Vec3.state = 'y'; result.y = fn();
@@ -45,9 +40,10 @@
 
 		let a = vec3(1, 2, 3);
 		let b = vec3(0, 1, 0);
-		let c = calc(() => a * 10 + b + vec3(0, 0, 2))
+		let c = calc(() => b + 0) // clone
+		let z = calc(() => a * 10 + b + c * 6 + vec3(0, 0, 2)) // do math expression calc
 
-		console.log(c); // Vec3 {x: 10, y: 21, z: 32}
+		console.log(z); // Vec3 {x: 10, y: 21, z: 32}
 
 	</script>
 
