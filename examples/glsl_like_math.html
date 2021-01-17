@@ -69,8 +69,8 @@
 		let z = calc(() => cross(a, b) + dot(a, b)) // do math expression calc
 
 		console.log(
-			new THREE.Vector3(1, 2, 3).cross(new THREE.Vector3(4, 5, 6))
-				.addScalar(new THREE.Vector3(1, 2, 3).dot(new THREE.Vector3(4, 5, 6)))
+			a.clone().cross(b)
+				.addScalar(a.clone().dot(b))
 		)
 		console.log(z);
 
