@@ -62,11 +62,10 @@
 
 		let a = vec3(1, 2, 3);
 		let b = vec3(4, 5, 6);
-		let z = calc(() => cross(a, b) + dot(a, b)) // do math expression calc
+		let z = calc(() => (a * 10 - b + 3) / (cross(a, b) + dot(a, b) * 3)) // do math expression calc
 
 		console.log('normal THREE.Vector3 result: ',
-			new THREE.Vector3().crossVectors(a, b)
-				.addScalar(a.dot(b))
+			(a.clone().multiplyScalar(10).sub(b).addScalar(3)).divide(new THREE.Vector3().crossVectors(a, b).addScalar(a.dot(b) * 3))
 		)
 		console.log('this glsl-like vec3 result: ', z);
 
