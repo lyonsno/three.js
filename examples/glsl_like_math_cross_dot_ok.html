@@ -68,11 +68,11 @@
 		let b = vec3(4, 5, 6);
 		let z = calc(() => cross(a, b) + dot(a, b)) // do math expression calc
 
-		console.log(
+		console.log('normal THREE.Vector3 result: ',
 			a.clone().cross(b)
 				.addScalar(a.clone().dot(b))
 		)
-		console.log(z);
+		console.log('this glsl-like vec3 result: ', z);
 
 	</script>
 	<script>
