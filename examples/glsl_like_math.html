@@ -12,10 +12,10 @@
 	<script src="../build/three.js"></script>
 	<script>
 
-		class Vec3 {
+		class Vec3 extends THREE.Vector3 {
 			static state = 'x'
 			constructor(x = 0, y = 0, z = 0) {
-				this.x = x; this.y = y; this.z = z;
+				super(x, y, z)
 			}
 			valueOf() {
 				return this[Vec3.state]
