@@ -14,6 +14,10 @@
 
 		class Vec3 extends THREE.Vector3 {
 			static state = 'x'
+			static crosss = []
+			static indexX = 0
+			static indexY = 0
+			static indexZ = 0
 			constructor(x = 0, y = 0, z = 0) {
 				super(x, y, z)
 			}
@@ -29,16 +33,38 @@
 			Vec3.state = 'x'; result.x = fn();
 			Vec3.state = 'y'; result.y = fn();
 			Vec3.state = 'z'; result.z = fn();
+			Vec3.crosss = []
+			Vec3.indexX = 0
+			Vec3.indexY = 0
+			Vec3.indexZ = 0
 			return result
+		}
+		function cross(a, b) {
+			if (Vec3.state === 'x') {
+				let reCross = a.clone().cross(b)
+				Vec3.crosss.push(reCross)
+				Vec3.indexX++
+				return reCross
+			} else if (Vec3.state === 'y') {
+				return Vec3.crosss[Vec3.indexY++]
+			} else if (Vec3.state === 'z') {
+				return Vec3.crosss[Vec3.indexZ++]
+			}
 		}
 
 		let a = vec3(1, 2, 3);
-		let b = vec3(0, 1, 0);
-		let c = calc(() => b + 0) // clone
-		let z = calc(() => a * 10 + b + c + vec3(0, 0, 2)) // do math expression calc
+		let b = vec3(4, 5, 6);
+		let z = calc(() => 0 + cross(a, b)) // do math expression calc
 
+		console.log(new THREE.Vector3(1, 2, 3).cross(new THREE.Vector3(4, 5, 6)))
 		console.log(z); // Vec3 {x: 10, y: 22, z: 32}
 
+	</script>
+	<script>
+		// csonole_test
+		if (false) {
+			new THREE.Vector3(1, 2, 3).cross(new THREE.Vector3(4, 5, 6))
+		}
 	</script>
 
 </body>
