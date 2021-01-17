@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>three.js glsl_like_math</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+</head>
+
+<body>
+
+	<script type="module">
+
+		import * as THREE from '../build/three.module.js';
+
+		class Vec3 {
+			static state = 'x'
+			constructor(x = 0, y = 0, z = 0) {
+				this.x = x; this.y = y; this.z = z;
+			}
+			valueOf() {
+				return this[Vec3.state]
+			}
+		}
+		function vec3(x, y, z) {
+			return new Vec3(x, y, z)
+		}
+		function calc(fn) {
+			let result = vec3()
+			Vec3.state = 'x'; result.x = fn();
+			Vec3.state = 'y'; result.y = fn();
+			Vec3.state = 'z'; result.z = fn();
+			return result
+		}
+
+		let a = vec3(1, 2, 3);
+		let b = vec3(0, 1, 0);
+		let c = calc(() => a * 10 + b + vec3(0, 0, 2))
+
+		console.log(c); // Vec3 {x: 10, y: 21, z: 32}
+
+	</script>
+
+</body>
+
+</html>
