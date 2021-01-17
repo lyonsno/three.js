@@ -39,7 +39,7 @@
 		}
 		function dot(a, b) {
 			if (Vec3.state === 'x') {
-				let re_dot = a.clone().dot(b)
+				let re_dot = a.dot(b)
 				Vec3.re_xs.push(re_dot)
 				return re_dot
 			} else if (Vec3.state === 'y') {
