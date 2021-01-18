@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>three.js glsl_like_math</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+</head>
+
+<body>
+	<div>glsl-like JavaScript Vec3 expression Demo (see devtool log)</div>
+	<script src="../build/three.js"></script>
+	<script>
+
+		class Vec3 extends THREE.Vector3 {
+			static state = 'x'
+			static re_xs = []
+			static index_y = 0
+			static index_z = 0
+			constructor(x = 0, y = 0, z = 0) {
+				super(x, y, z)
+			}
+			valueOf() {
+				return this[Vec3.state]
+			}
+		}
+		function vec3(x, y, z) {
+			return new Vec3(x, y, z)
+		}
+		function calc(fn) {
+			let result = vec3()
+			Vec3.state = 'x'; result.x = fn();
+			Vec3.state = 'y'; result.y = fn();
+			Vec3.state = 'z'; result.z = fn();
+			Vec3.re_xs = []
+			Vec3.index_y = 0
+			Vec3.index_z = 0
+			return result
+		}
+		function dot(a, b) {
+			if (Vec3.state === 'x') {
+				let re_dot = a.dot(b)
+				Vec3.re_xs.push(re_dot)
+				return re_dot
+			} else if (Vec3.state === 'y') {
+				return Vec3.re_xs[Vec3.index_y++]
+			} else if (Vec3.state === 'z') {
+				return Vec3.re_xs[Vec3.index_z++]
+			}
+		}
+		function cross(a, b) {
+			if (Vec3.state === 'x') {
+				let re_cross = a.clone().cross(b)
+				Vec3.re_xs.push(re_cross)
+				return re_cross
+			} else if (Vec3.state === 'y') {
+				return Vec3.re_xs[Vec3.index_y++]
+			} else if (Vec3.state === 'z') {
+				return Vec3.re_xs[Vec3.index_z++]
+			}
+		}
+		function length(a) {
+			if (Vec3.state === 'x') {
+				debugger
+				let re_cross = a.length()
+				Vec3.re_xs.push(re_cross)
+				return re_cross
+			} else if (Vec3.state === 'y') {
+				return Vec3.re_xs[Vec3.index_y++]
+			} else if (Vec3.state === 'z') {
+				return Vec3.re_xs[Vec3.index_z++]
+			}
+		}
+
+		let a = vec3(1, 2, 3);
+		let b = vec3(4, 5, 6);
+		let z = calc(() => (a * 10 - b + 3) / length(cross(a, b) + dot(a, b) * 3)) // do math expression calc
+
+		console.log('normal THREE.Vector3 result: ',
+			(a.clone().multiplyScalar(10).sub(b).addScalar(3)).divide(new THREE.Vector3().crossVectors(a, b).addScalar(a.dot(b) * 3).length())
+		)
+		console.log('this glsl-like vec3 result: ', z);
+
+	</script>
+	<script>
+		// csonole_test
+		if (false) {
+			{
+				new THREE.Vector3(1, 2, 3).cross(new THREE.Vector3(4, 5, 6))
+			}
+			{
+				new THREE.Vector3(1, 2, 3).cross(new THREE.Vector3(4, 5, 6))
+					.addScalar(new THREE.Vector3(1, 2, 3).dot(new THREE.Vector3(4, 5, 6)))
+			}
+		}
+	</script>
+
+</body>
+
+</html>
