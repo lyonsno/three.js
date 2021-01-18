@@ -8,14 +8,13 @@
 </head>
 
 <body>
-
+	<div>glsl-like JavaScript Vec3 expression Demo (see devtool log)</div>
 	<script src="../build/three.js"></script>
 	<script>
 
 		class Vec3 extends THREE.Vector3 {
 			static state = 'x'
 			static re_xs = []
-			static index_x = 0
 			static index_y = 0
 			static index_z = 0
 			constructor(x = 0, y = 0, z = 0) {
@@ -34,16 +33,14 @@
 			Vec3.state = 'y'; result.y = fn();
 			Vec3.state = 'z'; result.z = fn();
 			Vec3.re_xs = []
-			Vec3.index_x = 0
 			Vec3.index_y = 0
 			Vec3.index_z = 0
 			return result
 		}
 		function dot(a, b) {
 			if (Vec3.state === 'x') {
-				let re_dot = a.clone().dot(b)
+				let re_dot = a.dot(b)
 				Vec3.re_xs.push(re_dot)
-				Vec3.index_x++
 				return re_dot
 			} else if (Vec3.state === 'y') {
 				return Vec3.re_xs[Vec3.index_y++]
@@ -55,7 +52,6 @@
 			if (Vec3.state === 'x') {
 				let re_cross = a.clone().cross(b)
 				Vec3.re_xs.push(re_cross)
-				Vec3.index_x++
 				return re_cross
 			} else if (Vec3.state === 'y') {
 				return Vec3.re_xs[Vec3.index_y++]
@@ -66,13 +62,12 @@
 
 		let a = vec3(1, 2, 3);
 		let b = vec3(4, 5, 6);
-		let z = calc(() => cross(a, b) + dot(a, b)) // do math expression calc
+		let z = calc(() => (a * 10 - b + 3) / (cross(a, b) + dot(a, b) * 3)) // do math expression calc
 
-		console.log(
-			a.clone().cross(b)
-				.addScalar(a.clone().dot(b))
+		console.log('normal THREE.Vector3 result: ',
+			(a.clone().multiplyScalar(10).sub(b).addScalar(3)).divide(new THREE.Vector3().crossVectors(a, b).addScalar(a.dot(b) * 3))
 		)
-		console.log(z);
+		console.log('this glsl-like vec3 result: ', z);
 
 	</script>
 	<script>
