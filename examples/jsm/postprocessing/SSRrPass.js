@@ -17,9 +17,9 @@ import {
 	WebGLRenderTarget,
 } from "../../../build/three.module.js";
 import { Pass } from "../postprocessing/Pass.js";
-import { SSRShader } from "../shaders/SSRShader.js";
-import { SSRBlurShader } from "../shaders/SSRShader.js";
-import { SSRDepthShader } from "../shaders/SSRShader.js";
+import { SSRrShader } from "../shaders/SSRrShader.js";
+import { SSRBlurShader } from "../shaders/SSRrShader.js";
+import { SSRDepthShader } from "../shaders/SSRrShader.js";
 import { CopyShader } from "../shaders/CopyShader.js";
 
 var SSRrPass = function ({
@@ -43,11 +43,11 @@ var SSRrPass = function ({
 	this.camera = camera;
 	this.scene = scene;
 
-	this.opacity = SSRShader.uniforms.opacity.value;
+	this.opacity = SSRrShader.uniforms.opacity.value;
 	this.output = 0;
 
-	this.maxDistance = SSRShader.uniforms.maxDistance.value;
-	this.surfDist = SSRShader.uniforms.maxDistance.value;
+	this.maxDistance = SSRrShader.uniforms.maxDistance.value;
+	this.surfDist = SSRrShader.uniforms.maxDistance.value;
 
 	this.selects = selects;
 	this.isSelective = Array.isArray(this.selects);
@@ -76,7 +76,7 @@ var SSRrPass = function ({
 
 	this.isBlur = true;
 
-	this._isDistanceAttenuation = SSRShader.defines.isDistanceAttenuation;
+	this._isDistanceAttenuation = SSRrShader.defines.isDistanceAttenuation;
 	Object.defineProperty(this, "isDistanceAttenuation", {
 		get() {
 			return this._isDistanceAttenuation;
@@ -89,7 +89,7 @@ var SSRrPass = function ({
 		},
 	});
 
-	this._isFresnel = SSRShader.defines.isFresnel;
+	this._isFresnel = SSRrShader.defines.isFresnel;
 	Object.defineProperty(this, "isFresnel", {
 		get() {
 			return this._isFresnel;
@@ -102,7 +102,7 @@ var SSRrPass = function ({
 		},
 	});
 
-	this._isInfiniteThick = SSRShader.defines.isInfiniteThick;
+	this._isInfiniteThick = SSRrShader.defines.isInfiniteThick;
 	Object.defineProperty(this, "isInfiniteThick", {
 		get() {
 			return this._isInfiniteThick;
@@ -114,9 +114,9 @@ var SSRrPass = function ({
 			this.ssrMaterial.needsUpdate = true;
 		},
 	});
-	this.thickTolerance = SSRShader.uniforms.thickTolerance.value;
+	this.thickTolerance = SSRrShader.uniforms.thickTolerance.value;
 
-	this._isNoise = SSRShader.defines.isNoise;
+	this._isNoise = SSRrShader.defines.isNoise;
 	Object.defineProperty(this, "isNoise", {
 		get() {
 			return this._isNoise;
@@ -128,7 +128,7 @@ var SSRrPass = function ({
 			this.ssrMaterial.needsUpdate = true;
 		},
 	});
-	this.noiseIntensity = SSRShader.uniforms.noiseIntensity.value;
+	this.noiseIntensity = SSRrShader.uniforms.noiseIntensity.value;
 
 	// beauty render target with depth buffer
 
@@ -188,8 +188,8 @@ var SSRrPass = function ({
 
 	// ssrr material
 
-	if (SSRShader === undefined) {
-		console.error("THREE.SSRrPass: The pass relies on SSRShader.");
+	if (SSRrShader === undefined) {
+		console.error("THREE.SSRrPass: The pass relies on SSRrShader.");
 	}
 
 	this.ssrMaterial = new ShaderMaterial({
@@ -200,11 +200,11 @@ var SSRrPass = function ({
 						window.innerHeight * window.innerHeight
 				),
 			},
-			SSRShader.defines
+			SSRrShader.defines
 		),
-		uniforms: UniformsUtils.clone(SSRShader.uniforms),
-		vertexShader: SSRShader.vertexShader,
-		fragmentShader: SSRShader.fragmentShader,
+		uniforms: UniformsUtils.clone(SSRrShader.uniforms),
+		vertexShader: SSRrShader.vertexShader,
+		fragmentShader: SSRrShader.fragmentShader,
 		blending: NoBlending,
 	});
 	if (!isPerspectiveCamera) {
