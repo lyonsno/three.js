@@ -39,6 +39,9 @@ var SSRrPass = function ({
 	this.height = height !== undefined ? height : 512;
 
 	this.clear = true;
+	this.colorForRenderPass = new Color();
+	this.colorForRenderOverride = new Color();
+	this.colorForRenderMetalness = new Color();
 
 	this.camera = camera;
 	this.scene = scene;
@@ -564,7 +567,9 @@ SSRrPass.prototype = Object.assign(Object.create(Pass.prototype), {
 		clearAlpha
 	) {
 		// save original state
-		this.originalClearColor.copy(renderer.getClearColor());
+		this.originalClearColor.copy(
+			renderer.getClearColor(this.colorForRenderPass)
+		);
 		var originalClearAlpha = renderer.getClearAlpha();
 		var originalAutoClear = renderer.autoClear;
 
@@ -594,7 +599,9 @@ SSRrPass.prototype = Object.assign(Object.create(Pass.prototype), {
 		clearColor,
 		clearAlpha
 	) {
-		this.originalClearColor.copy(renderer.getClearColor());
+		this.originalClearColor.copy(
+			renderer.getClearColor(this.colorForRenderOverride)
+		);
 		var originalClearAlpha = renderer.getClearAlpha();
 		var originalAutoClear = renderer.autoClear;
 
@@ -628,7 +635,9 @@ SSRrPass.prototype = Object.assign(Object.create(Pass.prototype), {
 		clearColor,
 		clearAlpha
 	) {
-		this.originalClearColor.copy(renderer.getClearColor());
+		this.originalClearColor.copy(
+			renderer.getClearColor(this.colorForRenderMetalness)
+		);
 		var originalClearAlpha = renderer.getClearAlpha();
 		var originalAutoClear = renderer.autoClear;
 
