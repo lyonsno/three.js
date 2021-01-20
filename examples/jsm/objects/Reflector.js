@@ -11,7 +11,10 @@ import {
 	UniformsUtils,
 	Vector3,
 	Vector4,
-	WebGLRenderTarget
+	WebGLRenderTarget,
+	DepthTexture,
+	UnsignedShortType,
+	NearestFilter
 } from "../../../build/three.module.js";
 
 var Reflector = function ( geometry, options ) {
@@ -47,10 +50,17 @@ var Reflector = function ( geometry, options ) {
 	var textureMatrix = new Matrix4();
 	var virtualCamera = new PerspectiveCamera();
 
+	var depthTexture = new DepthTexture();
+  depthTexture.type = UnsignedShortType;
+  depthTexture.minFilter = NearestFilter;
+	depthTexture.maxFilter = NearestFilter;
+
 	var parameters = {
 		minFilter: LinearFilter,
 		magFilter: LinearFilter,
-		format: RGBFormat
+		format: RGBFormat,
+    depthTexture: depthTexture,
+    depthBuffer: true
 	};
 
 	var renderTarget = new WebGLRenderTarget( textureWidth, textureHeight, parameters );
@@ -67,7 +77,8 @@ var Reflector = function ( geometry, options ) {
 		vertexShader: shader.vertexShader
 	} );
 
-	material.uniforms[ "tDiffuse" ].value = renderTarget.texture;
+	// material.uniforms[ "tDiffuse" ].value = renderTarget.texture;
+	material.uniforms[ "tDiffuse" ].value = renderTarget.depthTexture;
 	material.uniforms[ "color" ].value = color;
 	material.uniforms[ "textureMatrix" ].value = textureMatrix;
 
