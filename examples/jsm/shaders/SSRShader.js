@@ -1,59 +1,51 @@
-import {
-  Matrix4,
-  Vector2
-} from "../../../build/three.module.js";
+import { Matrix4, Vector2 } from "../../../build/three.module.js";
 /**
  * References:
  * https://lettier.github.io/3d-game-shaders-for-beginners/screen-space-reflection.html
  */
 
 var SSRShader = {
+	defines: {
+		MAX_STEP: 0,
+		isPerspectiveCamera: true,
+		isDistanceAttenuation: true,
+		isFresnel: true,
+		isInfiniteThick: false,
+		isNoise: false,
+		isSelective: false,
+	},
 
-  defines: {
-    MAX_STEP: 0,
-    isPerspectiveCamera: true,
-    isDistanceAttenuation: true,
-    isFresnel: true,
-    isInfiniteThick: false,
-    isNoise: false,
-    isSelective: false,
-  },
+	uniforms: {
+		tDiffuse: { value: null },
+		tNormal: { value: null },
+		tMetalness: { value: null },
+		tDepth: { value: null },
+		cameraNear: { value: null },
+		cameraFar: { value: null },
+		resolution: { value: new Vector2() },
+		cameraProjectionMatrix: { value: new Matrix4() },
+		cameraInverseProjectionMatrix: { value: new Matrix4() },
+		opacity: { value: 0.5 },
+		maxDistance: { value: 180 },
+		cameraRange: { value: 0 },
+		surfDist: { value: 0.007 },
+		thickTolerance: { value: 0.03 },
+		noiseIntensity: { value: 0.1 },
+	},
 
-  uniforms: {
+	vertexShader: [
+		"varying vec2 vUv;",
 
-    "tDiffuse": { value: null },
-    "tNormal": { value: null },
-    "tMetalness": { value: null },
-    "tDepth": { value: null },
-    "cameraNear": { value: null },
-    "cameraFar": { value: null },
-    "resolution": { value: new Vector2() },
-    "cameraProjectionMatrix": { value: new Matrix4() },
-    "cameraInverseProjectionMatrix": { value: new Matrix4() },
-    "opacity": { value: .5 },
-    "maxDistance": { value: 180 },
-    "cameraRange": { value: 0 },
-    "surfDist": { value: .007 },
-    "thickTolerance": { value: .03 },
-    "noiseIntensity": { value: .1 },
+		"void main() {",
 
-  },
+		"	vUv = uv;",
 
-  vertexShader: [
+		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-    "varying vec2 vUv;",
+		"}",
+	].join("\n"),
 
-    "void main() {",
-
-    "	vUv = uv;",
-
-    "	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-
-    "}"
-
-  ].join("\n"),
-
-  fragmentShader: `
+	fragmentShader: `
 		// precision highp float;
 		precision highp sampler2D;
 		varying vec2 vUv;
@@ -189,7 +181,7 @@ var SSRShader = {
 					float viewReflectRayZ=1./(recipVPZ+s*(1./d1viewPosition.z-recipVPZ));
 					float sD=surfDist*cW;
 				#else
-				float viewReflectRayZ=viewPosition.z+s*(d1viewPosition.z-viewPosition.z);
+				  float viewReflectRayZ=viewPosition.z+s*(d1viewPosition.z-viewPosition.z);
 					float sD=surfDist;
 				#endif
 
@@ -221,47 +213,40 @@ var SSRShader = {
 				}
 			}
 		}
-	`
-
+	`,
 };
 
 var SSRDepthShader = {
+	defines: {
+		PERSPECTIVE_CAMERA: 1,
+	},
 
-  defines: {
-    "PERSPECTIVE_CAMERA": 1
-  },
+	uniforms: {
+		tDepth: { value: null },
+		cameraNear: { value: null },
+		cameraFar: { value: null },
+	},
 
-  uniforms: {
+	vertexShader: [
+		"varying vec2 vUv;",
 
-    "tDepth": { value: null },
-    "cameraNear": { value: null },
-    "cameraFar": { value: null },
+		"void main() {",
 
-  },
+		"	vUv = uv;",
+		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-  vertexShader: [
+		"}",
+	].join("\n"),
 
-    "varying vec2 vUv;",
+	fragmentShader: [
+		"uniform sampler2D tDepth;",
 
-    "void main() {",
+		"uniform float cameraNear;",
+		"uniform float cameraFar;",
 
-    "	vUv = uv;",
-    "	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+		"varying vec2 vUv;",
 
-    "}"
-
-  ].join("\n"),
-
-  fragmentShader: [
-
-    "uniform sampler2D tDepth;",
-
-    "uniform float cameraNear;",
-    "uniform float cameraFar;",
-
-    "varying vec2 vUv;",
-
-    "#include <packing>",
+		"#include <packing>",
 
 		"float getLinearDepth( const in vec2 uv ) {",
 
@@ -279,41 +264,34 @@ var SSRDepthShader = {
 
 		"}",
 
-    "void main() {",
+		"void main() {",
 
-    "	float depth = getLinearDepth( vUv );",
-    "	gl_FragColor = vec4( vec3( 1.0 - depth ), 1.0 );",
+		"	float depth = getLinearDepth( vUv );",
+		"	gl_FragColor = vec4( vec3( 1.0 - depth ), 1.0 );",
 
-    "}"
-
-  ].join("\n")
-
+		"}",
+	].join("\n"),
 };
 
 var SSRBlurShader = {
+	uniforms: {
+		tDiffuse: { value: null },
+		resolution: { value: new Vector2() },
+		opacity: { value: 0.5 },
+	},
 
-  uniforms: {
+	vertexShader: [
+		"varying vec2 vUv;",
 
-    "tDiffuse": { value: null },
-    "resolution": { value: new Vector2() },
-    "opacity": { value: .5 },
+		"void main() {",
 
-  },
+		"	vUv = uv;",
+		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-  vertexShader: [
+		"}",
+	].join("\n"),
 
-    "varying vec2 vUv;",
-
-    "void main() {",
-
-    "	vUv = uv;",
-    "	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-
-    "}"
-
-  ].join("\n"),
-
-  fragmentShader: `
+	fragmentShader: `
 
     uniform sampler2D tDiffuse;
     uniform vec2 resolution;
@@ -348,9 +326,7 @@ var SSRBlurShader = {
 			gl_FragColor=vec4(rgb,a);
 
 		}
-	`
-
-
+	`,
 };
 
 export { SSRShader, SSRDepthShader, SSRBlurShader };
