@@ -128,7 +128,7 @@ var SSRShader = {
 			#endif
 			#ifdef useReflector
 				float reflectorDepth=texture2D(tReflectorDepth,vUv).r;
-				if(reflectorDepth<1.){
+				if(reflectorDepth>0.&&reflectorDepth<1.){
 					gl_FragColor=texture2D(tReflectorDiffuse,vUv);
 					return;
 				}

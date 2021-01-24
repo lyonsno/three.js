@@ -23,7 +23,7 @@ import { SSRBlurShader } from "../shaders/SSRShader.js";
 import { SSRDepthShader } from "../shaders/SSRShader.js";
 import { CopyShader } from "../shaders/CopyShader.js";
 
-var SSRPass = function({ scene, camera, width, height, selects, encoding, isPerspectiveCamera = true, isBouncing = false, morphTargets = false, useReflector = false, reflectorRenderTarget }) {
+var SSRPass = function({ scene, camera, width, height, selects, encoding, isPerspectiveCamera = true, isBouncing = false, morphTargets = false, useReflector = false, reflector, reflectorRenderTarget }) {
 
   Pass.call(this);
 
@@ -46,6 +46,7 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
 
 	this.encoding = encoding
 
+	this.reflector = reflector
 	this.reflectorRenderTarget = reflectorRenderTarget
 
   this._isBouncing = isBouncing
@@ -354,7 +355,8 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
   },
 
-  render: function(renderer, writeBuffer /*, readBuffer, deltaTime, maskActive */ ) {
+	render: function (renderer, writeBuffer /*, readBuffer, deltaTime, maskActive */) {
+
 
     // render beauty and depth
 
@@ -363,15 +365,18 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     renderer.clear();
     renderer.render(this.scene, this.camera);
 
+		if (this.useReflector) {
+			this.reflector.visible=false
+		}
     // render normals
-
     this.renderOverride(renderer, this.normalMaterial, this.normalRenderTarget, 0, 0);
-
     // render metalnesses
-
     if (this.isSelective) {
       this.renderMetalness(renderer, this.metalnessOnMaterial, this.metalnessRenderTarget, 0, 0);
     }
+		if (this.useReflector) {
+			this.reflector.visible=true
+		}
 
     // render SSR
 
@@ -483,7 +488,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
       default:
         console.warn('THREE.SSRPass: Unknown output type.');
 
-    }
+		}
 
   },
 
