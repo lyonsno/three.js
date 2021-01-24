@@ -40,10 +40,10 @@
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
 		let params = {
-			enableSSR: true,
+			enableSSR: false,
 			isOrbitControls: false,
 			isOtherMeshes: true,
-			isReflector: false,
+			isReflector: true,
 		}
 		let composer
 		let ssrPass
@@ -148,6 +148,50 @@
 				reflector.rotation.x = -Math.PI / 2
 				reflector.visible = params.isReflector
 				scene.add(reflector);
+				window.reflectorRenderTarget=reflector.getRenderTarget()///test
+			}
+			{
+				let buffer_geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
+
+
+				// material
+				let uniforms = {
+					"colorTexture": { value: reflectorRenderTarget.texture }
+					// "colorTexture": { value: reflectorRenderTarget.depthTexture }
+				};
+				let material = new THREE.ShaderMaterial({
+					side:THREE.DoubleSide,
+					uniforms: uniforms,
+					vertexShader: `
+            varying vec2 vUv;
+            void main()	{
+              vUv = uv;
+              // gl_Position=projectionMatrix*modelViewMatrix*vec4(position, 1.0);
+              gl_Position=vec4(-position.x-.5,position.y+.5,position.z, 1.0);
+            }
+          `,
+					fragmentShader: `
+            uniform float time;
+            uniform sampler2D colorTexture;
+
+            varying vec2 vUv;
+
+            void main()	{
+
+              vec2 uv = vUv;
+              
+              vec3 color = texture2D( colorTexture, uv ).rgb;
+              gl_FragColor=vec4( color ,1.0 );
+
+            }
+          `
+
+				});
+
+
+				let mesh = new THREE.Mesh(buffer_geometry, material);
+
+				scene.add(mesh);
 			}
 
 			// renderer
@@ -183,6 +227,8 @@
 				height: innerHeight,
 				encoding: THREE.sRGBEncoding,
 				isPerspectiveCamera: isPerspectiveCamera,
+				useReflector:true,
+				reflectorRenderTarget,
 				// morphTargets: true,
 			});
 			composer.addPass(ssrPass);
