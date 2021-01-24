@@ -40,8 +40,8 @@
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
 		let params = {
-			enableSSR: false,
-			isOrbitControls: false,
+			enableSSR: true,
+			isOrbitControls: true,
 			isOtherMeshes: true,
 			isReflector: true,
 		}
@@ -150,7 +150,7 @@
 				scene.add(reflector);
 				window.reflectorRenderTarget=reflector.getRenderTarget()///test
 			}
-			{
+			if(0){
 				let buffer_geometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
 
 
@@ -182,6 +182,7 @@
               
               vec3 color = texture2D( colorTexture, uv ).rgb;
               gl_FragColor=vec4( color ,1.0 );
+              // gl_FragColor=vec4( vec3(color.r) ,1.0 );
 
             }
           `
@@ -237,6 +238,7 @@
 
 			gui = new GUI({ width: 400 });
 			gui.add(params, 'enableSSR').name('Enable SSR');
+			gui.add(ssrPass, 'useReflector');
 			gui.add(ssrPass, 'isDistanceAttenuation');
 			ssrPass.maxDistance = .1
 			gui.add(ssrPass, 'maxDistance').min(0).max(1).step(.01);

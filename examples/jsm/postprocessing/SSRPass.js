@@ -44,7 +44,9 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   this.selects = selects
   this.isSelective = Array.isArray(this.selects)
 
-  this.encoding = encoding
+	this.encoding = encoding
+
+	this.reflectorRenderTarget = reflectorRenderTarget
 
   this._isBouncing = isBouncing
   Object.defineProperty(this, 'isBouncing', {
@@ -63,6 +65,19 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   })
 
   this.isBlur = true
+
+  this._useReflector = SSRShader.defines.useReflector
+  Object.defineProperty(this, 'useReflector', {
+    get() {
+      return this._useReflector
+    },
+    set(val) {
+      if (this._useReflector === val) return
+      this._useReflector = val
+      this.ssrMaterial.defines.useReflector = val
+      this.ssrMaterial.needsUpdate = true
+    }
+	})
 
   this._isDistanceAttenuation = SSRShader.defines.isDistanceAttenuation
   Object.defineProperty(this, 'isDistanceAttenuation', {
@@ -210,6 +225,10 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   this.ssrMaterial.uniforms['resolution'].value.set(this.width, this.height);
   this.ssrMaterial.uniforms['cameraProjectionMatrix'].value.copy(this.camera.projectionMatrix);
   this.ssrMaterial.uniforms['cameraInverseProjectionMatrix'].value.copy(this.camera.projectionMatrixInverse);
+	// if (this.useReflector) {
+	this.ssrMaterial.uniforms['tReflectorDiffuse'].value = this.reflectorRenderTarget.texture
+	this.ssrMaterial.uniforms['tReflectorDepth'].value = this.reflectorRenderTarget.depthTexture
+	// }
 
   // normal material
 

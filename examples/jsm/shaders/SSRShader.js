@@ -17,6 +17,7 @@ var SSRShader = {
     isInfiniteThick: false,
     isNoise: false,
     isSelective: false,
+    useReflector: true,
   },
 
   uniforms: {
@@ -25,6 +26,8 @@ var SSRShader = {
     "tNormal": { value: null },
     "tMetalness": { value: null },
     "tDepth": { value: null },
+    "tReflectorDepth": { value: null },
+    "tReflectorDiffuse": { value: null },
     "cameraNear": { value: null },
     "cameraFar": { value: null },
     "resolution": { value: new Vector2() },
@@ -61,6 +64,8 @@ var SSRShader = {
 		uniform sampler2D tNormal;
 		uniform sampler2D tMetalness;
 		uniform sampler2D tDiffuse;
+		uniform sampler2D tReflectorDiffuse;
+		uniform sampler2D tReflectorDepth;
 		uniform float cameraRange;
 		uniform vec2 resolution;
 		uniform float opacity;
@@ -120,6 +125,13 @@ var SSRShader = {
 			#ifdef isSelective
 				float metalness=texture2D(tMetalness,vUv).r;
 				if(metalness==0.) return;
+			#endif
+			#ifdef useReflector
+				float reflectorDepth=texture2D(tReflectorDepth,vUv).r;
+				if(reflectorDepth<1.){
+					gl_FragColor=texture2D(tReflectorDiffuse,vUv);
+					return;
+				}
 			#endif
 
 			float depth = getDepth( vUv );
