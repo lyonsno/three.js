@@ -184,6 +184,8 @@ var SSRShader = {
 
 				#ifdef isPerspectiveCamera
 					#ifdef isInfiniteThick
+						// https://www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
+						float recipVPZ=1./viewPosition.z;
 						float viewReflectRayZ=1./(recipVPZ+s*(1./d1viewPosition.z-recipVPZ));
 					#endif
 					float sD=surfDist*cW;
