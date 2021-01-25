@@ -162,7 +162,7 @@ gui.add(params, 'enableSSR').name( 'Enable SSR' );
 gui.add(ssrPass, 'isDistanceAttenuation');
 ssrPass.maxDistance=1;
 gui.add(ssrPass, 'maxDistance').min(0).max(10).step(.001);
-ssrPass.isFresnel = false
+ssrPass.isFresnel = true
 gui.add(ssrPass, 'isFresnel');
 gui.add(params, 'darken').name('rainy').onChange(function(value){
 	if(value){
