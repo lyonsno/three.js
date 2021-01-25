@@ -277,9 +277,9 @@ Reflector.ReflectorShader = {
 		'	vec4 base = texture2DProj( tDiffuse, uv );',
 		'	#ifdef useDepthTexture',
 		'		vec4 depth = texture2DProj( tDepth, uv );',
-		// '		gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.-depth.r );',
+		'		gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.-depth.r );',
 		'	#else',
-		// '		gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );',
+		'		gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );',
 		'	#endif',
 
 		'}'

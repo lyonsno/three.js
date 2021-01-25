@@ -362,21 +362,22 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
     if (this.encoding) this.beautyRenderTarget.texture.encoding = this.encoding
     renderer.setRenderTarget(this.beautyRenderTarget);
-    renderer.clear();
-    renderer.render(this.scene, this.camera);
+		renderer.clear();
 
+		if (this.useReflector) {
+			this.reflector.visible=true
+		}
+    renderer.render(this.scene, this.camera);
 		if (this.useReflector) {
 			this.reflector.visible=false
 		}
+
     // render normals
     this.renderOverride(renderer, this.normalMaterial, this.normalRenderTarget, 0, 0);
     // render metalnesses
     if (this.isSelective) {
       this.renderMetalness(renderer, this.metalnessOnMaterial, this.metalnessRenderTarget, 0, 0);
     }
-		if (this.useReflector) {
-			this.reflector.visible=true
-		}
 
     // render SSR
 

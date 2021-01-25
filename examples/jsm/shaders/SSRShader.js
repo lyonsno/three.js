@@ -127,9 +127,10 @@ var SSRShader = {
 				if(metalness==0.) return;
 			#endif
 			#ifdef useReflector
-				float reflectorDepth=texture2D(tReflectorDepth,vUv).r;
-				if(reflectorDepth>0.&&reflectorDepth<1.){
-					gl_FragColor=texture2D(tReflectorDiffuse,vUv);
+				vec2 reflectorUV=vec2(1.-vUv.x,vUv.y);
+				float reflectorDepth=texture2D(tReflectorDepth,reflectorUV).r;
+				if(reflectorDepth<1.){
+					gl_FragColor=texture2D(tReflectorDiffuse,reflectorUV);
 					return;
 				}
 			#endif
