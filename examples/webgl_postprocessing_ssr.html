@@ -35,15 +35,15 @@
 		import { GUI } from './jsm/libs/dat.gui.module.js';
 		import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
 		import { SSRPass } from './jsm/postprocessing/SSRPass.js';
-		import { Reflector } from './jsm/objects/ReflectorForSSRPass.js';
+		import { Reflector } from './jsm/objects/Reflector.js';
 
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
 		let params = {
-			enableSSR: true,
-			autoRotate: true,
+			enableSSR: false,
+			autoRotate: false,
 			isOtherMeshes: true,
-			isReflector: false,
+			isReflector: true,
 		}
 		let composer
 		let ssrPass
@@ -97,21 +97,21 @@
 			spotLight.position.set(- 1, 1, 1);
 			scene.add(spotLight);
 
-			dracoLoader.load('models/draco/bunny.drc', function (geometry) {
+			// dracoLoader.load('models/draco/bunny.drc', function (geometry) {
 
-				geometry.computeVertexNormals();
+			// 	geometry.computeVertexNormals();
 
-				const material = new THREE.MeshStandardMaterial({ color: 0x606060 });
-				const mesh = new THREE.Mesh(geometry, material);
-				// mesh.castShadow = true;
-				// mesh.receiveShadow = true;
-				scene.add(mesh);
-				selects.push(mesh)
+			// 	const material = new THREE.MeshStandardMaterial({ color: 0x606060 });
+			// 	const mesh = new THREE.Mesh(geometry, material);
+			// 	// mesh.castShadow = true;
+			// 	// mesh.receiveShadow = true;
+			// 	scene.add(mesh);
+			// 	selects.push(mesh)
 
-				// Release decoder resources.
-				dracoLoader.dispose();
+			// 	// Release decoder resources.
+			// 	dracoLoader.dispose();
 
-			});
+			// });
 
 			{
 				const geometry = new THREE.BoxBufferGeometry(.05, .05, .05);
@@ -283,11 +283,11 @@
 				controls.update()
 			}
 
-			if (params.enableSSR) {
-				composer.render();
-			} else {
+			// if (params.enableSSR) {
+			// 	composer.render();
+			// } else {
 				renderer.render(scene, camera)
-			}
+			// }
 
 		}
 	</script>
