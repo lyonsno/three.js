@@ -59,18 +59,14 @@
 
 		const container = document.querySelector('#container');
 
-		// Configure and create Draco decoder.
-		const dracoLoader = new DRACOLoader();
-		dracoLoader.setDecoderPath('js/libs/draco/');
-		dracoLoader.setDecoderConfig({ type: 'js' });
-
 		init();
 		animate();
 
 		function init() {
 
 			camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 15);
-			camera.position.set(0.13271600513224902, 0.3489546826045913, 0.43921296427927076);
+			camera.position.set(0.3675778789191446, 0.05823451185108117, 0.3682962760183505);
+			window.camera=camera
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color(0x443333);
