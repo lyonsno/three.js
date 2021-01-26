@@ -116,6 +116,16 @@ var SSRShader = {
 			// http://glslsandbox.com/e#61476.1
 			return fract(sin(vec3(n,n+1.0,n+2.0))*vec3(43758.5453123,22578.1459123,19642.3490423));
 		}
+		vec3 random3(vec3 c) {
+			float j = 4096.0*sin(dot(c,vec3(17.0, 59.4, 15.0)));
+			vec3 r;
+			r.z = fract(512.0*j);
+			j *= .125;
+			r.x = fract(512.0*j);
+			j *= .125;
+			r.y = fract(512.0*j);
+			return r-0.5;
+		}
 		void main(){
 			#ifdef isSelective
 				float metalness=texture2D(tMetalness,vUv).r;
@@ -135,7 +145,7 @@ var SSRShader = {
 			vec3 viewNormal=getViewNormal( vUv );
 
 			#ifdef isNoise
-				viewNormal+=(hash3(viewPosition.x+viewPosition.y+viewPosition.z)-.5)*noiseIntensity;
+				viewNormal+=random3(viewPosition)*noiseIntensity*clipW;
 				viewNormal=normalize(viewNormal);
 			#endif
 
