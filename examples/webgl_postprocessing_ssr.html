@@ -52,7 +52,7 @@
 		let reflector
 		let reflectorRenderTarget
 		let selects=[]
-		window.readed = new Uint8Array( 4 );
+		window.readed = new Float32Array( 4 );
 		window.readedVec3=new THREE.Vector3()
 
 		const container = document.querySelector('#container');
@@ -198,7 +198,7 @@
 				selects: params.isReflector ? selects : null,
 				// morphTargets: true,
 			});
-			// window.ssrPass = ssrPass
+			window.ssrPass = ssrPass
 			composer.addPass(ssrPass);
 
 			// GUI
@@ -255,18 +255,21 @@
 			// gui.add(ssrPass, 'isBlur');
 			// gui.close()
 
+			// window.pixelCount=window.innerWidth*window.innerHeight
+			window.pixelCount=100
+
 			window.pixelRenderer=new THREE.WebGLRenderer({ antialias: false });
 			pixelRenderer.setSize(1,1);
 			pixelRenderer.outputEncoding = THREE.sRGBEncoding;
 			// container.appendChild(pixelRenderer.domElement);
 
-			window.pixelCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, .001, 1000 );
+			// window.pixelCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, .001, 1000 );
 
-			// window.pixelCameras=[]
-			// for(let i=0;i<1000;i++){
-			// 	let pixelCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, 1, 1000 );
-			// 	pixelCameras.push(pixelCamera)
-			// }
+			window.pixelCameras=[]
+			for(let i=0;i<pixelCount;i++){
+				let pixelCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, 1, 1000 );
+				pixelCameras.push(pixelCamera)
+			}
 
 		}
 
@@ -306,22 +309,38 @@
 			}
 
 			if (params.enableSSR) {
+
+				ssrPass.outputType=0
 				composer.render();
-				let max=0
-				for(let i=0;i<max;i++){
-					let {x,y}=vs.serial_to_xy(window.innerWidth,i)
-					renderer.readRenderTargetPixels( ssrPass.ssrRenderTarget, x*10, y*10, 1, 1, readed );
-					readedVec3.x=readed[0]
-					readedVec3.y=readed[1]
-					readedVec3.z=readed[2]
-					pixelCamera.rotation.setFromVector3(readedVec3)
-					pixelCamera.position.set(
-						Math.random()*1-.5,
-						Math.random()*1-.5,
-						Math.random()*1-.5,
-					)
-					pixelRenderer.render(scene,pixelCamera)
-					ctx2d.drawImage(renderer.domElement,x,y,1,1)
+				for(let y=0;y<window.innerHeight;y++){
+					for(let x=0;x<window.innerWidth;x++){
+						let i=y*window.innerWidth+x
+						renderer.readRenderTargetPixels( ssrPass.ssrRenderTarget, x, y, 1, 1, readed );
+						pixelCameras[i].position.set(
+							readed[0],
+							readed[1],
+							readed[2],
+						)
+					}
+				}
+				ssrPass.outputType=1
+				composer.render();
+				for(let y=0;y<window.innerHeight;y++){
+					for(let x=0;x<window.innerWidth;x++){
+						let i=y*window.innerWidth+x
+						renderer.readRenderTargetPixels( ssrPass.ssrRenderTarget, x, y, 1, 1, readed );
+						readedVec3.x=readed[0]
+						readedVec3.y=readed[1]
+						readedVec3.z=readed[2]
+						pixelCameras[i].rotation.setFromVector3(readedVec3)
+					}
+				}
+				for(let y=0;y<window.innerHeight;y++){
+					for(let x=0;x<window.innerWidth;x++){
+						let i=y*window.innerWidth+x
+						pixelRenderer.render(scene,pixelCameras[i])
+						ctx2d.drawImage(renderer.domElement,x,y,1,1)
+					}
 				}
 			} else {
 				renderer.render(scene, camera)
