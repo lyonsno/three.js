@@ -26,6 +26,7 @@ var SSRShader = {
     "tDepth": { value: null },
     "cameraNear": { value: null },
     "cameraFar": { value: null },
+    "cameraMatrix": { value: null },
     "resolution": { value: new Vector2() },
     "cameraProjectionMatrix": { value: new Matrix4() },
     "cameraInverseProjectionMatrix": { value: new Matrix4() },
@@ -64,6 +65,7 @@ var SSRShader = {
 		uniform float opacity;
 		uniform float cameraNear;
 		uniform float cameraFar;
+		uniform mat4 cameraMatrix;
 		uniform float maxDistance;
 		uniform float surfDist;
 		uniform mat4 cameraProjectionMatrix;
@@ -126,6 +128,8 @@ var SSRShader = {
 
 			float clipW = cameraProjectionMatrix[2][3] * viewZ+cameraProjectionMatrix[3][3];
 			vec3 viewPosition=getViewPosition( vUv, depth, clipW );
+			vec3 worldPosition=(cameraMatrix*vec4(viewPosition,1)).xyz;
+			gl_FragColor=vec4(worldPosition*10.,1);return;
 
 			vec2 d0=gl_FragCoord.xy;
 			vec2 d1;

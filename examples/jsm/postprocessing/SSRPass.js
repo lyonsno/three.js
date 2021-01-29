@@ -365,6 +365,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     this.ssrMaterial.uniforms['maxDistance'].value = this.maxDistance;
     this.ssrMaterial.uniforms['surfDist'].value = this.surfDist;
     this.ssrMaterial.uniforms['thickTolerance'].value = this.thickTolerance
+    this.ssrMaterial.uniforms['cameraMatrix'].value = this.camera.matrixWorld
     this.renderPass(renderer, this.ssrMaterial, this.ssrRenderTarget);
 
 
