@@ -1,5 +1,4 @@
 import {
-	Color,
 	LinearFilter,
 	MathUtils,
 	Matrix4,
@@ -24,7 +23,6 @@ var Reflector = function ( geometry, options ) {
 
 	options = options || {};
 
-	var color = ( options.color !== undefined ) ? new Color( options.color ) : new Color( 0x7F7F7F );
 	var textureWidth = options.textureWidth || 512;
 	var textureHeight = options.textureHeight || 512;
 	var clipBias = options.clipBias || 0;
@@ -68,7 +66,6 @@ var Reflector = function ( geometry, options ) {
 	} );
 
 	material.uniforms[ "tDiffuse" ].value = renderTarget.texture;
-	material.uniforms[ "color" ].value = color;
 	material.uniforms[ "textureMatrix" ].value = textureMatrix;
 
 	this.material = material;
@@ -202,10 +199,6 @@ Reflector.ReflectorShader = {
 
 	uniforms: {
 
-		'color': {
-			value: null
-		},
-
 		'tDiffuse': {
 			value: null
 		},
@@ -226,18 +219,11 @@ Reflector.ReflectorShader = {
 	`,
 
 	fragmentShader: `
-		uniform vec3 color;
 		uniform sampler2D tDiffuse;
 		varying vec4 vUv;
-		float blendOverlay( float base, float blend ) {
-			return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );
-		}
-		vec3 blendOverlay( vec3 base, vec3 blend ) {
-			return vec3( blendOverlay( base.r, blend.r ), blendOverlay( base.g, blend.g ), blendOverlay( base.b, blend.b ) );
-		}
 		void main() {
 			vec4 base = texture2DProj( tDiffuse, vUv );
-			gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );
+			gl_FragColor = vec4( base.rgb, 1.0 );
 		}
 	`,
 };
