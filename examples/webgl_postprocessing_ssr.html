@@ -12,10 +12,10 @@
 
 <body>
 	<div id="container"></div>
-	<div id="info">
+	<!-- <div id="info">
 		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
 		<a href="https://github.com/mrdoob/three.js/pull/20156" target="_blank" rel="noopener">SSRPass</a> demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
-	</div>
+	</div> -->
 
 	<script type="module">
 		import * as THREE from '../build/three.module.js';
@@ -172,7 +172,7 @@
 			// STATS
 
 			stats = new Stats();
-			container.appendChild(stats.dom);
+			// container.appendChild(stats.dom);
 
 			window.addEventListener('resize', onWindowResize, false);
 
@@ -194,57 +194,70 @@
 
 			// GUI
 
-			gui = new GUI({ width: 400 });
-			gui.add(params, 'enableSSR').name('Enable SSR');
-			gui.add(params, 'autoRotate').onChange(() => {
-				controls.enabled = !params.autoRotate
-			})
-			gui.add(ssrPass, 'isDistanceAttenuation');
-			ssrPass.maxDistance = .1
-			gui.add(ssrPass, 'maxDistance').min(0).max(1).step(.01);
-			gui.add(params, 'isReflector').onChange(() => {
-				if (params.isReflector) {
-					reflector.visible = true
-					ssrPass.selects = selects
-				} else {
-					reflector.visible = false
-					ssrPass.selects = null
-				}
-			})
-			gui.add(params, 'isOtherMeshes').onChange(() => {
-				if (params.isOtherMeshes) {
-					otherMeshes.forEach(mesh => mesh.visible = true)
-				} else {
-					otherMeshes.forEach(mesh => mesh.visible = false)
-				}
-			})
-			gui.add(ssrPass, 'isFresnel');
-			gui.add(ssrPass, 'isBouncing')
-			gui.add(ssrPass, 'output', {
-				'Default': SSRPass.OUTPUT.Default,
-				'SSR Only': SSRPass.OUTPUT.SSR,
-				'Beauty': SSRPass.OUTPUT.Beauty,
-				'Depth': SSRPass.OUTPUT.Depth,
-				'Normal': SSRPass.OUTPUT.Normal,
-				'Metalness': SSRPass.OUTPUT.Metalness,
-			}).onChange(function (value) {
+			// gui = new GUI({ width: 400 });
+			// gui.add(params, 'enableSSR').name('Enable SSR');
+			// gui.add(params, 'autoRotate').onChange(() => {
+			// 	controls.enabled = !params.autoRotate
+			// })
+			// gui.add(ssrPass, 'isDistanceAttenuation');
+			// ssrPass.maxDistance = .1
+			// gui.add(ssrPass, 'maxDistance').min(0).max(1).step(.01);
+			// gui.add(params, 'isReflector').onChange(() => {
+			// 	if (params.isReflector) {
+			// 		reflector.visible = true
+			// 		ssrPass.selects = selects
+			// 	} else {
+			// 		reflector.visible = false
+			// 		ssrPass.selects = null
+			// 	}
+			// })
+			// gui.add(params, 'isOtherMeshes').onChange(() => {
+			// 	if (params.isOtherMeshes) {
+			// 		otherMeshes.forEach(mesh => mesh.visible = true)
+			// 	} else {
+			// 		otherMeshes.forEach(mesh => mesh.visible = false)
+			// 	}
+			// })
+			// gui.add(ssrPass, 'isFresnel');
+			// gui.add(ssrPass, 'isBouncing')
+			// gui.add(ssrPass, 'output', {
+			// 	'Default': SSRPass.OUTPUT.Default,
+			// 	'SSR Only': SSRPass.OUTPUT.SSR,
+			// 	'Beauty': SSRPass.OUTPUT.Beauty,
+			// 	'Depth': SSRPass.OUTPUT.Depth,
+			// 	'Normal': SSRPass.OUTPUT.Normal,
+			// 	'Metalness': SSRPass.OUTPUT.Metalness,
+			// }).onChange(function (value) {
 
-				ssrPass.output = parseInt(value);
+			// 	ssrPass.output = parseInt(value);
 
-			});
-			ssrPass.opacity = .8
-			gui.add(ssrPass, 'opacity').min(0).max(1);
-			if (isPerspectiveCamera) {
-				ssrPass.surfDist = 0.0015
-				gui.add(ssrPass, 'surfDist').min(0).max(.005).step(.0001);
-			} else {
-				ssrPass.surfDist = 2
-				gui.add(ssrPass, 'surfDist').min(0).max(7).step(.01);
-			}
-			gui.add(ssrPass, 'isInfiniteThick');
-			gui.add(ssrPass, 'thickTolerance').min(0).max(.05).step(.0001);
-			gui.add(ssrPass, 'isBlur');
-			gui.close()
+			// });
+			// ssrPass.opacity = .8
+			// gui.add(ssrPass, 'opacity').min(0).max(1);
+			// if (isPerspectiveCamera) {
+			// 	ssrPass.surfDist = 0.0015
+			// 	gui.add(ssrPass, 'surfDist').min(0).max(.005).step(.0001);
+			// } else {
+			// 	ssrPass.surfDist = 2
+			// 	gui.add(ssrPass, 'surfDist').min(0).max(7).step(.01);
+			// }
+			// gui.add(ssrPass, 'isInfiniteThick');
+			// gui.add(ssrPass, 'thickTolerance').min(0).max(.05).step(.0001);
+			// gui.add(ssrPass, 'isBlur');
+			// gui.close()
+
+			window.pixelRenderer=new THREE.WebGLRenderer({ antialias: false });
+			pixelRenderer.setSize(1,1);
+			pixelRenderer.outputEncoding = THREE.sRGBEncoding;
+			// container.appendChild(pixelRenderer.domElement);
+
+			window.pixelCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, 1, 1000 );
+
+			// window.pixelCameras=[]
+			// for(let i=0;i<1000;i++){
+			// 	let pixelCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, 1, 1000 );
+			// 	pixelCameras.push(pixelCamera)
+			// }
 
 		}
 
@@ -288,6 +301,14 @@
 			} else {
 				renderer.render(scene, camera)
 			}
+
+			for(let i=0;i<1000;i++){
+				pixelRenderer.render(scene,pixelCamera)
+			}
+
+			// pixelCameras.forEach((n,i)=>{
+			// 	pixelRenderer.render(scene,pixelCameras[i])
+			// })
 
 		}
 	</script>
