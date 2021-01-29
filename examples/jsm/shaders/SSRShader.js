@@ -27,6 +27,7 @@ var SSRShader = {
     "tDepth": { value: null },
     "cameraNear": { value: null },
     "cameraFar": { value: null },
+    "cameraMatrix": { value: null },
     "resolution": { value: new Vector2() },
     "cameraProjectionMatrix": { value: new Matrix4() },
     "cameraInverseProjectionMatrix": { value: new Matrix4() },
@@ -62,6 +63,7 @@ var SSRShader = {
 		uniform sampler2D tMetalness;
 		uniform sampler2D tDiffuse;
 		uniform float cameraRange;
+		uniform mat4 cameraMatrix;
 		uniform vec2 resolution;
 		uniform float opacity;
 		uniform float cameraNear;
@@ -145,7 +147,9 @@ var SSRShader = {
 			vec3 viewNormal=getViewNormal( vUv );
 
 			#ifdef isNoise
-				viewNormal+=random3(viewPosition)*noiseIntensity*clipW;
+				vec3 worldPosition=(cameraMatrix*vec4(viewPosition,1)).xyz;
+				// gl_FragColor=vec4(worldPosition*10.,1);return;
+				viewNormal+=random3(worldPosition)*noiseIntensity;
 				viewNormal=normalize(viewNormal);
 			#endif
 

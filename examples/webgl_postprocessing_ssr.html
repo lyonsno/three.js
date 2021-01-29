@@ -41,7 +41,7 @@
 
 		let params = {
 			enableSSR: true,
-			autoRotate: true,
+			autoRotate: false,
 			isOtherMeshes: true,
 			isReflector: false,
 		}
@@ -107,6 +107,7 @@
 				// mesh.receiveShadow = true;
 				scene.add(mesh);
 				selects.push(mesh)
+				window.bunny=mesh
 
 				// Release decoder resources.
 				dracoLoader.dispose();
@@ -246,6 +247,7 @@
 			gui.add(ssrPass, 'isInfiniteThick');
 			gui.add(ssrPass, 'thickTolerance').min(0).max(.05).step(.0001);
 			gui.add(ssrPass, 'isBlur');
+			ssrPass.isNoise=true
 			gui.add(ssrPass, 'isNoise');
 			gui.add(ssrPass, 'noiseIntensity').min(0).max(.3).step(.01);
 
