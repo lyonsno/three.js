@@ -12,6 +12,7 @@
 
 <body>
 	<div id="container"></div>
+	<canvas id="cvs2d" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events: none;"></canvas>
 	<!-- <div id="info">
 		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
 		<a href="https://github.com/mrdoob/three.js/pull/20156" target="_blank" rel="noopener">SSRPass</a> demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
@@ -57,6 +58,11 @@
 		const dracoLoader = new DRACOLoader();
 		dracoLoader.setDecoderPath('js/libs/draco/');
 		dracoLoader.setDecoderConfig({ type: 'js' });
+
+		cvs2d.width=window.innerWidth
+		cvs2d.height=window.innerHeight
+		window.ctx2d=cvs2d.getContext('2d')
+		ctx2d.fillRect(0,0,cvs2d.width,cvs2d.height)
 
 		init();
 		animate();
@@ -298,13 +304,14 @@
 
 			if (params.enableSSR) {
 				composer.render();
+				// for(let i=0;i<1000;i++){
+				// 	pixelRenderer.render(scene,pixelCamera)
+				// }
+				ctx2d.drawImage(renderer.domElement,0,0,cvs2d.width/2,cvs2d.height/2)
 			} else {
 				renderer.render(scene, camera)
 			}
 
-			for(let i=0;i<1000;i++){
-				pixelRenderer.render(scene,pixelCamera)
-			}
 
 			// pixelCameras.forEach((n,i)=>{
 			// 	pixelRenderer.render(scene,pixelCameras[i])
