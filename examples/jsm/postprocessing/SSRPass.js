@@ -43,6 +43,8 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
 
 	this.encoding = encoding
 
+	this.cameraRotationMatrix=new THREE.Matrix4()
+
 	this._selects = selects
   this.isSelective = Array.isArray(this._selects)
 	Object.defineProperty(this, 'selects', {
@@ -366,6 +368,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     this.ssrMaterial.uniforms['surfDist'].value = this.surfDist;
     this.ssrMaterial.uniforms['thickTolerance'].value = this.thickTolerance
     this.ssrMaterial.uniforms['cameraMatrix'].value = this.camera.matrixWorld
+    this.ssrMaterial.uniforms['cameraRotationMatrix'].value = this.cameraRotationMatrix.extractRotation(camera.matrixWorld)
     this.renderPass(renderer, this.ssrMaterial, this.ssrRenderTarget);
 
 

@@ -19,6 +19,7 @@
 
 	<script type="module">
 		import * as THREE from '../build/three.module.js';
+		window.THREE=THREE
 
 		import Stats from './jsm/libs/stats.module.js';
 
@@ -63,7 +64,9 @@
 		function init() {
 
 			camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 15);
-			camera.position.set(0.13271600513224902, 0.3489546826045913, 0.43921296427927076);
+			window.camera=camera
+			// camera.position.set(0.13271600513224902, 0.3489546826045913, 0.43921296427927076);
+			camera.position.set(.5, 0, 0).applyAxisAngle(new THREE.Vector3(0,0,1),Math.PI/4);
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color(0x443333);
@@ -75,7 +78,7 @@
 				new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
 			);
 			plane.rotation.x = - Math.PI / 2;
-			plane.position.y = 0.0365;
+			// plane.position.y = 0.0365;
 			// plane.receiveShadow = true;
 			scene.add(plane);
 
@@ -96,6 +99,7 @@
 
 				const material = new THREE.MeshStandardMaterial({ color: 0x606060 });
 				const mesh = new THREE.Mesh(geometry, material);
+				mesh.position.y=-0.0365
 				// mesh.castShadow = true;
 				// mesh.receiveShadow = true;
 				scene.add(mesh);
@@ -160,8 +164,8 @@
 			//
 
 			controls = new OrbitControls(camera, renderer.domElement);
-			controls.enableDamping = true
-			controls.target.set(0, 0.1, 0);
+			// controls.enableDamping = true
+			// controls.target.set(0, 0.05, 0);
 			controls.update()
 			controls.enabled = !params.autoRotate
 
@@ -240,6 +244,7 @@
 			gui.add(ssrPass, 'isInfiniteThick');
 			gui.add(ssrPass, 'thickTolerance').min(0).max(.05).step(.0001);
 			gui.add(ssrPass, 'isBlur');
+			gui.close()
 
 		}
 
