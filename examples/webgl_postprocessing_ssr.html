@@ -52,6 +52,8 @@
 		let reflector
 		let reflectorRenderTarget
 		let selects=[]
+		window.readed = new Uint8Array( 4 );
+		window.readedVec3=new THREE.Vector3()
 
 		const container = document.querySelector('#container');
 
@@ -63,7 +65,7 @@
 		cvs2d.width=window.innerWidth
 		cvs2d.height=window.innerHeight
 		window.ctx2d=cvs2d.getContext('2d')
-		ctx2d.fillRect(0,0,cvs2d.width,cvs2d.height)
+		// ctx2d.fillRect(0,0,cvs2d.width,cvs2d.height)
 
 		init();
 		animate();
@@ -258,7 +260,7 @@
 			pixelRenderer.outputEncoding = THREE.sRGBEncoding;
 			// container.appendChild(pixelRenderer.domElement);
 
-			window.pixelCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, 1, 1000 );
+			window.pixelCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, .001, 1000 );
 
 			// window.pixelCameras=[]
 			// for(let i=0;i<1000;i++){
@@ -305,8 +307,19 @@
 
 			if (params.enableSSR) {
 				composer.render();
-				for(let i=0;i<1000;i++){
+				let max=0
+				for(let i=0;i<max;i++){
 					let {x,y}=vs.serial_to_xy(window.innerWidth,i)
+					renderer.readRenderTargetPixels( ssrPass.ssrRenderTarget, x*10, y*10, 1, 1, readed );
+					readedVec3.x=readed[0]
+					readedVec3.y=readed[1]
+					readedVec3.z=readed[2]
+					pixelCamera.rotation.setFromVector3(readedVec3)
+					pixelCamera.position.set(
+						Math.random()*1-.5,
+						Math.random()*1-.5,
+						Math.random()*1-.5,
+					)
 					pixelRenderer.render(scene,pixelCamera)
 					ctx2d.drawImage(renderer.domElement,x,y,1,1)
 				}
