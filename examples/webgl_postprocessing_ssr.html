@@ -34,7 +34,10 @@
 
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
-		let params = {
+		const window_width=window.innerWidth
+		const window_height=window.innerHeight
+
+		window.params = {
 			enableSSR: true,
 			autoRotate: false,
 			isOtherMeshes: true,
@@ -62,8 +65,8 @@
 		dracoLoader.setDecoderPath('js/libs/draco/');
 		dracoLoader.setDecoderConfig({ type: 'js' });
 
-		cvs2d.width=window.innerWidth
-		cvs2d.height=window.innerHeight
+		cvs2d.width=window_width
+		cvs2d.height=window_height
 		window.ctx2d=cvs2d.getContext('2d')
 		// ctx2d.fillRect(0,0,cvs2d.width,cvs2d.height)
 
@@ -73,15 +76,17 @@
 
 		function init() {
 
-			camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 15);
+			camera = new THREE.PerspectiveCamera(35, window_width / window_height, 0.1, 15);
 			window.camera=camera
 			// camera.position.set(0.13271600513224902, 0.3489546826045913, 0.43921296427927076);
 			// camera.position.set(.5, 0, 0).applyAxisAngle(new THREE.Vector3(0,0,1),Math.PI/4);
-			camera.position.set(0.18829417135451876, 0.08142276408283763, -0.10567413852928587);
+			// camera.position.set(0.18829417135451876, 0.08142276408283763, -0.10567413852928587);
+			// camera.position.set(0.03563935501962898, 0.22116787374986915, -0.0553714098215656);
+			camera.position.set(0.09323919966209626, 0.09299305784167794, 0.18949967775832036);
 
 			scene = new THREE.Scene();
-			scene.background = new THREE.Color(0x443333);
-			scene.fog = new THREE.Fog(0x443333, 1, 4);
+			// scene.background = new THREE.Color(0x443333);
+			// scene.fog = new THREE.Fog(0x443333, 1, 4);
 
 			// Ground
 			const plane = new THREE.Mesh(
@@ -152,8 +157,8 @@
 				const geometry = new THREE.PlaneBufferGeometry(8, 8);
 				reflector = new Reflector(geometry, {
 					clipBias: 0.003,
-					textureWidth: window.innerWidth,
-					textureHeight: window.innerHeight,
+					textureWidth: window_width,
+					textureHeight: window_height,
 					color: 0x888888,
 					useDepthTexture: true,
 				});
@@ -167,7 +172,7 @@
 			// renderer
 			renderer = new THREE.WebGLRenderer({ antialias: false });
 			// renderer.setPixelRatio(window.devicePixelRatio);
-			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.setSize(window_width, window_height);
 			renderer.outputEncoding = THREE.sRGBEncoding;
 			// renderer.shadowMap.enabled = true;
 			container.appendChild(renderer.domElement);
@@ -257,7 +262,7 @@
 			// gui.add(ssrPass, 'isBlur');
 			// gui.close()
 
-			window.pixelCount=window.innerWidth*window.innerHeight
+			window.pixelCount=window_width*window_height
 			// window.pixelCount=100
 
 			window.pixelRenderer=new THREE.WebGLRenderer({ antialias: false });
@@ -268,9 +273,9 @@
 			// window.pixelCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, .001, 1000 );
 
 			window.pixelCameras=[]
-			let pixelCameraSize=.0001
+			let pixelCameraSize=.000001
 			for(let i=0;i<pixelCount;i++){
-				let pixelCamera = new THREE.OrthographicCamera( -pixelCameraSize, pixelCameraSize, pixelCameraSize, -pixelCameraSize, .001, 15 );
+				let pixelCamera = new THREE.OrthographicCamera( -pixelCameraSize, pixelCameraSize, pixelCameraSize, -pixelCameraSize, .001, 10 );
 				pixelCameras.push(pixelCamera)
 			}
 
@@ -279,12 +284,12 @@
 
 		function onWindowResize() {
 
-			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.aspect = window_width / window_height;
 			camera.updateProjectionMatrix();
 
-			renderer.setSize(window.innerWidth, window.innerHeight);
-			composer.setSize(window.innerWidth, window.innerHeight);
-			reflectorRenderTarget.setSize(window.innerWidth, window.innerHeight);
+			renderer.setSize(window_width, window_height);
+			composer.setSize(window_width, window_height);
+			reflectorRenderTarget.setSize(window_width, window_height);
 
 		}
 
@@ -316,10 +321,12 @@
 
 				ssrPass.outputType=0
 				composer.render();
-				for(let y=0;y<window.innerHeight;y++){
-					for(let x=0;x<window.innerWidth;x++){
-						let i=y*window.innerWidth+x
+				// ctx2d.drawImage(renderer.domElement,0,0);return;
+				for(let y=0;y<window_height;y++){
+					for(let x=0;x<window_width;x++){
+						let i=y*window_width+x
 						renderer.readRenderTargetPixels( ssrPass.ssrRenderTarget, x, y, 1, 1, readed );
+						// if(y===60) debugger
 						pixelCameras[i].position.set(
 							readed[0],
 							readed[1],
@@ -329,21 +336,25 @@
 				}
 				ssrPass.outputType=1
 				composer.render();
-				for(let y=0;y<window.innerHeight;y++){
-					for(let x=0;x<window.innerWidth;x++){
-						let i=y*window.innerWidth+x
+				// ctx2d.drawImage(renderer.domElement,0,0);return;
+				for(let y=0;y<window_height;y++){
+					for(let x=0;x<window_width;x++){
+						let i=y*window_width+x
 						renderer.readRenderTargetPixels( ssrPass.ssrRenderTarget, x, y, 1, 1, readed );
+						// if(y===60) debugger
 						readedVec3.x=readed[0]
 						readedVec3.y=readed[1]
 						readedVec3.z=readed[2]
-						pixelCameras[i].rotation.setFromVector3(readedVec3)
+						// pixelCameras[i].rotation.setFromVector3(readedVec3.normalize())
+						// pixelCameras[i].rotation.setFromVector3(readedVec3)
+						pixelCameras[i].lookAt(readedVec3.add(pixelCameras[i].position))
 					}
 				}
-				for(let y=0;y<window.innerHeight;y++){
-					for(let x=0;x<window.innerWidth;x++){
-						let i=y*window.innerWidth+x
+				for(let y=0;y<window_height;y++){
+					for(let x=0;x<window_width;x++){
+						let i=y*window_width+x
 						pixelRenderer.render(scene,pixelCameras[i])
-						ctx2d.drawImage(pixelRenderer.domElement,x,y,1,1)
+						ctx2d.drawImage(pixelRenderer.domElement,x,window_height-y,1,1)
 						// ctx2d.fillRect(x,y,1,1)
 					}
 				}
