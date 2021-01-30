@@ -137,8 +137,9 @@
 			// window.pixelCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, .001, 1000 );
 
 			window.pixelCameras=[]
+			let pixelCameraSize=.0001
 			for(let i=0;i<pixelCount;i++){
-				let pixelCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, 1, 1000 );
+				let pixelCamera = new THREE.OrthographicCamera( -pixelCameraSize, pixelCameraSize, pixelCameraSize, -pixelCameraSize, .01, 15 );
 				pixelCameras.push(pixelCamera)
 			}
 
@@ -200,7 +201,7 @@
 				for(let x=0;x<2;x++){
 					let i=y*2+x
 					pixelRenderer.render(scene,pixelCameras[i])
-					ctx2d.drawImage(pixelRenderer.domElement,x,y,1,1)
+					ctx2d.drawImage(pixelRenderer.domElement,x*4,y*4,1,1)
 				}
 			}
 			// renderer.render(scene, camera)
