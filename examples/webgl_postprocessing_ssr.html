@@ -12,7 +12,7 @@
 
 <body>
 	<div id="container"></div>
-	<canvas id="cvs2d" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events: none;"></canvas>
+	<canvas id="cvs2d" style="position:absolute;left:100px;top:100px;width:100%;height:100%;pointer-events: none;"></canvas>
 	<!-- <div id="info">
 		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
 		<a href="https://github.com/mrdoob/three.js/pull/20156" target="_blank" rel="noopener">SSRPass</a> demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
@@ -29,8 +29,6 @@
 
 		import { GUI } from './jsm/libs/dat.gui.module.js';
 		import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
-		import { SSRPass } from './jsm/postprocessing/SSRPass.js';
-		import { Reflector } from './jsm/objects/ReflectorForSSRPass.js';
 
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
@@ -41,7 +39,6 @@
 			isReflector: false,
 		}
 		let composer
-		let ssrPass
 		let gui
 		let isPerspectiveCamera = true
 		let stats;
@@ -129,78 +126,8 @@
 
 			window.addEventListener('resize', onWindowResize, false);
 
-			// composer
-
-			composer = new EffectComposer(renderer);
-			ssrPass = new SSRPass({
-				scene,
-				camera,
-				width: innerWidth,
-				height: innerHeight,
-				encoding: THREE.sRGBEncoding,
-				isPerspectiveCamera: isPerspectiveCamera,
-				selects: params.isReflector ? selects : null,
-				// morphTargets: true,
-			});
-			window.ssrPass = ssrPass
-			composer.addPass(ssrPass);
-
-			// GUI
-
-			// gui = new GUI({ width: 400 });
-			// gui.add(params, 'enableSSR').name('Enable SSR');
-			// gui.add(params, 'autoRotate').onChange(() => {
-			// 	controls.enabled = !params.autoRotate
-			// })
-			// gui.add(ssrPass, 'isDistanceAttenuation');
-			// ssrPass.maxDistance = .1
-			// gui.add(ssrPass, 'maxDistance').min(0).max(1).step(.01);
-			// gui.add(params, 'isReflector').onChange(() => {
-			// 	if (params.isReflector) {
-			// 		reflector.visible = true
-			// 		ssrPass.selects = selects
-			// 	} else {
-			// 		reflector.visible = false
-			// 		ssrPass.selects = null
-			// 	}
-			// })
-			// gui.add(params, 'isOtherMeshes').onChange(() => {
-			// 	if (params.isOtherMeshes) {
-			// 		otherMeshes.forEach(mesh => mesh.visible = true)
-			// 	} else {
-			// 		otherMeshes.forEach(mesh => mesh.visible = false)
-			// 	}
-			// })
-			// gui.add(ssrPass, 'isFresnel');
-			// gui.add(ssrPass, 'isBouncing')
-			// gui.add(ssrPass, 'output', {
-			// 	'Default': SSRPass.OUTPUT.Default,
-			// 	'SSR Only': SSRPass.OUTPUT.SSR,
-			// 	'Beauty': SSRPass.OUTPUT.Beauty,
-			// 	'Depth': SSRPass.OUTPUT.Depth,
-			// 	'Normal': SSRPass.OUTPUT.Normal,
-			// 	'Metalness': SSRPass.OUTPUT.Metalness,
-			// }).onChange(function (value) {
-
-			// 	ssrPass.output = parseInt(value);
-
-			// });
-			// ssrPass.opacity = .8
-			// gui.add(ssrPass, 'opacity').min(0).max(1);
-			// if (isPerspectiveCamera) {
-			// 	ssrPass.surfDist = 0.0015
-			// 	gui.add(ssrPass, 'surfDist').min(0).max(.005).step(.0001);
-			// } else {
-			// 	ssrPass.surfDist = 2
-			// 	gui.add(ssrPass, 'surfDist').min(0).max(7).step(.01);
-			// }
-			// gui.add(ssrPass, 'isInfiniteThick');
-			// gui.add(ssrPass, 'thickTolerance').min(0).max(.05).step(.0001);
-			// gui.add(ssrPass, 'isBlur');
-			// gui.close()
-
 			// window.pixelCount=window.innerWidth*window.innerHeight
-			window.pixelCount=100
+			window.pixelCount=4
 
 			window.pixelRenderer=new THREE.WebGLRenderer({ antialias: false });
 			pixelRenderer.setSize(1,1);
@@ -252,43 +179,31 @@
 				controls.update()
 			}
 
-			if (params.enableSSR) {
-
-				ssrPass.outputType=0
-				composer.render();
-				for(let y=0;y<window.innerHeight;y++){
-					for(let x=0;x<window.innerWidth;x++){
-						let i=y*window.innerWidth+x
-						renderer.readRenderTargetPixels( ssrPass.ssrRenderTarget, x, y, 1, 1, readed );
-						pixelCameras[i].position.set(
-							readed[0],
-							readed[1],
-							readed[2],
-						)
-					}
+			// for(let y=0;y<window.innerHeight;y++){
+			// 	for(let x=0;x<window.innerWidth;x++){
+			// 		let i=y*window.innerWidth+x
+			// 		renderer.readRenderTargetPixels( ssrPass.ssrRenderTarget, x, y, 1, 1, readed );
+			// 		pixelCameras[i].position.set(
+			// 			readed[0],
+			// 			readed[1],
+			// 			readed[2],
+			// 		)
+			// 	}
+			// }
+			for(let y=0;y<2;y++){
+				for(let x=0;x<2;x++){
+					let i=y*2+x
+					pixelCameras[i].rotation.y=i*Math.PI/2
 				}
-				ssrPass.outputType=1
-				composer.render();
-				for(let y=0;y<window.innerHeight;y++){
-					for(let x=0;x<window.innerWidth;x++){
-						let i=y*window.innerWidth+x
-						renderer.readRenderTargetPixels( ssrPass.ssrRenderTarget, x, y, 1, 1, readed );
-						readedVec3.x=readed[0]
-						readedVec3.y=readed[1]
-						readedVec3.z=readed[2]
-						pixelCameras[i].rotation.setFromVector3(readedVec3)
-					}
-				}
-				for(let y=0;y<window.innerHeight;y++){
-					for(let x=0;x<window.innerWidth;x++){
-						let i=y*window.innerWidth+x
-						pixelRenderer.render(scene,pixelCameras[i])
-						ctx2d.drawImage(renderer.domElement,x,y,1,1)
-					}
-				}
-			} else {
-				renderer.render(scene, camera)
 			}
+			for(let y=0;y<2;y++){
+				for(let x=0;x<2;x++){
+					let i=y*2+x
+					pixelRenderer.render(scene,pixelCameras[i])
+					ctx2d.drawImage(pixelRenderer.domElement,x,y,1,1)
+				}
+			}
+			// renderer.render(scene, camera)
 
 
 			// pixelCameras.forEach((n,i)=>{
