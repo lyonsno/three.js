@@ -12,7 +12,7 @@
 
 <body>
 	<div id="container"></div>
-	<canvas id="cvs2d" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events: none;"></canvas>
+	<canvas id="cvs2d" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events: none;z-index: 1000;"></canvas>
 	<!-- <div id="info">
 		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
 		<a href="https://github.com/mrdoob/three.js/pull/20156" target="_blank" rel="noopener">SSRPass</a> demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
@@ -68,14 +68,16 @@
 		// ctx2d.fillRect(0,0,cvs2d.width,cvs2d.height)
 
 		init();
-		animate();
+		console.log('inited')
+		// animate();
 
 		function init() {
 
 			camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 15);
 			window.camera=camera
 			// camera.position.set(0.13271600513224902, 0.3489546826045913, 0.43921296427927076);
-			camera.position.set(.5, 0, 0).applyAxisAngle(new THREE.Vector3(0,0,1),Math.PI/4);
+			// camera.position.set(.5, 0, 0).applyAxisAngle(new THREE.Vector3(0,0,1),Math.PI/4);
+			camera.position.set(0.18829417135451876, 0.08142276408283763, -0.10567413852928587);
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color(0x443333);
@@ -255,8 +257,8 @@
 			// gui.add(ssrPass, 'isBlur');
 			// gui.close()
 
-			// window.pixelCount=window.innerWidth*window.innerHeight
-			window.pixelCount=100
+			window.pixelCount=window.innerWidth*window.innerHeight
+			// window.pixelCount=100
 
 			window.pixelRenderer=new THREE.WebGLRenderer({ antialias: false });
 			pixelRenderer.setSize(1,1);
@@ -266,8 +268,9 @@
 			// window.pixelCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, .001, 1000 );
 
 			window.pixelCameras=[]
+			let pixelCameraSize=.0001
 			for(let i=0;i<pixelCount;i++){
-				let pixelCamera = new THREE.OrthographicCamera( -1, 1, 1, -1, 1, 1000 );
+				let pixelCamera = new THREE.OrthographicCamera( -pixelCameraSize, pixelCameraSize, pixelCameraSize, -pixelCameraSize, .001, 15 );
 				pixelCameras.push(pixelCamera)
 			}
 
@@ -295,6 +298,7 @@
 
 		}
 
+		window.render=render
 		function render() {
 
 			if(params.autoRotate){
@@ -339,7 +343,8 @@
 					for(let x=0;x<window.innerWidth;x++){
 						let i=y*window.innerWidth+x
 						pixelRenderer.render(scene,pixelCameras[i])
-						ctx2d.drawImage(renderer.domElement,x,y,1,1)
+						ctx2d.drawImage(pixelRenderer.domElement,x,y,1,1)
+						// ctx2d.fillRect(x,y,1,1)
 					}
 				}
 			} else {
@@ -351,6 +356,7 @@
 			// 	pixelRenderer.render(scene,pixelCameras[i])
 			// })
 
+			console.log('rendered')
 		}
 	</script>
 </body>
