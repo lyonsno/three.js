@@ -35,7 +35,7 @@
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
 		let params = {
-			enableSSR: true,
+			enableSSR: false,
 			autoRotate: false,
 			isOtherMeshes: true,
 			isReflector: false,
@@ -57,11 +57,6 @@
 
 		const container = document.querySelector('#container');
 
-		// Configure and create Draco decoder.
-		const dracoLoader = new DRACOLoader();
-		dracoLoader.setDecoderPath('js/libs/draco/');
-		dracoLoader.setDecoderConfig({ type: 'js' });
-
 		cvs2d.width=window.innerWidth
 		cvs2d.height=window.innerHeight
 		window.ctx2d=cvs2d.getContext('2d')
@@ -75,91 +70,40 @@
 			camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 15);
 			window.camera=camera
 			// camera.position.set(0.13271600513224902, 0.3489546826045913, 0.43921296427927076);
-			camera.position.set(.5, 0, 0).applyAxisAngle(new THREE.Vector3(0,0,1),Math.PI/4);
+			// camera.position.set(.5, 0, 0).applyAxisAngle(new THREE.Vector3(0,0,1),Math.PI/4);
+			camera.position.set(0, .5, .5)
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color(0x443333);
 			scene.fog = new THREE.Fog(0x443333, 1, 4);
 
-			// Ground
-			const plane = new THREE.Mesh(
-				new THREE.PlaneGeometry(8, 8),
-				new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
-			);
-			plane.rotation.x = - Math.PI / 2;
-			// plane.position.y = 0.0365;
-			// plane.receiveShadow = true;
-			scene.add(plane);
-
-			// Lights
-			const hemiLight = new THREE.HemisphereLight(0x443333, 0x111122);
-			scene.add(hemiLight);
-
-			const spotLight = new THREE.SpotLight();
-			spotLight.angle = Math.PI / 16;
-			spotLight.penumbra = 0.5;
-			// spotLight.castShadow = true;
-			spotLight.position.set(- 1, 1, 1);
-			scene.add(spotLight);
-
-			dracoLoader.load('models/draco/bunny.drc', function (geometry) {
-
-				geometry.computeVertexNormals();
-
-				const material = new THREE.MeshStandardMaterial({ color: 0x606060 });
-				const mesh = new THREE.Mesh(geometry, material);
-				mesh.position.y=-0.0365
-				// mesh.castShadow = true;
-				// mesh.receiveShadow = true;
-				scene.add(mesh);
-				selects.push(mesh)
-
-				// Release decoder resources.
-				dracoLoader.dispose();
-
-			});
-
 			{
 				const geometry = new THREE.BoxBufferGeometry(.05, .05, .05);
-				const material = new THREE.MeshStandardMaterial({ color: 'green' })
+				const material = new THREE.MeshBasicMaterial({ color: 'red' })
 				const mesh = new THREE.Mesh(geometry, material)
-				mesh.position.set(-.12, plane.position.y + .025, .015)
+				mesh.position.set(.12, 0, 0)
 				scene.add(mesh)
-				otherMeshes.push(mesh)
-				selects.push(mesh)
 			}
 			{
-				const geometry = new THREE.IcosahedronBufferGeometry(.025, 4);
-				const material = new THREE.MeshStandardMaterial({ color: 'cyan' })
+				const geometry = new THREE.BoxBufferGeometry(.05, .05, .05);
+				const material = new THREE.MeshBasicMaterial({ color: 'green' })
 				const mesh = new THREE.Mesh(geometry, material)
-				mesh.position.set(-.05, plane.position.y + .025, .08)
+				mesh.position.set(-.12, 0, 0)
 				scene.add(mesh)
-				otherMeshes.push(mesh)
-				selects.push(mesh)
 			}
 			{
-				const geometry = new THREE.ConeBufferGeometry(.025, .05, 64);
-				const material = new THREE.MeshStandardMaterial({ color: 'yellow' })
+				const geometry = new THREE.BoxBufferGeometry(.05, .05, .05);
+				const material = new THREE.MeshBasicMaterial({ color: 'blue' })
 				const mesh = new THREE.Mesh(geometry, material)
-				mesh.position.set(-.05, plane.position.y + .025, -.055)
+				mesh.position.set(0, 0, .12)
 				scene.add(mesh)
-				otherMeshes.push(mesh)
-				selects.push(mesh)
 			}
 			{
-				const geometry = new THREE.PlaneBufferGeometry(8, 8);
-				reflector = new Reflector(geometry, {
-					clipBias: 0.003,
-					textureWidth: window.innerWidth,
-					textureHeight: window.innerHeight,
-					color: 0x888888,
-					useDepthTexture: true,
-				});
-				reflectorRenderTarget = reflector.getRenderTarget()
-				reflector.position.y = plane.position.y + .0001;
-				reflector.rotation.x = -Math.PI / 2
-				reflector.visible = params.isReflector
-				scene.add(reflector);
+				const geometry = new THREE.BoxBufferGeometry(.05, .05, .05);
+				const material = new THREE.MeshBasicMaterial({ color: 'yellow' })
+				const mesh = new THREE.Mesh(geometry, material)
+				mesh.position.set(0, 0, -.12)
+				scene.add(mesh)
 			}
 
 			// renderer
