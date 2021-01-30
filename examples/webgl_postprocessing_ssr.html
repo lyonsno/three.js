@@ -30,7 +30,6 @@
 		import { GUI } from './jsm/libs/dat.gui.module.js';
 		import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
 		import { SSRPass } from './jsm/postprocessing/SSRPass.js';
-		import { Reflector } from './jsm/objects/ReflectorForSSRPass.js';
 
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
@@ -153,21 +152,6 @@
 				otherMeshes.push(mesh)
 				selects.push(mesh)
 			}
-			{
-				const geometry = new THREE.PlaneBufferGeometry(8, 8);
-				reflector = new Reflector(geometry, {
-					clipBias: 0.003,
-					textureWidth: window_width,
-					textureHeight: window_height,
-					color: 0x888888,
-					useDepthTexture: true,
-				});
-				reflectorRenderTarget = reflector.getRenderTarget()
-				reflector.position.y = plane.position.y + .0001;
-				reflector.rotation.x = -Math.PI / 2
-				reflector.visible = params.isReflector
-				scene.add(reflector);
-			}
 
 			// renderer
 			renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -207,60 +191,6 @@
 			});
 			window.ssrPass = ssrPass
 			composer.addPass(ssrPass);
-
-			// GUI
-
-			// gui = new GUI({ width: 400 });
-			// gui.add(params, 'enableSSR').name('Enable SSR');
-			// gui.add(params, 'autoRotate').onChange(() => {
-			// 	controls.enabled = !params.autoRotate
-			// })
-			// gui.add(ssrPass, 'isDistanceAttenuation');
-			// ssrPass.maxDistance = .1
-			// gui.add(ssrPass, 'maxDistance').min(0).max(1).step(.01);
-			// gui.add(params, 'isReflector').onChange(() => {
-			// 	if (params.isReflector) {
-			// 		reflector.visible = true
-			// 		ssrPass.selects = selects
-			// 	} else {
-			// 		reflector.visible = false
-			// 		ssrPass.selects = null
-			// 	}
-			// })
-			// gui.add(params, 'isOtherMeshes').onChange(() => {
-			// 	if (params.isOtherMeshes) {
-			// 		otherMeshes.forEach(mesh => mesh.visible = true)
-			// 	} else {
-			// 		otherMeshes.forEach(mesh => mesh.visible = false)
-			// 	}
-			// })
-			// gui.add(ssrPass, 'isFresnel');
-			// gui.add(ssrPass, 'isBouncing')
-			// gui.add(ssrPass, 'output', {
-			// 	'Default': SSRPass.OUTPUT.Default,
-			// 	'SSR Only': SSRPass.OUTPUT.SSR,
-			// 	'Beauty': SSRPass.OUTPUT.Beauty,
-			// 	'Depth': SSRPass.OUTPUT.Depth,
-			// 	'Normal': SSRPass.OUTPUT.Normal,
-			// 	'Metalness': SSRPass.OUTPUT.Metalness,
-			// }).onChange(function (value) {
-
-			// 	ssrPass.output = parseInt(value);
-
-			// });
-			// ssrPass.opacity = .8
-			// gui.add(ssrPass, 'opacity').min(0).max(1);
-			// if (isPerspectiveCamera) {
-			// 	ssrPass.surfDist = 0.0015
-			// 	gui.add(ssrPass, 'surfDist').min(0).max(.005).step(.0001);
-			// } else {
-			// 	ssrPass.surfDist = 2
-			// 	gui.add(ssrPass, 'surfDist').min(0).max(7).step(.01);
-			// }
-			// gui.add(ssrPass, 'isInfiniteThick');
-			// gui.add(ssrPass, 'thickTolerance').min(0).max(.05).step(.0001);
-			// gui.add(ssrPass, 'isBlur');
-			// gui.close()
 
 			window.pixelCount=window_width*window_height
 			// window.pixelCount=100
