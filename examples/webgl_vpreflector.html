@@ -17,7 +17,7 @@
 
 <body>
 	<div id="container"><canvas id="cvs3d" style="position:absolute;left:0;top:0;width:100%;height:100%;"></canvas></div>
-	<canvas id="cvs2d" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events: none;z-index: 1000;"></canvas>
+	<!-- <canvas id="cvs2d" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events: none;z-index: 1000;"></canvas> -->
 	<!-- <div id="info">
 		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
 		<a href="https://github.com/mrdoob/three.js/pull/20156" target="_blank" rel="noopener">SSRPass</a> demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
@@ -29,7 +29,7 @@
 			<button onclick="renderVPReflector()">render</button>
 		</span>
 		<span id="dom_info" style="color:white;">loading...</span>
-		<button id="dom_toggleVPReflector" onclick="toggleVPReflector()" style="display:none;">toggle VPReflector</button>
+		<!-- <button id="dom_toggleVPReflector" onclick="toggleVPReflector()" style="display:none;">toggle VPReflector</button> -->
 	</span>
 
 	<script type="module">
@@ -104,9 +104,9 @@
 
 		function init() {
 
-			cvs2d.width=render_width
-			cvs2d.height=render_height
-			window.ctx2d=cvs2d.getContext('2d')
+			// cvs2d.width=render_width
+			// cvs2d.height=render_height
+			// window.ctx2d=cvs2d.getContext('2d')
 			// ctx2d.fillRect(0,0,cvs2d.width,cvs2d.height)
 
 			camera = new THREE.PerspectiveCamera(35, render_width / render_height, 0.1, 15);
@@ -177,6 +177,7 @@
 			renderer.setSize(render_width, render_height, false);
 			renderer.outputEncoding = THREE.sRGBEncoding;
 			// renderer.shadowMap.enabled = true;
+			renderer.autoClear=false
 			container.appendChild(renderer.domElement);
 
 			//
@@ -256,10 +257,18 @@
 			dom_info.innerText='rendering...'
 			await new Promise(resolve=>setTimeout(resolve, 0))
 
+			console.time('renderVPReflector')
+
+			ssrPass.worldReflectMaterial.uniforms['uCameraPosition'].value = ssrPass.tempVec3.setFromMatrixPosition(ssrPass.camera.matrixWorld)
+			ssrPass.worldReflectMaterial.uniforms['cameraRotationMatrix'].value = ssrPass.cameraRotationMatrix.extractRotation(ssrPass.camera.matrixWorld)
+
 			renderer.render(scene, camera)
-			ctx2d.drawImage(renderer.domElement,0,0);
+			// ctx2d.drawImage(renderer.domElement,0,0);
 
 			composer.render();
+			
+			// renderer.setClearColor( 0x000000,0 );
+			renderer.setScissorTest( true );
 			for(let y=0;y<render_height;y++){
 				for(let x=0;x<render_width;x++){
 					let i=y*render_width+x
@@ -268,43 +277,53 @@
 					// if(y===60) debugger
 					pixelCamera.position.set( readed[0], readed[1], readed[2], )
 					
-					renderer.readRenderTargetPixels( ssrPass.worldNormalRenderTarget, x, y, 1, 1, readed );
+					renderer.readRenderTargetPixels( ssrPass.worldReflectRenderTarget, x, y, 1, 1, readed );
 					// if(y===60) debugger
-					readedVec3.set( readed[0], readed[1], readed[2], )
-					incidenceDir.copy(pixelCamera.position).sub(camera.position).normalize()
-					reflectDir.copy(incidenceDir).reflect(readedVec3)
-					pixelCamera.lookAt(tempVec3.copy(reflectDir).add(pixelCamera.position))
+					// readedVec3.set( readed[0], readed[1], readed[2], )
+					// incidenceDir.copy(pixelCamera.position).sub(camera.position).normalize()
+					// reflectDir.copy(incidenceDir).reflect(readedVec3)
+					// pixelCamera.lookAt(tempVec3.copy(reflectDir).add(pixelCamera.position))
+					pixelCamera.lookAt(readed[0], readed[1], readed[2])
 
-					fresnel=(tempVec3.copy(incidenceDir).dot(reflectDir)+1)/2
-					ctx2d.globalAlpha=opacity*fresnel
+					// fresnel=(tempVec3.copy(incidenceDir).dot(reflectDir)+1)/2
+					// ctx2d.globalAlpha=opacity*fresnel
 
-					pixelRenderer.render(scene,pixelCamera)
-					ctx2d.drawImage(pixelRenderer.domElement,x,render_height-y,1,1)
+					
+					// renderer.setViewport( x, y, 1, 1 );
+					renderer.setScissor( x, y, 1, 1 );
+					renderer.render( scene, pixelCamera );
 
+					// pixelRenderer.render(scene,pixelCamera)
+					// ctx2d.drawImage(pixelRenderer.domElement,x,render_height-y,1,1)
+
+					
 				}
-				dom_info.innerText=`rendering... line: ${y}/${render_height}`
-				await new Promise(resolve=>setTimeout(resolve, 0))
+				console.log(`line: ${y}/${render_height}`)
+				// dom_info.innerText=`rendering... line: ${y}/${render_height}`
+				// await new Promise(resolve=>setTimeout(resolve, 0))
 			}
-			{/* solve line gap problem */
-				cvs2d.style.display='none'
-				await new Promise(resolve=>setTimeout(resolve, 300))
-				cvs2d.style.display='block'
-			}
+			// {/* solve line gap problem */
+			// 	cvs2d.style.display='none'
+			// 	await new Promise(resolve=>setTimeout(resolve, 300))
+			// 	cvs2d.style.display='block'
+			// }
 
 			console.log('rendered')
 			dom_info.innerText='rendered'
-			dom_toggleVPReflector.style.display='inline'
+			// dom_toggleVPReflector.style.display='inline'
 			state='rendered'
+
+			console.timeEnd('renderVPReflector')
 		}
 
-		window.toggleVPReflector=toggleVPReflector
-		function toggleVPReflector(){
-			if(cvs2d.style.display==='none'){
-				cvs2d.style.display='block'
-			}else{
-				cvs2d.style.display='none'
-			}
-		}
+		// window.toggleVPReflector=toggleVPReflector
+		// function toggleVPReflector(){
+		// 	if(cvs2d.style.display==='none'){
+		// 		cvs2d.style.display='block'
+		// 	}else{
+		// 		cvs2d.style.display='none'
+		// 	}
+		// }
 
 		function getQueryStringByName(name) {
 			var result = location.search.match(new RegExp("[\?\&]" + name + "=([^\&]+)", "i"));

@@ -66,7 +66,7 @@ var WorldPositionShader = {
 	`
 };
 
-var WorldNormalShader = {
+var WorldReflectShader = {
 
   defines: {
   },
@@ -74,6 +74,8 @@ var WorldNormalShader = {
   uniforms: {
 
     "tNormal": { value: null },
+    "tWorldPosition": { value: null },
+    "uCameraPosition": { value: null },
     "cameraRotationMatrix": { value: null },
 
   },
@@ -97,6 +99,8 @@ var WorldNormalShader = {
 		precision highp sampler2D;
 		varying vec2 vUv;
 		uniform sampler2D tNormal;
+		uniform sampler2D tWorldPosition;
+		uniform vec3 uCameraPosition;
 		uniform mat4 cameraRotationMatrix;
 		#include <packing>
 		vec3 getViewNormal( const in vec2 uv ) {
@@ -108,9 +112,15 @@ var WorldNormalShader = {
 			// gl_FragColor=vec4(viewNormal,1);return;
 			vec3 worldNormal=(cameraRotationMatrix*vec4(viewNormal,1)).xyz;
 			// worldNormal=normalize(worldNormal);
-			gl_FragColor=vec4(worldNormal,1);return;
+
+			vec3 worldPosition=texture2D(tWorldPosition,vUv).xyz;
+			vec3 incidenceDir=normalize(worldPosition-uCameraPosition);
+			vec3 reflectDir=reflect(incidenceDir,worldNormal);
+			reflectDir+=worldPosition;
+
+			gl_FragColor=vec4(reflectDir,1);return;
 		}
 	`
 };
 
-export { WorldPositionShader, WorldNormalShader };
+export { WorldPositionShader, WorldReflectShader };
