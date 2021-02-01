@@ -42,7 +42,7 @@
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
 		window.render_height=100
-		window.render_width=Math.round(window.innerWidth*100/window.innerHeight)
+		window.render_width=Math.round(window.innerWidth*render_height/window.innerHeight)
 		dom_width.value=window.render_width
 
 		window.params = {
@@ -66,7 +66,7 @@
 		window.state='initial'
 		window.readed = new Float32Array( 4 );
 		window.readedVec3=new THREE.Vector3()
-		window.reflectVec3=new THREE.Vector3()
+		window.tempVec3=new THREE.Vector3()
 
 		const container = document.querySelector('#container');
 
@@ -232,6 +232,10 @@
 			// composer.render()
 		}
 
+		window.opacity=.5
+		window.fresnel=1
+		window.incidenceDir=new THREE.Vector3()
+		window.reflectDir=new THREE.Vector3()
 		window.renderAPReflector=renderAPReflector
 		async function renderAPReflector() {
 			if(state==='rendering') return
@@ -248,7 +252,6 @@
 			ctx2d.drawImage(renderer.domElement,0,0);
 
 			composer.render();
-			ctx2d.globalAlpha=.5
 			for(let y=0;y<render_height;y++){
 				for(let x=0;x<render_width;x++){
 					let i=y*render_width+x
@@ -260,13 +263,18 @@
 					renderer.readRenderTargetPixels( ssrPass.worldNormalRenderTarget, x, y, 1, 1, readed );
 					// if(y===60) debugger
 					readedVec3.set( readed[0], readed[1], readed[2], )
-					pixelCamera.lookAt(reflectVec3.copy(pixelCamera.position).sub(camera.position).reflect(readedVec3).add(pixelCamera.position))
+					incidenceDir.copy(pixelCamera.position).sub(camera.position).normalize()
+					reflectDir.copy(incidenceDir).reflect(readedVec3)
+					pixelCamera.lookAt(tempVec3.copy(reflectDir).add(pixelCamera.position))
+
+					fresnel=(tempVec3.copy(incidenceDir).dot(reflectDir)+1)/2
+					ctx2d.globalAlpha=opacity*fresnel
 
 					pixelRenderer.render(scene,pixelCamera)
 					ctx2d.drawImage(pixelRenderer.domElement,x,render_height-y,1,1)
 
 				}
-				dom_info.innerText=`rendering... line: ${y}`
+				dom_info.innerText=`rendering... line: ${y}/${render_height}`
 				await new Promise(resolve=>setTimeout(resolve, 0))
 			}
 			{/* solve line gap problem */
