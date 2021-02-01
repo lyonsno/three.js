@@ -201,12 +201,15 @@
 			window.ssrPass = ssrPass
 			composer.addPass(ssrPass);
 
-			window.pixelRenderer=new THREE.WebGLRenderer({ antialias: false });
+			window.pixelRenderer=new THREE.WebGLRenderer({ antialias: false, alpha: true });
 			pixelRenderer.setSize(1,1);
 			pixelRenderer.outputEncoding = THREE.sRGBEncoding;
 			// container.appendChild(pixelRenderer.domElement);
 
-			let pixelCameraSize=.000001
+			let pixelCameraSize
+			// pixelCameraSize=.00000000000000000000000000000000000001
+			// pixelCameraSize=.0000000000000000000000000000000000001
+			pixelCameraSize=.000001
 			window.pixelCamera = new THREE.OrthographicCamera( -pixelCameraSize, pixelCameraSize, pixelCameraSize, -pixelCameraSize, .001, 10 );
 
 			state='inited'
@@ -239,9 +242,11 @@
 
 			if (params.enableSSR) {
 
-				composer.render();
-				// ctx2d.drawImage(renderer.domElement,0,0);return;
+				renderer.render(scene, camera)
+				ctx2d.drawImage(renderer.domElement,0,0);
 
+				composer.render();
+				ctx2d.globalAlpha=.5
 				for(let y=0;y<render_height;y++){
 					for(let x=0;x<render_width;x++){
 						let i=y*render_width+x
