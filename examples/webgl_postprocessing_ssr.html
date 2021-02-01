@@ -63,7 +63,9 @@
 		function init() {
 
 			camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 15);
-			camera.position.set(0.13271600513224902, 0.3489546826045913, 0.43921296427927076);
+			window.camera=camera
+			// camera.position.set(0.13271600513224902, 0.3489546826045913, 0.43921296427927076);
+			camera.position.set(0.23724229193127974, 0.30014508968789955, 0.4362919732173631);
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color(0x443333);
@@ -160,8 +162,9 @@
 			//
 
 			controls = new OrbitControls(camera, renderer.domElement);
+			window.controls=controls
 			controls.enableDamping = true
-			controls.target.set(0, 0.1, 0);
+			controls.target.set(-0.06055291045970278, 0.0916449151670129, 0.0616645654259065);
 			controls.update()
 			controls.enabled = !params.autoRotate
 
