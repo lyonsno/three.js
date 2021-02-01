@@ -11,7 +11,7 @@
 	</head>
 
 <body>
-	<div id="container"><canvas id="cvs3d" style="display:none;"></canvas></div>
+	<div id="container"><canvas id="cvs3d" style="position:absolute;left:0;top:0;width:100%;height:100%;"></canvas></div>
 	<canvas id="cvs2d" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events: none;z-index: 1000;"></canvas>
 	<!-- <div id="info">
 		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
@@ -20,9 +20,9 @@
 	<span style="background:rgba(0,0,0,.7);position: relative; z-index: 1000;padding:5px;padding-left: 0;">
 		<span id="dom_wrap" style="display:none;">
 			<button onclick="setToWindowSize()">set to window size</button>
-			<label for="">width:<input id="dom_width" type="number" value="100" style="width:50px;"></label>
-			<label for="">height:<input id="dom_height" type="number" value="100" style="width:50px;"></label>
-			<button onclick="render(dom_width.value,dom_height.value)">render</button>
+			<label for="">width:<input id="dom_width" type="number" value="100" onchange="render_width=this.value" style="width:50px;"></label>
+			<label for="">height:<input id="dom_height" type="number" value="100" onchange="render_height=this.value" style="width:50px;"></label>
+			<button onclick="renderAPReflector();state='rendering';cancelAnimationFrame(raf);">render</button>
 		</span>
 		<span id="dom_info" style="color:white;">loading...</span>
 	</span>
@@ -41,9 +41,9 @@
 
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
-		let render_width
-		let render_height
-		dom_width.value=Math.round(window.innerWidth*100/window.innerHeight)
+		window.render_height=100
+		window.render_width=Math.round(window.innerWidth*100/window.innerHeight)
+		dom_width.value=window.render_width
 
 		window.params = {
 			enableSSR: true,
@@ -63,7 +63,7 @@
 		let reflector
 		let reflectorRenderTarget
 		let mesh_bunny
-		let state='initial'
+		window.state='initial'
 		window.readed = new Float32Array( 4 );
 		window.readedVec3=new THREE.Vector3()
 		window.reflectVec3=new THREE.Vector3()
@@ -80,7 +80,6 @@
 
 			const material = new THREE.MeshStandardMaterial({ color: 0x606060 });
 			const mesh = new THREE.Mesh(geometry, material);
-			mesh.position.y=-0.0365
 			// mesh.castShadow = true;
 			// mesh.receiveShadow = true;
 			mesh_bunny=mesh
@@ -92,10 +91,10 @@
 			dom_info.innerText=''
 			dom_wrap.style.display='inline'
 
-		});
+			init();
+			animate();
 
-		// init();
-		// animate();
+		});
 
 		function init() {
 
@@ -110,7 +109,8 @@
 			// camera.position.set(.5, 0, 0).applyAxisAngle(new THREE.Vector3(0,0,1),Math.PI/4);
 			// camera.position.set(0.18829417135451876, 0.08142276408283763, -0.10567413852928587);
 			// camera.position.set(0.03563935501962898, 0.22116787374986915, -0.0553714098215656);
-			camera.position.set(0.09323919966209626, 0.09299305784167794, 0.25949967775832036);
+			// camera.position.set(0.09323919966209626, 0.09299305784167794, 0.25949967775832036);
+			camera.position.set(0.11867382037835228, 0.3091829818920357, 0.43643250194722316);
 
 			scene = new THREE.Scene();
 			// scene.background = new THREE.Color(0x443333);
@@ -124,7 +124,7 @@
 				new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
 			);
 			plane.rotation.x = - Math.PI / 2;
-			// plane.position.y = 0.0365;
+			plane.position.y = 0.0365;
 			// plane.receiveShadow = true;
 			scene.add(plane);
 
@@ -141,10 +141,10 @@
 
 
 			{
-				const geometry = new THREE.BoxBufferGeometry(.05, .05, .05);
+				const geometry = new THREE.BoxBufferGeometry(.05, .3, .3);
 				const material = new THREE.MeshStandardMaterial({ color: 'green' })
 				const mesh = new THREE.Mesh(geometry, material)
-				mesh.position.set(-.12, plane.position.y + .025, .015)
+				mesh.position.set(-.13, plane.position.y + .15, .015)
 				scene.add(mesh)
 				otherMeshes.push(mesh)
 			}
@@ -168,7 +168,7 @@
 			// renderer
 			renderer = new THREE.WebGLRenderer({ antialias: false, canvas:cvs3d });
 			// renderer.setPixelRatio(window.devicePixelRatio);
-			renderer.setSize(render_width, render_height);
+			renderer.setSize(render_width, render_height, false);
 			renderer.outputEncoding = THREE.sRGBEncoding;
 			// renderer.shadowMap.enabled = true;
 			container.appendChild(renderer.domElement);
@@ -176,8 +176,9 @@
 			//
 
 			controls = new OrbitControls(camera, renderer.domElement);
+			window.controls=controls
 			// controls.enableDamping = true
-			// controls.target.set(0, 0.05, 0);
+			controls.target.set(-0.08137769989670579, 0.060094131763247, 0.002092414710654196);
 			controls.update()
 			controls.enabled = !params.autoRotate
 
@@ -216,8 +217,9 @@
 		}
 
 		function animate() {
+			console.log('animate')
 
-			requestAnimationFrame(animate);
+			window.raf=requestAnimationFrame(animate);
 
 			stats.begin();
 			render();
@@ -225,55 +227,51 @@
 
 		}
 
-		window.render=render
-		async function render(width=100,height=100) {
+		function render() {
+			renderer.render(scene, camera)
+		}
+
+		window.renderAPReflector=renderAPReflector
+		async function renderAPReflector() {
 			if(state==='rendering') return
 			if(state==='rendered'){
 				alert('Please reload page to re-render.')
 				return
 			}
-			render_width=width
-			render_height=height
-			if(state==='initial') init()
 
-			state='rendering'
 			dom_info.innerText='rendering...'
 			await new Promise(resolve=>setTimeout(resolve, 0))
 
-			if (params.enableSSR) {
 
-				renderer.render(scene, camera)
-				ctx2d.drawImage(renderer.domElement,0,0);
+			renderer.render(scene, camera)
+			ctx2d.drawImage(renderer.domElement,0,0);
 
-				composer.render();
-				ctx2d.globalAlpha=.5
-				for(let y=0;y<render_height;y++){
-					for(let x=0;x<render_width;x++){
-						let i=y*render_width+x
+			composer.render();
+			ctx2d.globalAlpha=.5
+			for(let y=0;y<render_height;y++){
+				for(let x=0;x<render_width;x++){
+					let i=y*render_width+x
 
-						renderer.readRenderTargetPixels( ssrPass.worldPositionRenderTarget, x, y, 1, 1, readed );
-						// if(y===60) debugger
-						pixelCamera.position.set( readed[0], readed[1], readed[2], )
-						
-						renderer.readRenderTargetPixels( ssrPass.worldNormalRenderTarget, x, y, 1, 1, readed );
-						// if(y===60) debugger
-						readedVec3.set( readed[0], readed[1], readed[2], )
-						pixelCamera.lookAt(reflectVec3.copy(pixelCamera.position).sub(camera.position).reflect(readedVec3).add(pixelCamera.position))
+					renderer.readRenderTargetPixels( ssrPass.worldPositionRenderTarget, x, y, 1, 1, readed );
+					// if(y===60) debugger
+					pixelCamera.position.set( readed[0], readed[1], readed[2], )
+					
+					renderer.readRenderTargetPixels( ssrPass.worldNormalRenderTarget, x, y, 1, 1, readed );
+					// if(y===60) debugger
+					readedVec3.set( readed[0], readed[1], readed[2], )
+					pixelCamera.lookAt(reflectVec3.copy(pixelCamera.position).sub(camera.position).reflect(readedVec3).add(pixelCamera.position))
 
-						pixelRenderer.render(scene,pixelCamera)
-						ctx2d.drawImage(pixelRenderer.domElement,x,render_height-y,1,1)
+					pixelRenderer.render(scene,pixelCamera)
+					ctx2d.drawImage(pixelRenderer.domElement,x,render_height-y,1,1)
 
-					}
-					dom_info.innerText=`rendering... line: ${y}`
-					await new Promise(resolve=>setTimeout(resolve, 0))
 				}
-				{/* solve line gap problem */
-					cvs2d.style.display='none'
-					await new Promise(resolve=>setTimeout(resolve, 300))
-					cvs2d.style.display='block'
-				}
-			} else {
-				renderer.render(scene, camera)
+				dom_info.innerText=`rendering... line: ${y}`
+				await new Promise(resolve=>setTimeout(resolve, 0))
+			}
+			{/* solve line gap problem */
+				cvs2d.style.display='none'
+				await new Promise(resolve=>setTimeout(resolve, 300))
+				cvs2d.style.display='block'
 			}
 
 			console.log('rendered')
