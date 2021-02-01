@@ -17,7 +17,7 @@
 
 <body>
 	<div id="container"><canvas id="cvs3d" style="position:absolute;left:0;top:0;width:100%;height:100%;"></canvas></div>
-	<!-- <canvas id="cvs2d" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events: none;z-index: 1000;"></canvas> -->
+	<canvas id="cvsVPR" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events: none;z-index: 1000;"></canvas>
 	<!-- <div id="info">
 		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
 		<a href="https://github.com/mrdoob/three.js/pull/20156" target="_blank" rel="noopener">SSRPass</a> demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
@@ -209,16 +209,26 @@
 			window.ssrPass = ssrPass
 			composer.addPass(ssrPass);
 
-			window.pixelRenderer=new THREE.WebGLRenderer({ antialias: false, alpha: true });
-			pixelRenderer.setSize(1,1);
-			pixelRenderer.outputEncoding = THREE.sRGBEncoding;
-			// container.appendChild(pixelRenderer.domElement);
+			window.vprRenderer=new THREE.WebGLRenderer({ antialias: false, alpha: true, canvas:cvsVPR });
+			vprRenderer.setSize(render_width,render_height,false);
+			vprRenderer.outputEncoding = THREE.sRGBEncoding;
+			// container.appendChild(vprRenderer.domElement);
 
-			let pixelCameraSize
+						let pixelCameraSize
 			// pixelCameraSize=.00000000000000000000000000000000000001
 			// pixelCameraSize=.0000000000000000000000000000000000001
 			pixelCameraSize=.000001
-			window.pixelCamera = new THREE.OrthographicCamera( -pixelCameraSize, pixelCameraSize, pixelCameraSize, -pixelCameraSize, .001, 10 );
+			// window.pixelCamera = new THREE.OrthographicCamera( -pixelCameraSize, pixelCameraSize, pixelCameraSize, -pixelCameraSize, .001, 10 );
+			window.pixelCameras=[]
+			for(let y=0;y<render_height;y++){
+				for(let x=0;x<render_width;x++){
+					let i=y*render_width+x
+					let pixelCamera = new THREE.OrthographicCamera( -pixelCameraSize, pixelCameraSize, pixelCameraSize, -pixelCameraSize, .001, 10 );
+					pixelCamera.viewport=new THREE.Vector4( x, y, 1, 1 );
+					pixelCameras.push(pixelCamera)
+				}
+			}
+			window.arrayCamera=new THREE.ArrayCamera( pixelCameras );
 
 			state='inited'
 		}
@@ -262,46 +272,39 @@
 			ssrPass.worldReflectMaterial.uniforms['uCameraPosition'].value = ssrPass.tempVec3.setFromMatrixPosition(ssrPass.camera.matrixWorld)
 			ssrPass.worldReflectMaterial.uniforms['cameraRotationMatrix'].value = ssrPass.cameraRotationMatrix.extractRotation(ssrPass.camera.matrixWorld)
 
-			renderer.render(scene, camera)
+			// renderer.render(scene, camera)
 			// ctx2d.drawImage(renderer.domElement,0,0);
 
 			composer.render();
 			
-			// renderer.setClearColor( 0x000000,0 );
-			renderer.setScissorTest( true );
 			for(let y=0;y<render_height;y++){
 				for(let x=0;x<render_width;x++){
 					let i=y*render_width+x
 
 					renderer.readRenderTargetPixels( ssrPass.worldPositionRenderTarget, x, y, 1, 1, readed );
-					// if(y===60) debugger
-					pixelCamera.position.set( readed[0], readed[1], readed[2], )
+					pixelCameras[i].position.set( readed[0], readed[1], readed[2], )
 					
 					renderer.readRenderTargetPixels( ssrPass.worldReflectRenderTarget, x, y, 1, 1, readed );
-					// if(y===60) debugger
-					// readedVec3.set( readed[0], readed[1], readed[2], )
-					// incidenceDir.copy(pixelCamera.position).sub(camera.position).normalize()
-					// reflectDir.copy(incidenceDir).reflect(readedVec3)
-					// pixelCamera.lookAt(tempVec3.copy(reflectDir).add(pixelCamera.position))
-					pixelCamera.lookAt(readed[0], readed[1], readed[2])
+					pixelCameras[i].lookAt(readed[0], readed[1], readed[2])
+
+					// pixelCameras[i].updateProjectionMatrix();
 
 					// fresnel=(tempVec3.copy(incidenceDir).dot(reflectDir)+1)/2
 					// ctx2d.globalAlpha=opacity*fresnel
 
-					
-					// renderer.setViewport( x, y, 1, 1 );
-					renderer.setScissor( x, y, 1, 1 );
-					renderer.render( scene, pixelCamera );
-
-					// pixelRenderer.render(scene,pixelCamera)
-					// ctx2d.drawImage(pixelRenderer.domElement,x,render_height-y,1,1)
+					// vprRenderer.render(scene,pixelCameras[i])
+					// ctx2d.drawImage(vprRenderer.domElement,x,render_height-y,1,1)
 
 					
 				}
-				console.log(`line: ${y}/${render_height}`)
+				// console.log(`line: ${y}/${render_height}`)
 				// dom_info.innerText=`rendering... line: ${y}/${render_height}`
 				// await new Promise(resolve=>setTimeout(resolve, 0))
 			}
+			vprRenderer.render( scene, arrayCamera );
+			
+			console.timeEnd('renderVPReflector')
+
 			// {/* solve line gap problem */
 			// 	cvs2d.style.display='none'
 			// 	await new Promise(resolve=>setTimeout(resolve, 300))
@@ -313,7 +316,6 @@
 			// dom_toggleVPReflector.style.display='inline'
 			state='rendered'
 
-			console.timeEnd('renderVPReflector')
 		}
 
 		// window.toggleVPReflector=toggleVPReflector
