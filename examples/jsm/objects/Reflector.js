@@ -218,11 +218,11 @@ Reflector.ReflectorShader = {
 
 	vertexShader: [
 		'uniform mat4 textureMatrix;',
-		'varying vec4 vUv;',
+		'varying vec2 vUv;',
 
 		'void main() {',
 
-		'	vUv = textureMatrix * vec4( position, 1.0 );',
+		'	vUv = uv;',
 
 		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
 
@@ -232,7 +232,7 @@ Reflector.ReflectorShader = {
 	fragmentShader: [
 		'uniform vec3 color;',
 		'uniform sampler2D tDiffuse;',
-		'varying vec4 vUv;',
+		'varying vec2 vUv;',
 
 		'float blendOverlay( float base, float blend ) {',
 
@@ -248,7 +248,7 @@ Reflector.ReflectorShader = {
 
 		'void main() {',
 
-		'	vec4 base = texture2DProj( tDiffuse, vUv );',
+		'	vec4 base = texture2D( tDiffuse, vUv );',
 		'	gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );',
 
 		'}'

@@ -27,15 +27,16 @@
 		import { GUI } from './jsm/libs/dat.gui.module.js';
 		import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
 		import { SSRPass } from './jsm/postprocessing/SSRPass.js';
-		import { Reflector } from './jsm/objects/ReflectorForSSRPass.js';
+		// import { Reflector } from './jsm/objects/ReflectorForSSRPass.js';
+		import { Reflector } from './jsm/objects/Reflector.js';
 
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
 		let params = {
-			enableSSR: true,
+			enableSSR: false,
 			autoRotate: false,
 			isOtherMeshes: true,
-			isReflector: false,
+			isReflector: true,
 		}
 		let composer
 		let ssrPass
@@ -65,7 +66,8 @@
 			camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 15);
 			window.camera=camera
 			// camera.position.set(0.13271600513224902, 0.3489546826045913, 0.43921296427927076);
-			camera.position.set(0.14703025254066782, 0.30918298189203564, 0.42221350369381716);
+			// camera.position.set(0.14703025254066782, 0.30918298189203564, 0.42221350369381716);
+			camera.position.set(0.4116339039676998, 0.5977448229772744, 0.9089109807307694);
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color(0x443333);
@@ -102,6 +104,7 @@
 				// mesh.receiveShadow = true;
 				scene.add(mesh);
 				selects.push(mesh)
+				mesh.position.y=.03
 
 				// Release decoder resources.
 				dracoLoader.dispose();
@@ -136,7 +139,7 @@
 				selects.push(mesh)
 			}
 			{
-				const geometry = new THREE.PlaneBufferGeometry(8, 8);
+				const geometry = new THREE.PlaneBufferGeometry(1, 1);
 				reflector = new Reflector(geometry, {
 					clipBias: 0.003,
 					textureWidth: window.innerWidth,
