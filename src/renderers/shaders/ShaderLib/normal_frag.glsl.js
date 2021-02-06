@@ -29,6 +29,41 @@ uniform float opacity;
 #include <logdepthbuf_pars_fragment>
 #include <clipping_planes_pars_fragment>
 
+mat4 extractRotation( mat4 me ) {
+
+	// this method does not support reflection matrices
+
+	mat4 te = mat4(
+		1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		0,0,0,1
+	);
+
+	te[0][ 0 ] = me[0][ 0 ];
+	te[0][ 1 ] = me[0][ 1 ];
+	te[0][ 2 ] = me[0][ 2 ];
+	te[0][ 3 ] = 0.;
+
+	te[1][ 0 ] = me[1][ 0 ];
+	te[1][ 1 ] = me[1][ 1 ];
+	te[1][ 2 ] = me[1][ 2 ];
+	te[1][ 3 ] = 0.;
+
+	te[2][ 0 ]= me[2][ 0 ];
+	te[2][ 1 ]= me[2][ 1 ];
+	te[2][ 2 ] = me[2][ 2 ];
+	te[2][ 3 ] = 0.;
+
+	te[3][ 0 ] = 0.;
+	te[3][ 1 ] = 0.;
+	te[3][ 2 ] = 0.;
+	te[3][ 3 ] = 1.;
+
+	return te;
+
+}
+
 void main() {
 
 	#include <clipping_planes_fragment>
@@ -36,7 +71,17 @@ void main() {
 	#include <normal_fragment_begin>
 	#include <normal_fragment_maps>
 
-	gl_FragColor = vec4( packNormalToRGB( normal ), opacity );
+	// mat4 rotationMatrix=extractRotation(viewMatrix);
+	mat4 rotationMatrix=mat4(
+		1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		0,0,0,1
+	);
+	rotationMatrix=inverse(rotationMatrix);
+	vec3 worldNormal=(rotationMatrix*vec4(normal,1)).xyz;
+	gl_FragColor = vec4( packNormalToRGB( worldNormal ), opacity );
+	// gl_FragColor = vec4( packNormalToRGB( normal ), opacity );
 
 }
 `;
