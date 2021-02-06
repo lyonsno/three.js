@@ -7,7 +7,7 @@ import {
 	Sphere,
 	Vector3,
 	WireframeGeometry
-} from '../../../build/three.module.js';
+} from '../../../src/Three.js';
 
 var LineSegmentsGeometry = function () {
 

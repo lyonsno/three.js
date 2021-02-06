@@ -1,7 +1,7 @@
 import {
 	Frustum,
 	Vector3
-} from '../../../build/three.module.js';
+} from '../../../src/Three.js';
 
 /**
  * This is a class to check whether objects are in a selection area in 3D space

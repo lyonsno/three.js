@@ -2,7 +2,7 @@
  * https://github.com/google/model-viewer/blob/master/packages/model-viewer/src/three-components/EnvironmentScene.ts
  */
 
-import * as THREE from '../../../build/three.module.js';
+import * as THREE from '../../../src/Three.js';
 
 function RoomEnvironment() {
 

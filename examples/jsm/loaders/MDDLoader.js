@@ -16,7 +16,7 @@ import {
 	FileLoader,
 	Loader,
 	NumberKeyframeTrack
-} from '../../../build/three.module.js';
+} from '../../../src/Three.js';
 
 var MDDLoader = function ( manager ) {
 
