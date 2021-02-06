@@ -83,10 +83,19 @@ void main() {
 	// 	0,0,1,0,
 	// 	0,0,0,1
 	// );
-	// rotationMatrix=inverse(rotationMatrix);
+	rotationMatrix=inverse(rotationMatrix);
 	vec3 worldNormal=(rotationMatrix*vec4(normal,1)).xyz;
 	gl_FragColor = vec4( packNormalToRGB( worldNormal ), opacity );
 	// gl_FragColor = vec4( packNormalToRGB( normal ), opacity );
 
+	// gl_FragColor = vec4( viewMatrix[0][0],viewMatrix[0][1],viewMatrix[0][2],1 );
+	// gl_FragColor = vec4( viewMatrix[1][0],viewMatrix[1][1],viewMatrix[1][2],1 );
+	// gl_FragColor = vec4( viewMatrix[2][0],viewMatrix[2][1],viewMatrix[2][2],1 );
+	// gl_FragColor = vec4( viewMatrix[3][0],viewMatrix[3][1],viewMatrix[3][2],1 );
+
 }
 `;
+/*
+	envmap_physical_pars_fragment.glsl.js
+		vec3 worldNormal = inverseTransformDirection( geometry.normal, viewMatrix );
+*/
