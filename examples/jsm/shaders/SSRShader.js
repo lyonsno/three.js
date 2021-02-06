@@ -115,6 +115,10 @@ var SSRShader = {
 			return xy;
 		}
 		void main(){
+			float sampleStride=3.;
+			if(mod(gl_FragCoord.x-.5,sampleStride)!=0.) return;
+			if(mod(gl_FragCoord.y-.5,sampleStride)!=0.) return;
+
 			#ifdef isSelective
 				float metalness=texture2D(tMetalness,vUv).r;
 				if(metalness==0.) return;
