@@ -37,13 +37,12 @@
 
 		<h2>Constructor</h2>
 
-		<h3>[name]( [param:Number fov], [param:Number aspect], [param:Number near], [param:Number far], [param:Boolean fitWidth] )</h3>
+		<h3>[name]( [param:Number fov], [param:Number aspect], [param:Number near], [param:Number far] )</h3>
 		<p>
 		fov — Camera frustum vertical field of view.<br />
 		aspect — Camera frustum aspect ratio.<br />
 		near — Camera frustum near plane.<br />
-		far — Camera frustum far plane.<br />
-		fitWidth — Whether to apply [page:.fov fov] to horizontal.<br /><br />
+		far — Camera frustum far plane.<br /><br />
 
 			Together these define the camera's [link:https://en.wikipedia.org/wiki/Viewing_frustum viewing frustum].
 		</p>
@@ -80,9 +79,6 @@
 
 		<h3>[property:Float fov]</h3>
 		<p>Camera frustum vertical field of view, from bottom to top of view, in degrees. Default is *50*.</p>
-
-		<h3>[property:Boolean fitWidth]</h3>
-		<p>Whether to apply [page:.fov fov] to horizontal. Default is *false*.</p>
 
 
 		<h3>[property:Float near]</h3>
@@ -134,6 +130,30 @@
 		Sets the FOV by focal length in respect to the current [page:PerspectiveCamera.filmGauge .filmGauge].<br /><br />
 
 		By default, the focal length is specified for a 35mm (full frame) camera.
+		</p>
+
+		<h3>[method:Float getHorizontalFOV]()</h3>
+		<p>Returns the current horizontal field of view angle in degrees, calculated from [page:.fov .fov] and [page:.aspect .aspect].</p>
+
+		<h3>[method:null setHorizontalFOV]( [param:Float horizontalFOV] )</h3>
+		<p>Sets the [page:.fov .fov] by horizontal field of view in degrees and [page:.aspect .aspect].</p>
+
+		<p>
+			To maintain a constant horizontal fov, you would call it like this:<br />
+
+			<code>function onWindowResize( event ) {
+
+	renderer.setSize( window.innerWidth, window.innerHeight );
+
+	// maintain a constant horizontal fov
+	const hfov = camera.getHorizontalFOV();
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.setHorizontalFOV( hfov );
+
+	render(); // if there is no animation loop
+
+}
+</code>
 		</p>
 
 		<h3>[method:null setViewOffset]( [param:Float fullWidth], [param:Float fullHeight], [param:Float x], [param:Float y], [param:Float width], [param:Float height] )</h3>
