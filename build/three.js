@@ -785,7 +785,7 @@
 		Function("r", "regeneratorRuntime = r")(runtime);
 	}
 
-	var REVISION = '125';
+	var REVISION = '126dev';
 	var MOUSE = {
 		LEFT: 0,
 		MIDDLE: 1,
@@ -9066,17 +9066,17 @@
 		clone: function clone() {
 			/*
 			 // Handle primitives
-				 const parameters = this.parameters;
-				 if ( parameters !== undefined ) {
-				 const values = [];
-				 for ( const key in parameters ) {
-				 values.push( parameters[ key ] );
-				 }
-				 const geometry = Object.create( this.constructor.prototype );
+					 const parameters = this.parameters;
+					 if ( parameters !== undefined ) {
+					 const values = [];
+					 for ( const key in parameters ) {
+					 values.push( parameters[ key ] );
+					 }
+					 const geometry = Object.create( this.constructor.prototype );
 			 this.constructor.apply( geometry, values );
 			 return geometry;
-				 }
-				 return new this.constructor().copy( this );
+					 }
+					 return new this.constructor().copy( this );
 			 */
 			return new BufferGeometry().copy(this);
 		},
@@ -9968,6 +9968,14 @@
 		getFocalLength: function getFocalLength() {
 			var vExtentSlope = Math.tan(MathUtils.DEG2RAD * 0.5 * this.fov);
 			return 0.5 * this.getFilmHeight() / vExtentSlope;
+		},
+		setHorizontalFOV: function setHorizontalFOV(horizontalFOV) {
+			this.fov = Math.atan(Math.tan(horizontalFOV * MathUtils.DEG2RAD * 0.5) / this.aspect) * MathUtils.RAD2DEG * 2; // degrees
+
+			this.updateProjectionMatrix();
+		},
+		getHorizontalFOV: function getHorizontalFOV() {
+			return Math.atan(Math.tan(this.fov * MathUtils.DEG2RAD * 0.5) * this.aspect) * MathUtils.RAD2DEG * 2; // degrees
 		},
 		getEffectiveFOV: function getEffectiveFOV() {
 			return MathUtils.RAD2DEG * 2 * Math.atan(Math.tan(MathUtils.DEG2RAD * 0.5 * this.fov) / this.zoom);
@@ -33982,15 +33990,15 @@
 			// TODO: delete this comment?
 			const distanceGeometry = new THREE.IcosahedronBufferGeometry( 1, 2 );
 			const distanceMaterial = new THREE.MeshBasicMaterial( { color: hexColor, fog: false, wireframe: true, opacity: 0.1, transparent: true } );
-			this.lightSphere = new THREE.Mesh( bulbGeometry, bulbMaterial );
+				this.lightSphere = new THREE.Mesh( bulbGeometry, bulbMaterial );
 			this.lightDistance = new THREE.Mesh( distanceGeometry, distanceMaterial );
-			const d = light.distance;
-			if ( d === 0.0 ) {
-				this.lightDistance.visible = false;
-			} else {
-				this.lightDistance.scale.set( d, d, d );
-			}
-			this.add( this.lightDistance );
+				const d = light.distance;
+				if ( d === 0.0 ) {
+					this.lightDistance.visible = false;
+				} else {
+					this.lightDistance.scale.set( d, d, d );
+				}
+				this.add( this.lightDistance );
 			*/
 
 
@@ -34012,12 +34020,12 @@
 			}
 			/*
 			const d = this.light.distance;
-				if ( d === 0.0 ) {
-					this.lightDistance.visible = false;
-				} else {
-					this.lightDistance.visible = true;
+					if ( d === 0.0 ) {
+						this.lightDistance.visible = false;
+					} else {
+						this.lightDistance.visible = true;
 				this.lightDistance.scale.set( d, d, d );
-				}
+					}
 			*/
 
 		};
@@ -34519,7 +34527,7 @@
 			1/___0/|
 			| 6__|_7
 			2/___3/
-				0: max.x, max.y, max.z
+					0: max.x, max.y, max.z
 			1: min.x, max.y, max.z
 			2: min.x, min.y, max.z
 			3: max.x, min.y, max.z
@@ -36751,27 +36759,8 @@
 	CubeCamera.prototype.clear = function (renderer, color, depth, stencil) {
 		console.warn('THREE.CubeCamera: .clear() is now .renderTarget.clear().');
 		return this.renderTarget.clear(renderer, color, depth, stencil);
-	}; //
-
-
-	var GeometryUtils = {
-		merge: function merge(geometry1, geometry2, materialIndexOffset) {
-			console.warn('THREE.GeometryUtils: .merge() has been moved to Geometry. Use geometry.merge( geometry2, matrix, materialIndexOffset ) instead.');
-			var matrix;
-
-			if (geometry2.isMesh) {
-				geometry2.matrixAutoUpdate && geometry2.updateMatrix();
-				matrix = geometry2.matrix;
-				geometry2 = geometry2.geometry;
-			}
-
-			geometry1.merge(geometry2, matrix, materialIndexOffset);
-		},
-		center: function center(geometry) {
-			console.warn('THREE.GeometryUtils: .center() has been moved to Geometry. Use geometry.center() instead.');
-			return geometry.center();
-		}
 	};
+
 	ImageUtils.crossOrigin = undefined;
 
 	ImageUtils.loadTexture = function (url, mapping, onLoad, onError) {
@@ -36984,7 +36973,6 @@
 	exports.GLSL1 = GLSL1;
 	exports.GLSL3 = GLSL3;
 	exports.GammaEncoding = GammaEncoding;
-	exports.GeometryUtils = GeometryUtils;
 	exports.GreaterDepth = GreaterDepth;
 	exports.GreaterEqualDepth = GreaterEqualDepth;
 	exports.GreaterEqualStencilFunc = GreaterEqualStencilFunc;

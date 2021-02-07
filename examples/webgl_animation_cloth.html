@@ -598,10 +598,12 @@
 
 			function onWindowResize() {
 
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
-
 				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				// maintain a constant horizontal fov
+				const hfov = camera.getHorizontalFOV();
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.setHorizontalFOV( hfov );
 
 			}
 
