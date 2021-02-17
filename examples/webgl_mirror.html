@@ -63,9 +63,7 @@
 				scene = new THREE.Scene();
 
 				// camera
-				const NEAR = 1;
-				const FAR = 500;
-				camera = new THREE.PerspectiveCamera( 45, aspect, NEAR, FAR );
+				camera = new THREE.PerspectiveCamera( 45, aspect, 1, 2000 );
 				camera.position.set( 0, 50, 160 );
 
 				cameraControls = new OrbitControls( camera, renderer.domElement );

@@ -27,7 +27,7 @@ var Reflector = function (geometry, options, params) {
 	var shader = options.shader || Reflector.ReflectorShader;
 
 	// var virtualCamera = new OrthographicCamera(-50, 50, 50, -50, 1, 500);
-	var virtualCamera = new PerspectiveCamera(params.fov, 1, 1, 500);
+	var virtualCamera = new PerspectiveCamera(params.fov, 1, 1, 2000);
 	this.virtualCamera=virtualCamera
 
 	var parameters = {
