@@ -209,8 +209,10 @@
 				verticalMirror.virtualCamera.position.x=camera.position.x
 				verticalMirror.virtualCamera.position.y=camera.position.y
 				verticalMirror.virtualCamera.position.z=-camera.position.z
-				verticalMirror.virtualCamera.fov=Math.atan2(50,camera.position.z)*THREE.Math.RAD2DEG*2
+				// verticalMirror.virtualCamera.fov=Math.atan2(50,camera.position.z)*THREE.Math.RAD2DEG*2
+				verticalMirror.virtualCamera.fov=Math.atan2(50,camera.position.length())*THREE.Math.RAD2DEG*2
 				verticalMirror.virtualCamera.updateProjectionMatrix()
+				verticalMirror.virtualCamera.lookAt(0,0,0)
 			}
 
 			function onWindowResize() {
