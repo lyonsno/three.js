@@ -188,13 +188,8 @@
 					child.position.z+=50
 				})
 
-				cameraControls.addEventListener('change',e=>{
-					verticalMirror.virtualCamera.position.x=camera.position.x
-					verticalMirror.virtualCamera.position.y=camera.position.y
-					verticalMirror.virtualCamera.position.z=-camera.position.z
-					verticalMirror.virtualCamera.fov=Math.atan2(50,camera.position.z)*THREE.Math.RAD2DEG*2
-					verticalMirror.virtualCamera.updateProjectionMatrix()
-				})
+				cameraControls.addEventListener('change',handleCameraControlsChange)
+				handleCameraControlsChange()
 
 				// window.gui = new GUI();
 				// gui.add(params, 'fov').step(.1).onChange(() => {
@@ -204,6 +199,14 @@
 				// gui.add(params, 'posZ').step(1).onChange(() => {
 				// 	verticalMirror.virtualCamera.position.z=params.posZ
 				// })
+			}
+
+			function handleCameraControlsChange(){
+				verticalMirror.virtualCamera.position.x=camera.position.x
+				verticalMirror.virtualCamera.position.y=camera.position.y
+				verticalMirror.virtualCamera.position.z=-camera.position.z
+				verticalMirror.virtualCamera.fov=Math.atan2(50,camera.position.z)*THREE.Math.RAD2DEG*2
+				verticalMirror.virtualCamera.updateProjectionMatrix()
 			}
 
 			function onWindowResize() {
