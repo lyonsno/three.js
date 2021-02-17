@@ -33,8 +33,8 @@
 			let aspect = window.innerWidth / window.innerHeight;
 
 			window.params={
-				fov: 26.3,
-				posZ: -264,
+				fov: 26.8,
+				posZ: -260, // 260 = 160 + 50 + 50
 			}
 
 			let camera, scene, renderer;
@@ -67,7 +67,7 @@
 				camera.position.set( 0, 50, 160 );
 
 				cameraControls = new OrbitControls( camera, renderer.domElement );
-				cameraControls.target.set( 0, 40, 0 );
+				cameraControls.target.set( 0, 50, 0 );
 				cameraControls.maxDistance = 400;
 				cameraControls.minDistance = 10;
 				cameraControls.update();
