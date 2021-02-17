@@ -33,10 +33,12 @@
 			let aspect = window.innerWidth / window.innerHeight;
 
 			window.params={
-				fov: 26.8,
-				posZ: -260, // 260 = 160 + 50 + 50
+				// fov: 26.8,
+				// posZ: -260, // 260 = 160 + 50 + 50
 				// fov: 12.7,
 				// posZ: -500, // 500 = 400 + 50 + 50
+				fov:1,
+				posZ:-1, // why cannot positive 1 ?
 			}
 
 			let camera, scene, renderer;
@@ -66,10 +68,11 @@
 
 				// camera
 				camera = new THREE.PerspectiveCamera( 45, aspect, 1, 2000 );
-				camera.position.set( 0, 50, 160 );
+				window.camera=camera
+				camera.position.set( 0, 0, 160 );
 
 				cameraControls = new OrbitControls( camera, renderer.domElement );
-				cameraControls.target.set( 0, 50, 0 );
+				cameraControls.target.set( 0, 0, 0 );
 				cameraControls.maxDistance = 400;
 				cameraControls.minDistance = 10;
 				cameraControls.update();
@@ -180,14 +183,27 @@
 
 				window.addEventListener( "resize", onWindowResize, false );
 
-				window.gui = new GUI();
-				gui.add(params, 'fov').step(.1).onChange(() => {
-					verticalMirror.virtualCamera.fov=params.fov
+				scene.children.forEach(child=>{
+					child.position.y-=50
+					child.position.z+=50
+				})
+
+				cameraControls.addEventListener('change',e=>{
+					verticalMirror.virtualCamera.position.x=-camera.position.x
+					verticalMirror.virtualCamera.position.y=-camera.position.y
+					verticalMirror.virtualCamera.position.z=-camera.position.z
+					verticalMirror.virtualCamera.fov=Math.atan2(50,camera.position.z)*THREE.Math.RAD2DEG*2
 					verticalMirror.virtualCamera.updateProjectionMatrix()
 				})
-				gui.add(params, 'posZ').step(1).onChange(() => {
-					verticalMirror.virtualCamera.position.z=params.posZ
-				})
+
+				// window.gui = new GUI();
+				// gui.add(params, 'fov').step(.1).onChange(() => {
+				// 	verticalMirror.virtualCamera.fov=params.fov
+				// 	verticalMirror.virtualCamera.updateProjectionMatrix()
+				// })
+				// gui.add(params, 'posZ').step(1).onChange(() => {
+				// 	verticalMirror.virtualCamera.position.z=params.posZ
+				// })
 			}
 
 			function onWindowResize() {

@@ -28,6 +28,7 @@ var Reflector = function (geometry, options, params) {
 
 	// var virtualCamera = new OrthographicCamera(-50, 50, 50, -50, 1, 500);
 	var virtualCamera = new PerspectiveCamera(params.fov, 1, 1, 2000);
+	window.virtualCamera=virtualCamera
 	this.virtualCamera=virtualCamera
 
 	var parameters = {
@@ -54,8 +55,8 @@ var Reflector = function (geometry, options, params) {
 
 	this.material = material;
 
-	virtualCamera.position.set(0, 50, params.posZ)
-	virtualCamera.lookAt(0, 50, 0)
+	virtualCamera.position.set(0, 0, params.posZ)
+	virtualCamera.lookAt(0, 0, 0)
 
 	this.onBeforeRender = function (renderer, scene, camera) {
 
