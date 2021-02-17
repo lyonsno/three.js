@@ -69,7 +69,7 @@
 				// camera
 				camera = new THREE.PerspectiveCamera( 45, aspect, 1, 2000 );
 				window.camera=camera
-				camera.position.set( 0, 0, 160 );
+				camera.position.set( 0, 0, 160+50 );
 
 				cameraControls = new OrbitControls( camera, renderer.domElement );
 				cameraControls.target.set( 0, 0, 0 );
@@ -189,8 +189,8 @@
 				})
 
 				cameraControls.addEventListener('change',e=>{
-					verticalMirror.virtualCamera.position.x=-camera.position.x
-					verticalMirror.virtualCamera.position.y=-camera.position.y
+					verticalMirror.virtualCamera.position.x=camera.position.x
+					verticalMirror.virtualCamera.position.y=camera.position.y
 					verticalMirror.virtualCamera.position.z=-camera.position.z
 					verticalMirror.virtualCamera.fov=Math.atan2(50,camera.position.z)*THREE.Math.RAD2DEG*2
 					verticalMirror.virtualCamera.updateProjectionMatrix()
@@ -230,8 +230,8 @@
 
 					smallSphere.position.set(
 						Math.cos( timer * 0.1 ) * 30,
-						Math.abs( Math.cos( timer * 0.2 ) ) * 20 + 5,
-						Math.sin( timer * 0.1 ) * 30
+						Math.abs( Math.cos( timer * 0.2 ) ) * 20 + 5 - 50,
+						Math.sin( timer * 0.1 ) * 30 + 50
 					);
 					smallSphere.rotation.y = ( Math.PI / 2 ) - timer * 0.1;
 					smallSphere.rotation.z = timer * 0.8;
