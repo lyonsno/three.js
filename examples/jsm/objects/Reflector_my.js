@@ -3,6 +3,7 @@ import {
 	MathUtils,
 	Mesh,
 	OrthographicCamera,
+	PerspectiveCamera,
 	RGBFormat,
 	ShaderMaterial,
 	UniformsUtils,
@@ -25,7 +26,8 @@ var Reflector = function (geometry, options) {
 	var textureHeight = options.textureHeight || 512;
 	var shader = options.shader || Reflector.ReflectorShader;
 
-	var virtualCamera = new OrthographicCamera(-50, 50, 50, -50, 1, 500);
+	// var virtualCamera = new OrthographicCamera(-50, 50, 50, -50, 1, 500);
+	var virtualCamera = new PerspectiveCamera(45, 1, 1, 500);
 
 	var parameters = {
 		minFilter: LinearFilter,
@@ -51,7 +53,7 @@ var Reflector = function (geometry, options) {
 
 	this.material = material;
 
-	virtualCamera.position.set(0, 50, -50)
+	virtualCamera.position.set(0, 50, -160)
 	virtualCamera.lookAt(0, 50, 0)
 
 	this.onBeforeRender = function (renderer, scene, camera) {
