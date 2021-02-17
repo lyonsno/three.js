@@ -209,18 +209,26 @@
 			}
 
 			function handleCameraControlsChange(){
-				verticalMirror.virtualCamera.position.x=camera.position.x
-				verticalMirror.virtualCamera.position.y=camera.position.y
-				verticalMirror.virtualCamera.position.z=-camera.position.z
-				// verticalMirror.virtualCamera.fov=Math.atan2(50,camera.position.z)*THREE.Math.RAD2DEG*2
 				verticalMirror.virtualCamera.fov=Math.atan2(50,camera.position.length())*THREE.Math.RAD2DEG*2
-				verticalMirror.virtualCamera.updateProjectionMatrix()
 
-				// console.log(verticalMirror.virtualCamera.rotation.y*THREE.Math.RAD2DEG)
+				verticalMirror.virtualCamera.position.set(0,0,-210)
+				
+				verticalMirror.virtualCamera.position.x-=50
+				verticalMirror.virtualCamera.position.applyAxisAngle(new THREE.Vector3(0,1,0),-camera.rotation.y)
+				verticalMirror.virtualCamera.position.x+=50
+
+				// console.log(
+				// 	camera.rotation.y*THREE.Math.RAD2DEG,
+				// 	verticalMirror.virtualCamera.rotation.y*THREE.Math.RAD2DEG,
+				// )
+				
 				let theta=verticalMirror.virtualCamera.rotation.y
 				let x=(50/Math.cos(theta))-50
-				// x*=-1
+				x*=-1
 				verticalMirror.virtualCamera.lookAt(x,0,0)
+				// verticalMirror.virtualCamera.lookAt(0,0,0)
+
+				verticalMirror.virtualCamera.updateProjectionMatrix()
 			}
 
 			function onWindowResize() {
