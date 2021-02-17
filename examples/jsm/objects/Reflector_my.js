@@ -14,9 +14,11 @@ import {
 	WebGLRenderTarget
 } from '../../../build/three.module.js';
 
-var Reflector = function ( geometry, options ) {
+var Reflector = function (geometry, options) {
 
 	Mesh.call( this, geometry );
+
+	let s = this
 
 	this.type = 'Reflector';
 
@@ -71,51 +73,10 @@ var Reflector = function ( geometry, options ) {
 
 	this.material = material;
 
-	this.onBeforeRender = function ( renderer, scene, camera ) {
+	virtualCamera.position.set(0, 50, -50)
+	virtualCamera.lookAt(0, 50, 0)
 
-		reflectorWorldPosition.setFromMatrixPosition( scope.matrixWorld );
-		cameraWorldPosition.setFromMatrixPosition( camera.matrixWorld );
-
-		rotationMatrix.extractRotation( scope.matrixWorld );
-
-		normal.set( 0, 0, 1 );
-		normal.applyMatrix4( rotationMatrix );
-
-		view.subVectors( reflectorWorldPosition, cameraWorldPosition );
-
-		// Avoid rendering when reflector is facing away
-
-		if ( view.dot( normal ) > 0 ) return;
-
-		view.reflect( normal ).negate();
-		view.add( reflectorWorldPosition );
-
-		rotationMatrix.extractRotation( camera.matrixWorld );
-
-		lookAtPosition.set( 0, 0, - 1 );
-		lookAtPosition.applyMatrix4( rotationMatrix );
-		lookAtPosition.add( cameraWorldPosition );
-
-		target.subVectors( reflectorWorldPosition, lookAtPosition );
-		target.reflect( normal ).negate();
-		target.add( reflectorWorldPosition );
-
-		virtualCamera.position.copy( view );
-		virtualCamera.up.set( 0, 1, 0 );
-		virtualCamera.up.applyMatrix4( rotationMatrix );
-		virtualCamera.up.reflect( normal );
-		virtualCamera.lookAt( target );
-
-		virtualCamera.far = camera.far; // Used in WebGLBackground
-
-		virtualCamera.updateMatrixWorld();
-
-		// Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
-		// Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
-		reflectorPlane.setFromNormalAndCoplanarPoint( normal, reflectorWorldPosition );
-		reflectorPlane.applyMatrix4( virtualCamera.matrixWorldInverse );
-
-		clipPlane.set( reflectorPlane.normal.x, reflectorPlane.normal.y, reflectorPlane.normal.z, reflectorPlane.constant );
+	this.onBeforeRender = function (renderer, scene, camera) {
 
 		// Render
 
