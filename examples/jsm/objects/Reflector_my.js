@@ -44,7 +44,6 @@ var Reflector = function ( geometry, options ) {
 	var target = new Vector3();
 	var q = new Vector4();
 
-	var textureMatrix = new Matrix4();
 	var virtualCamera = new OrthographicCamera();
 
 	var parameters = {
@@ -69,7 +68,6 @@ var Reflector = function ( geometry, options ) {
 
 	material.uniforms[ 'tDiffuse' ].value = renderTarget.texture;
 	material.uniforms[ 'color' ].value = color;
-	material.uniforms[ 'textureMatrix' ].value = textureMatrix;
 
 	this.material = material;
 
@@ -112,17 +110,6 @@ var Reflector = function ( geometry, options ) {
 
 		virtualCamera.updateMatrixWorld();
 		virtualCamera.projectionMatrix.copy( camera.projectionMatrix );
-
-		// Update the texture matrix
-		textureMatrix.set(
-			0.5, 0.0, 0.0, 0.5,
-			0.0, 0.5, 0.0, 0.5,
-			0.0, 0.0, 0.5, 0.5,
-			0.0, 0.0, 0.0, 1.0
-		);
-		textureMatrix.multiply( virtualCamera.projectionMatrix );
-		textureMatrix.multiply( virtualCamera.matrixWorldInverse );
-		textureMatrix.multiply( scope.matrixWorld );
 
 		// Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
 		// Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
@@ -210,19 +197,14 @@ Reflector.ReflectorShader = {
 			value: null
 		},
 
-		'textureMatrix': {
-			value: null
-		}
-
 	},
 
 	vertexShader: [
-		'uniform mat4 textureMatrix;',
-		'varying vec4 vUv;',
+		'varying vec2 vUv;',
 
 		'void main() {',
 
-		'	vUv = textureMatrix * vec4( position, 1.0 );',
+		'	vUv = uv;',
 
 		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
 
@@ -232,7 +214,7 @@ Reflector.ReflectorShader = {
 	fragmentShader: [
 		'uniform vec3 color;',
 		'uniform sampler2D tDiffuse;',
-		'varying vec4 vUv;',
+		'varying vec2 vUv;',
 
 		'float blendOverlay( float base, float blend ) {',
 
@@ -248,7 +230,7 @@ Reflector.ReflectorShader = {
 
 		'void main() {',
 
-		'	vec4 base = texture2DProj( tDiffuse, vUv );',
+		'	vec4 base = texture2D( tDiffuse, vUv );',
 		'	gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );',
 
 		'}'
