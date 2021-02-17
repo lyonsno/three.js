@@ -1,15 +1,11 @@
 import {
 	LinearFilter,
 	MathUtils,
-	Matrix4,
 	Mesh,
 	OrthographicCamera,
-	Plane,
 	RGBFormat,
 	ShaderMaterial,
 	UniformsUtils,
-	Vector3,
-	Vector4,
 	WebGLRenderTarget
 } from '../../../build/three.module.js';
 
@@ -27,22 +23,7 @@ var Reflector = function (geometry, options) {
 
 	var textureWidth = options.textureWidth || 512;
 	var textureHeight = options.textureHeight || 512;
-	var clipBias = options.clipBias || 0;
 	var shader = options.shader || Reflector.ReflectorShader;
-
-	//
-
-	var reflectorPlane = new Plane();
-	var normal = new Vector3();
-	var reflectorWorldPosition = new Vector3();
-	var cameraWorldPosition = new Vector3();
-	var rotationMatrix = new Matrix4();
-	var lookAtPosition = new Vector3( 0, 0, - 1 );
-	var clipPlane = new Vector4();
-
-	var view = new Vector3();
-	var target = new Vector3();
-	var q = new Vector4();
 
 	var virtualCamera = new OrthographicCamera(-50, 50, 50, -50, 1, 500);
 
@@ -83,10 +64,8 @@ var Reflector = function (geometry, options) {
 
 		var currentRenderTarget = renderer.getRenderTarget();
 
-		var currentXrEnabled = renderer.xr.enabled;
 		var currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
 
-		renderer.xr.enabled = false; // Avoid camera modification
 		renderer.shadowMap.autoUpdate = false; // Avoid re-computing shadows
 
 		renderer.setRenderTarget( renderTarget );
@@ -96,20 +75,9 @@ var Reflector = function (geometry, options) {
 		if ( renderer.autoClear === false ) renderer.clear();
 		renderer.render( scene, virtualCamera );
 
-		renderer.xr.enabled = currentXrEnabled;
 		renderer.shadowMap.autoUpdate = currentShadowAutoUpdate;
 
 		renderer.setRenderTarget( currentRenderTarget );
-
-		// Restore viewport
-
-		var viewport = camera.viewport;
-
-		if ( viewport !== undefined ) {
-
-			renderer.state.viewport( viewport );
-
-		}
 
 		scope.visible = true;
 
