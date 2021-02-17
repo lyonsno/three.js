@@ -4,7 +4,7 @@ import {
 	MathUtils,
 	Matrix4,
 	Mesh,
-	PerspectiveCamera,
+	OrthographicCamera,
 	Plane,
 	RGBFormat,
 	ShaderMaterial,
@@ -45,7 +45,7 @@ var Reflector = function ( geometry, options ) {
 	var q = new Vector4();
 
 	var textureMatrix = new Matrix4();
-	var virtualCamera = new PerspectiveCamera();
+	var virtualCamera = new OrthographicCamera();
 
 	var parameters = {
 		minFilter: LinearFilter,
