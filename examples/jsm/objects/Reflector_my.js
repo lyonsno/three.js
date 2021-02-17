@@ -7,6 +7,7 @@ import {
 	RGBFormat,
 	ShaderMaterial,
 	UniformsUtils,
+	Vector4,
 	WebGLRenderTarget
 } from '../../../build/three.module.js';
 
@@ -58,6 +59,8 @@ var Reflector = function (geometry, options, params) {
 	virtualCamera.position.set(0, 0, params.posZ)
 	virtualCamera.lookAt(0, 0, 0)
 
+	let bakViewport=new Vector4()
+
 	this.onBeforeRender = function (renderer, scene, camera) {
 
 		// Render
@@ -68,7 +71,10 @@ var Reflector = function (geometry, options, params) {
 
 		var currentRenderTarget = renderer.getRenderTarget();
 
-		renderer.setRenderTarget( renderTarget );
+		renderer.setRenderTarget(renderTarget);
+
+		renderer.getViewport(bakViewport)
+		renderer.setViewport(0,window.innerHeight/2,window.innerWidth,window.innerHeight)
 
 		renderer.state.buffers.depth.setMask( true ); // make sure the depth buffer is writable so it can be properly cleared, see #18897
 
@@ -76,6 +82,15 @@ var Reflector = function (geometry, options, params) {
 		renderer.render( scene, virtualCamera );
 
 		renderer.setRenderTarget( currentRenderTarget );
+
+		// Restore viewport
+
+		renderer.setViewport(
+			bakViewport.x,
+			bakViewport.y,
+			bakViewport.z,
+			bakViewport.w,
+		)
 
 		scope.visible = true;
 
@@ -120,7 +135,7 @@ Reflector.ReflectorShader = {
 
 		'void main() {',
 
-		'	vec4 base = texture2D( tDiffuse, vec2(1.-vUv.x, vUv.y) );',
+		'	vec4 base = texture2D( tDiffuse, vec2(1.-vUv.x, vUv.y+.25) );',
 		'	gl_FragColor = vec4( base.rgb, 1.0 );',
 
 		'}'
