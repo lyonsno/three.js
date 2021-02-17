@@ -76,9 +76,12 @@
 				camera.position.set( 0, 0, 160+50 );
 
 				cameraControls = new OrbitControls( camera, renderer.domElement );
+				window.cameraControls=cameraControls
 				cameraControls.target.set( 0, 0, 0 );
 				cameraControls.maxDistance = 400;
 				cameraControls.minDistance = 10;
+				cameraControls.minPolarAngle=Math.PI/2
+				cameraControls.maxPolarAngle=Math.PI/2
 				cameraControls.update();
 
 				//
@@ -212,7 +215,12 @@
 				// verticalMirror.virtualCamera.fov=Math.atan2(50,camera.position.z)*THREE.Math.RAD2DEG*2
 				verticalMirror.virtualCamera.fov=Math.atan2(50,camera.position.length())*THREE.Math.RAD2DEG*2
 				verticalMirror.virtualCamera.updateProjectionMatrix()
-				verticalMirror.virtualCamera.lookAt(0,0,0)
+
+				// console.log(verticalMirror.virtualCamera.rotation.y*THREE.Math.RAD2DEG)
+				let theta=verticalMirror.virtualCamera.rotation.y
+				let x=(50/Math.cos(theta))-50
+				// x*=-1
+				verticalMirror.virtualCamera.lookAt(x,0,0)
 			}
 
 			function onWindowResize() {
