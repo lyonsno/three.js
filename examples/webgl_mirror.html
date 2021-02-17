@@ -27,12 +27,15 @@
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
 			import { Reflector } from './jsm/objects/Reflector_my.js';
 			import Stats from "./jsm/libs/stats.module.js";
+			import { GUI } from './jsm/libs/dat.gui.module.js';
 
 			// camera
-			const VIEW_ANGLE = 45;
 			let aspect = window.innerWidth / window.innerHeight;
-			const NEAR = 1;
-			const FAR = 500;
+
+			window.params={
+				fov: 26.3,
+				posZ: -264,
+			}
 
 			let camera, scene, renderer;
 
@@ -60,7 +63,9 @@
 				scene = new THREE.Scene();
 
 				// camera
-				camera = new THREE.PerspectiveCamera( VIEW_ANGLE, aspect, NEAR, FAR );
+				const NEAR = 1;
+				const FAR = 500;
+				camera = new THREE.PerspectiveCamera( 45, aspect, NEAR, FAR );
 				camera.position.set( 0, 50, 160 );
 
 				cameraControls = new OrbitControls( camera, renderer.domElement );
@@ -83,19 +88,19 @@
 					textureWidth: window.innerWidth * window.devicePixelRatio,
 					textureHeight: window.innerHeight * window.devicePixelRatio,
 					color: 0x777777
-				} );
+				}, params );
 				groundMirrorRenderTarget = groundMirror.getRenderTarget()
 				groundMirror.position.y = 0.5;
 				groundMirror.rotateX( - Math.PI / 2 );
 				scene.add( groundMirror );
 
 				geometry = new THREE.PlaneGeometry( 100, 100 );
-				const verticalMirror = new Reflector( geometry, {
+				window.verticalMirror = new Reflector( geometry, {
 					clipBias: 0.003,
 					textureWidth: window.innerWidth * window.devicePixelRatio,
 					textureHeight: window.innerHeight * window.devicePixelRatio,
 					color: 0x889999
-				} );
+				}, params );
 				verticalMirrorRenderTarget = verticalMirror.getRenderTarget()
 				verticalMirror.position.y = 50;
 				verticalMirror.position.z = - 50;
@@ -174,6 +179,15 @@
 				document.body.appendChild( stats.dom );
 
 				window.addEventListener( "resize", onWindowResize, false );
+
+				window.gui = new GUI();
+				gui.add(params, 'fov').step(.1).onChange(() => {
+					verticalMirror.virtualCamera.fov=params.fov
+					verticalMirror.virtualCamera.updateProjectionMatrix()
+				})
+				gui.add(params, 'posZ').step(1).onChange(() => {
+					verticalMirror.virtualCamera.position.z=params.posZ
+				})
 			}
 
 			function onWindowResize() {

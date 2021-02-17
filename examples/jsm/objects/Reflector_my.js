@@ -10,7 +10,7 @@ import {
 	WebGLRenderTarget
 } from '../../../build/three.module.js';
 
-var Reflector = function (geometry, options) {
+var Reflector = function (geometry, options, params) {
 
 	Mesh.call( this, geometry );
 
@@ -27,7 +27,8 @@ var Reflector = function (geometry, options) {
 	var shader = options.shader || Reflector.ReflectorShader;
 
 	// var virtualCamera = new OrthographicCamera(-50, 50, 50, -50, 1, 500);
-	var virtualCamera = new PerspectiveCamera(45, 1, 1, 500);
+	var virtualCamera = new PerspectiveCamera(params.fov, 1, 1, 500);
+	this.virtualCamera=virtualCamera
 
 	var parameters = {
 		minFilter: LinearFilter,
@@ -53,7 +54,7 @@ var Reflector = function (geometry, options) {
 
 	this.material = material;
 
-	virtualCamera.position.set(0, 50, -160)
+	virtualCamera.position.set(0, 50, params.posZ)
 	virtualCamera.lookAt(0, 50, 0)
 
 	this.onBeforeRender = function (renderer, scene, camera) {
