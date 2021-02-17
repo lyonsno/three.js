@@ -135,7 +135,16 @@ Reflector.ReflectorShader = {
 
 		'void main() {',
 
-		'	vec4 base = texture2D( tDiffuse, vec2(1.-vUv.x, vUv.y) );',
+		'	float uvX=1.-vUv.x;',
+		'	float uvY=vUv.y;',
+
+		'	uvY-=.5;',
+		'	uvY*=1.-(uvX*(1.-.715));',
+		'	uvY+=.5;',
+
+		'	uvX-=uvX*.5;',
+
+		'	vec4 base = texture2D( tDiffuse, vec2(uvX, uvY) );',
 		'	gl_FragColor = vec4( base.rgb, 1.0 );',
 
 		'}'
