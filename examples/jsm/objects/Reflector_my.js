@@ -59,7 +59,7 @@ var Reflector = function (geometry, options, params) {
 	virtualCamera.position.set(0, 0, params.posZ)
 	virtualCamera.lookAt(0, 0, 0)
 
-	let bakViewport=new Vector4()
+	// let bakViewport=new Vector4()
 
 	this.onBeforeRender = function (renderer, scene, camera) {
 
@@ -71,10 +71,10 @@ var Reflector = function (geometry, options, params) {
 
 		var currentRenderTarget = renderer.getRenderTarget();
 
-		renderer.setRenderTarget(renderTarget);
+		renderer.setRenderTarget( renderTarget );
 
-		renderer.getViewport(bakViewport)
-		renderer.setViewport(0,window.innerHeight/2,window.innerWidth,window.innerHeight)
+		// renderer.getViewport(bakViewport)
+		// renderer.setViewport(0,window.innerHeight/2,window.innerWidth,window.innerHeight)
 
 		renderer.state.buffers.depth.setMask( true ); // make sure the depth buffer is writable so it can be properly cleared, see #18897
 
@@ -83,14 +83,14 @@ var Reflector = function (geometry, options, params) {
 
 		renderer.setRenderTarget( currentRenderTarget );
 
-		// Restore viewport
+		// // Restore viewport
 
-		renderer.setViewport(
-			bakViewport.x,
-			bakViewport.y,
-			bakViewport.z,
-			bakViewport.w,
-		)
+		// renderer.setViewport(
+		// 	bakViewport.x,
+		// 	bakViewport.y,
+		// 	bakViewport.z,
+		// 	bakViewport.w,
+		// )
 
 		scope.visible = true;
 
@@ -135,7 +135,7 @@ Reflector.ReflectorShader = {
 
 		'void main() {',
 
-		'	vec4 base = texture2D( tDiffuse, vec2(1.-vUv.x, vUv.y+.25) );',
+		'	vec4 base = texture2D( tDiffuse, vec2(1.-vUv.x, vUv.y) );',
 		'	gl_FragColor = vec4( base.rgb, 1.0 );',
 
 		'}'
