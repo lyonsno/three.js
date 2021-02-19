@@ -37,6 +37,21 @@ var Reflector = function ( geometry, options ) {
 	//
 
 	scope.needsUpdate = false;
+	scope.maxDistance = Reflector.ReflectorShader.uniforms.maxDistance.value
+	scope.opacity = Reflector.ReflectorShader.uniforms.opacity.value
+
+  scope._isDistanceAttenuation = Reflector.ReflectorShader.defines.isDistanceAttenuation
+  Object.defineProperty(scope, 'isDistanceAttenuation', {
+    get() {
+      return scope._isDistanceAttenuation
+    },
+    set(val) {
+      if (scope._isDistanceAttenuation === val) return
+      scope._isDistanceAttenuation = val
+      scope.material.defines.isDistanceAttenuation = val
+      scope.material.needsUpdate = true
+    }
+	})
 
 	var reflectorPlane = new Plane();
 	var normal = new Vector3();
@@ -78,6 +93,9 @@ var Reflector = function ( geometry, options ) {
 	var material = new ShaderMaterial( {
 		transparent: useDepthTexture,
 		defines: { useDepthTexture: useDepthTexture },
+    defines: Object.assign({
+      useDepthTexture: useDepthTexture
+    }, Reflector.ReflectorShader.defines),
 		uniforms: UniformsUtils.clone( shader.uniforms ),
 		fragmentShader: shader.fragmentShader,
 		vertexShader: shader.vertexShader
@@ -207,6 +225,9 @@ var Reflector = function ( geometry, options ) {
 
 		scope.visible = true;
 
+		material.uniforms[ 'maxDistance' ].value = scope.maxDistance;
+		material.uniforms[ 'opacity' ].value = scope.opacity;
+
 	};
 
 	this.getRenderTarget = function () {
@@ -222,6 +243,10 @@ Reflector.prototype.constructor = Reflector;
 
 Reflector.ReflectorShader = {
 
+  defines: {
+    isDistanceAttenuation: true,
+  },
+
 	uniforms: {
 
 		color: { value: null },
@@ -229,6 +254,7 @@ Reflector.ReflectorShader = {
 		tDepth: { value: null },
 		textureMatrix: { value: null },
     maxDistance: { value: 180 },
+    opacity: { value: .5 },
 
 	},
 
@@ -249,6 +275,8 @@ Reflector.ReflectorShader = {
 		uniform vec3 color;
 		uniform sampler2D tDiffuse;
 		uniform sampler2D tDepth;
+		uniform float maxDistance;
+		uniform float opacity;
 		varying vec4 vUv;
 		float blendOverlay( float base, float blend ) {
 			return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );
@@ -259,9 +287,15 @@ Reflector.ReflectorShader = {
 		void main() {
 			vec4 base = texture2DProj( tDiffuse, vUv );
 			#ifdef useDepthTexture
+				float op=opacity;
 				float depth = texture2DProj( tDepth, vUv ).r;
-				if(depth>.01) discard;
-				gl_FragColor = vec4( blendOverlay( base.rgb, color ), pow(1.-depth,10./*temp*/) );
+				if(depth>maxDistance) discard;
+				#ifdef isDistanceAttenuation
+					float ratio=1.-(depth/maxDistance);
+					float attenuation=ratio*ratio;
+					op=opacity*attenuation;
+				#endif
+				gl_FragColor = vec4( blendOverlay( base.rgb, color ), op );
 			#else
 				gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );
 			#endif
