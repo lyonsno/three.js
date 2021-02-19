@@ -33,7 +33,7 @@
 
 		let params = {
 			enableSSR: true,
-			autoRotate: true,
+			autoRotate: false,
 			isOtherMeshes: true,
 			isGroundReflector: true,
 		}
@@ -71,7 +71,7 @@
 			// Ground
 			const plane = new THREE.Mesh(
 				new THREE.PlaneGeometry(8, 8),
-				new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
+				new THREE.MeshPhongMaterial({ color: 0x231123, specular: 0x101010 })
 			);
 			plane.rotation.x = - Math.PI / 2;
 			plane.position.y = 0.0365;
@@ -193,8 +193,9 @@
 			gui.add(params, 'autoRotate').onChange(() => {
 				controls.enabled = !params.autoRotate
 			})
+			ssrPass.isDistanceAttenuation = false
 			gui.add(ssrPass, 'isDistanceAttenuation');
-			ssrPass.maxDistance = .1
+			ssrPass.maxDistance = .01
 			gui.add(ssrPass, 'maxDistance').min(0).max(1).step(.01);
 			gui.add(params, 'isGroundReflector').onChange(() => {
 				if (params.isGroundReflector) {
