@@ -224,21 +224,11 @@ Reflector.ReflectorShader = {
 
 	uniforms: {
 
-		'color': {
-			value: null
-		},
-
-		'tDiffuse': {
-			value: null
-		},
-
-		'tDepth': {
-			value: null
-		},
-
-		'textureMatrix': {
-			value: null
-		}
+		color: { value: null },
+		tDiffuse: { value: null },
+		tDepth: { value: null },
+		textureMatrix: { value: null },
+    maxDistance: { value: 180 },
 
 	},
 
