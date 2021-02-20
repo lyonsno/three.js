@@ -131,10 +131,11 @@ var Reflector = function ( geometry, options ) {
 
 		// console.log(camera.position)
 
-		material.uniforms['maxDistance'].value = scope.maxDistance;
-		material.uniforms['maxDistance'].value = scope.maxDistance * new Vector3(0, 1, 0).dot(new Vector3().copy(camera.position).normalize());
-		let after=material.uniforms['maxDistance'].value
-		console.log(scope.maxDistance, after)
+		// material.uniforms['maxDistance'].value = scope.maxDistance;
+		// material.uniforms['maxDistance'].value = scope.maxDistance * new Vector3(0, 1, 0).dot(new Vector3().copy(camera.position).normalize());
+		material.uniforms['maxDistance'].value = scope.maxDistance * (camera.position.length()/camera.position.y);
+		// let after=material.uniforms['maxDistance'].value
+		// console.log(scope.maxDistance, after)
 		material.uniforms[ 'opacity' ].value = scope.opacity;
 
 		view.reflect( normal ).negate();
