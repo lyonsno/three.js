@@ -33,9 +33,9 @@
 
 		let params = {
 			enableSSR: true,
-			autoRotate: true,
-			isOtherMeshes: true,
-			isGroundReflector: true,
+			autoRotate: false,
+			isOtherMeshes: false,
+			isGroundReflector: false,
 		}
 		let composer
 		let ssrPass
@@ -66,7 +66,7 @@
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color(0x443333);
-			scene.fog = new THREE.Fog(0x443333, 1, 4);
+			// scene.fog = new THREE.Fog(0x443333, 1, 4);
 
 			// Ground
 			const plane = new THREE.Mesh(
@@ -79,7 +79,7 @@
 			scene.add(plane);
 
 			// Lights
-			const hemiLight = new THREE.HemisphereLight(0x443333, 0x111122);
+			const hemiLight = new THREE.HemisphereLight(0xaaaaaa, 0x111111);
 			scene.add(hemiLight);
 
 			const spotLight = new THREE.SpotLight();
@@ -87,7 +87,7 @@
 			spotLight.penumbra = 0.5;
 			// spotLight.castShadow = true;
 			spotLight.position.set(- 1, 1, 1);
-			scene.add(spotLight);
+			// scene.add(spotLight);
 
 			dracoLoader.load('models/draco/bunny.drc', function (geometry) {
 
