@@ -198,6 +198,9 @@ var SSRShader = {
 					vec3 vN=getViewNormal( uv );
 					if(dot(viewReflectDir,vN)>=0.) continue;
 					float distance=pointPlaneDistance(vP,viewPosition,viewNormal);
+					gl_FragColor.xyz=vec3(distance*3.);
+					gl_FragColor.a=1.;
+					return;
 					if(distance>maxDistance) break;
 					#ifdef isDistanceAttenuation
 						float ratio=1.-(distance/maxDistance);
