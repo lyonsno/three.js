@@ -14,7 +14,8 @@ import {
 	WebGLRenderTarget,
 	DepthTexture,
 	UnsignedShortType,
-	NearestFilter
+	NearestFilter,
+	TetrahedronGeometry
 } from '../../../build/three.module.js';
 
 var Reflector = function ( geometry, options ) {
@@ -126,7 +127,15 @@ var Reflector = function ( geometry, options ) {
 
 		// Avoid rendering when reflector is facing away
 
-		if ( view.dot( normal ) > 0 ) return;
+		if (view.dot(normal) > 0) return;
+
+		// console.log(camera.position)
+
+		// material.uniforms['maxDistance'].value = scope.maxDistance;
+		material.uniforms['maxDistance'].value = scope.maxDistance * new Vector3(0, 1, 0).dot(new Vector3().copy(camera.position).normalize());
+		// let after=material.uniforms['maxDistance'].value
+		// console.log(scope.maxDistance, after)
+		material.uniforms[ 'opacity' ].value = scope.opacity;
 
 		view.reflect( normal ).negate();
 		view.add( reflectorWorldPosition );
@@ -224,9 +233,6 @@ var Reflector = function ( geometry, options ) {
 
 		scope.visible = true;
 
-		material.uniforms[ 'maxDistance' ].value = scope.maxDistance;
-		material.uniforms[ 'opacity' ].value = scope.opacity;
-
 	};
 
 	this.getRenderTarget = function () {
@@ -277,6 +283,15 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		uniform float maxDistance;
 		uniform float opacity;
 		varying vec4 vUv;
+		float getViewZ( const in float depth ) {
+			return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
+			///todo: orthographicCamera
+		}
+		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
+			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
+			clipPosition *= clipW; //clip
+			return ( cameraInverseProjectionMatrix * clipPosition ).xyz;//view
+		}
 		float blendOverlay( float base, float blend ) {
 			return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );
 		}
