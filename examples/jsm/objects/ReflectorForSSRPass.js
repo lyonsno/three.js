@@ -14,7 +14,9 @@ import {
 	WebGLRenderTarget,
 	DepthTexture,
 	UnsignedShortType,
-	NearestFilter
+	NearestFilter,
+	MeshBasicMaterial,
+	MeshStandardMaterial
 } from '../../../build/three.module.js';
 
 var Reflector = function ( geometry, options ) {
@@ -114,7 +116,8 @@ var Reflector = function ( geometry, options ) {
 		uniforms: UniformsUtils.clone( shader.uniforms ),
 		fragmentShader: shader.fragmentShader,
 		vertexShader: shader.vertexShader
-	} );
+	});
+	var material2=new MeshStandardMaterial({color:'red',transparent:true,opacity:.1})
 
 	material.uniforms[ 'tDiffuse' ].value = renderTarget.texture;
 	material.uniforms[ 'color' ].value = color;
@@ -125,10 +128,7 @@ var Reflector = function ( geometry, options ) {
 
 	this.material = material;
 
-	this.onBeforeRender = function ( renderer, scene, camera ) {
-		if ( !scope.needsUpdate ) return;
-		scope.needsUpdate = false;
-		// console.log('onBeforeRender')
+	this.doRender = function ( renderer, scene, camera ) {
 
 		material.uniforms['maxDistance'].value = scope.maxDistance * (camera.position.length() / camera.position.y);
 		///todo: Temporary hack,
@@ -218,39 +218,39 @@ var Reflector = function ( geometry, options ) {
 
 		renderTarget.texture.encoding = renderer.outputEncoding;
 
-		scope.visible = false;
+		// scope.visible = false;
 
 		var currentRenderTarget = renderer.getRenderTarget();
 
-		var currentXrEnabled = renderer.xr.enabled;
-		var currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
+		// var currentXrEnabled = renderer.xr.enabled;
+		// var currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
 
-		renderer.xr.enabled = false; // Avoid camera modification
-		renderer.shadowMap.autoUpdate = false; // Avoid re-computing shadows
+		// renderer.xr.enabled = false; // Avoid camera modification
+		// renderer.shadowMap.autoUpdate = false; // Avoid re-computing shadows
 
 		renderer.setRenderTarget( renderTarget );
 
-		renderer.state.buffers.depth.setMask( true ); // make sure the depth buffer is writable so it can be properly cleared, see #18897
+		// renderer.state.buffers.depth.setMask( true ); // make sure the depth buffer is writable so it can be properly cleared, see #18897
 
-		if ( renderer.autoClear === false ) renderer.clear();
+		// if ( renderer.autoClear === false ) renderer.clear();
 		renderer.render( scene, virtualCamera );
 
-		renderer.xr.enabled = currentXrEnabled;
-		renderer.shadowMap.autoUpdate = currentShadowAutoUpdate;
+		// renderer.xr.enabled = currentXrEnabled;
+		// renderer.shadowMap.autoUpdate = currentShadowAutoUpdate;
 
 		renderer.setRenderTarget( currentRenderTarget );
 
 		// Restore viewport
 
-		var viewport = camera.viewport;
+		// var viewport = camera.viewport;
 
-		if ( viewport !== undefined ) {
+		// if ( viewport !== undefined ) {
 
-			renderer.state.viewport( viewport );
+		// 	renderer.state.viewport( viewport );
 
-		}
+		// }
 
-		scope.visible = true;
+		// scope.visible = true;
 
 	};
 
@@ -305,18 +305,13 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		uniform float opacity;
 		uniform float fresnel;
 		varying vec4 vUv;
-		float blendOverlay( float base, float blend ) {
-			return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );
-		}
-		vec3 blendOverlay( vec3 base, vec3 blend ) {
-			return vec3( blendOverlay( base.r, blend.r ), blendOverlay( base.g, blend.g ), blendOverlay( base.b, blend.b ) );
-		}
 		void main() {
+			gl_FragColor = vec4( 1,0,0, 0 );
 			vec4 base = texture2DProj( tDiffuse, vUv );
 			#ifdef useDepthTexture
 				float op=opacity;
 				float depth = texture2DProj( tDepth, vUv ).r;
-				if(depth>maxDistance) discard;
+				if(depth>maxDistance) return;
 				#ifdef isDistanceAttenuation
 					float ratio=1.-(depth/maxDistance);
 					float attenuation=ratio*ratio;
@@ -325,7 +320,7 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 				#ifdef isFresnel
 					op*=fresnel;
 				#endif
-				gl_FragColor = vec4( blendOverlay( base.rgb, color ), op );
+				gl_FragColor = vec4( 1,0,0, 1 );
 			#else
 				gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );
 			#endif

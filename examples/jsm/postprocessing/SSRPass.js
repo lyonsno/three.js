@@ -23,7 +23,7 @@ import { SSRBlurShader } from "../shaders/SSRShader.js";
 import { SSRDepthShader } from "../shaders/SSRShader.js";
 import { CopyShader } from "../shaders/CopyShader.js";
 
-var SSRPass = function({ scene, camera, width, height, selects, encoding, isPerspectiveCamera = true, isBouncing = false, morphTargets = false }) {
+var SSRPass = function({ scene, camera, width, height, selects, encoding, isPerspectiveCamera = true, isBouncing = false, morphTargets = false, groundReflector }) {
 
   Pass.call(this);
 
@@ -33,7 +33,8 @@ var SSRPass = function({ scene, camera, width, height, selects, encoding, isPers
   this.clear = true;
 
   this.camera = camera;
-  this.scene = scene;
+	this.scene = scene;
+	this.groundReflector = groundReflector;
 
   this.opacity = SSRShader.uniforms.opacity.value;;
   this.output = 0;
@@ -348,8 +349,10 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
     if (this.encoding) this.beautyRenderTarget.texture.encoding = this.encoding
     renderer.setRenderTarget(this.beautyRenderTarget);
-		renderer.clear();
-    renderer.render(this.scene, this.camera);
+		// renderer.clear();
+		this.groundReflector.visible = true;
+		renderer.render(this.scene, this.camera);
+		this.groundReflector.visible = false;
 
     // render normals
 
@@ -479,17 +482,14 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     // save original state
     this.originalClearColor.copy(renderer.getClearColor(this.tempColor));
     var originalClearAlpha = renderer.getClearAlpha(this.tempColor);
-    var originalAutoClear = renderer.autoClear;
 
     renderer.setRenderTarget(renderTarget);
 
     // setup pass state
-    renderer.autoClear = false;
     if ((clearColor !== undefined) && (clearColor !== null)) {
 
       renderer.setClearColor(clearColor);
       renderer.setClearAlpha(clearAlpha || 0.0);
-      renderer.clear();
 
     }
 
@@ -497,7 +497,6 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
     this.fsQuad.render(renderer);
 
     // restore original state
-    renderer.autoClear = originalAutoClear;
     renderer.setClearColor(this.originalClearColor);
     renderer.setClearAlpha(originalClearAlpha);
 
@@ -507,10 +506,8 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
     this.originalClearColor.copy(renderer.getClearColor(this.tempColor));
     var originalClearAlpha = renderer.getClearAlpha(this.tempColor);
-    var originalAutoClear = renderer.autoClear;
 
     renderer.setRenderTarget(renderTarget);
-    renderer.autoClear = false;
 
     clearColor = overrideMaterial.clearColor || clearColor;
     clearAlpha = overrideMaterial.clearAlpha || clearAlpha;
@@ -519,7 +516,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
       renderer.setClearColor(clearColor);
       renderer.setClearAlpha(clearAlpha || 0.0);
-      renderer.clear();
+      // renderer.clear();
 
     }
 
@@ -529,7 +526,6 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
     // restore original state
 
-    renderer.autoClear = originalAutoClear;
     renderer.setClearColor(this.originalClearColor);
     renderer.setClearAlpha(originalClearAlpha);
 
@@ -539,10 +535,8 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
     this.originalClearColor.copy(renderer.getClearColor(this.tempColor));
     var originalClearAlpha = renderer.getClearAlpha(this.tempColor);
-    var originalAutoClear = renderer.autoClear;
 
     renderer.setRenderTarget(renderTarget);
-    renderer.autoClear = false;
 
     clearColor = overrideMaterial.clearColor || clearColor;
     clearAlpha = overrideMaterial.clearAlpha || clearAlpha;
@@ -551,7 +545,7 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
       renderer.setClearColor(clearColor);
       renderer.setClearAlpha(clearAlpha || 0.0);
-      renderer.clear();
+      // renderer.clear();
 
     }
 
@@ -570,7 +564,6 @@ SSRPass.prototype = Object.assign(Object.create(Pass.prototype), {
 
     // restore original state
 
-    renderer.autoClear = originalAutoClear;
     renderer.setClearColor(this.originalClearColor);
     renderer.setClearAlpha(originalClearAlpha);
 

@@ -33,7 +33,7 @@
 
 		let params = {
 			enableSSR: true,
-			autoRotate: true,
+			autoRotate: false,
 			isOtherMeshes: true,
 			isGroundReflector: true,
 		}
@@ -77,6 +77,7 @@
 			plane.position.y = 0.0365;
 			// plane.receiveShadow = true;
 			scene.add(plane);
+			plane.material.depthWrite=false
 
 			// Lights
 			const hemiLight = new THREE.HemisphereLight(0x443333, 0x111122);
@@ -141,7 +142,7 @@
 					color: 0x888888,
 					useDepthTexture: true,
 				});
-				groundReflector.position.y = plane.position.y + .0001;
+				groundReflector.position.y = plane.position.y;
 				groundReflector.rotation.x = -Math.PI / 2
 				groundReflector.visible = params.isGroundReflector
 				scene.add(groundReflector);
@@ -153,6 +154,7 @@
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			renderer.outputEncoding = THREE.sRGBEncoding;
 			// renderer.shadowMap.enabled = true;
+			// renderer.autoClear=false
 			container.appendChild(renderer.domElement);
 
 			//
@@ -182,6 +184,7 @@
 				isPerspectiveCamera: isPerspectiveCamera,
 				selects: params.isGroundReflector ? selects : null,
 				// morphTargets: true,
+				groundReflector: groundReflector,
 			});
 			// window.ssrPass = ssrPass
 			composer.addPass(ssrPass);
@@ -248,7 +251,7 @@
 			gui.add(ssrPass, 'isInfiniteThick');
 			gui.add(ssrPass, 'thickTolerance').min(0).max(.05).step(.0001);
 			gui.add(ssrPass, 'isBlur');
-			gui.close()
+			// gui.close()
 
 		}
 
@@ -288,7 +291,8 @@
 			}
 
 			if (params.enableSSR) {
-				groundReflector.needsUpdate = true;  // Just SSRPass's beautyRenderTarget (which rendered fisrt internally) need Reflector.
+				groundReflector.visible=false
+				groundReflector.doRender( renderer, scene, camera );
 				///todo: groundReflector has full ground info, need use it to solve reflection gaps problem on objects when camera near ground.
 				///todo: the normal info where groundReflector reflected need to be changed.
 				composer.render();
