@@ -44,7 +44,7 @@
 		let stats;
 		let mesh;
 		let controls;
-		let camera, scene, renderer;
+		let camera, scene, sceneObjects, renderer;
 		let otherMeshes = []
 		let groundReflector
 		let selects=[]
@@ -67,6 +67,8 @@
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color(0x443333);
 			scene.fog = new THREE.Fog(0x443333, 1, 4);
+			
+			sceneObjects = new THREE.Scene();
 
 			// Ground
 			const plane = new THREE.Mesh(
@@ -77,61 +79,7 @@
 			plane.position.y = 0.0365;
 			// plane.receiveShadow = true;
 			scene.add(plane);
-
-			// Lights
-			const hemiLight = new THREE.HemisphereLight(0x443333, 0x111122);
-			scene.add(hemiLight);
-
-			const spotLight = new THREE.SpotLight();
-			spotLight.angle = Math.PI / 16;
-			spotLight.penumbra = 0.5;
-			// spotLight.castShadow = true;
-			spotLight.position.set(- 1, 1, 1);
-			scene.add(spotLight);
-
-			dracoLoader.load('models/draco/bunny.drc', function (geometry) {
-
-				geometry.computeVertexNormals();
-
-				const material = new THREE.MeshStandardMaterial({ color: 0x606060 });
-				const mesh = new THREE.Mesh(geometry, material);
-				// mesh.castShadow = true;
-				// mesh.receiveShadow = true;
-				scene.add(mesh);
-				selects.push(mesh)
-
-				// Release decoder resources.
-				dracoLoader.dispose();
-
-			});
-
-			{
-				const geometry = new THREE.BoxBufferGeometry(.05, .05, .05);
-				const material = new THREE.MeshStandardMaterial({ color: 'green' })
-				const mesh = new THREE.Mesh(geometry, material)
-				mesh.position.set(-.12, plane.position.y + .025, .015)
-				scene.add(mesh)
-				otherMeshes.push(mesh)
-				selects.push(mesh)
-			}
-			{
-				const geometry = new THREE.IcosahedronBufferGeometry(.025, 4);
-				const material = new THREE.MeshStandardMaterial({ color: 'cyan' })
-				const mesh = new THREE.Mesh(geometry, material)
-				mesh.position.set(-.05, plane.position.y + .025, .08)
-				scene.add(mesh)
-				otherMeshes.push(mesh)
-				selects.push(mesh)
-			}
-			{
-				const geometry = new THREE.ConeBufferGeometry(.025, .05, 64);
-				const material = new THREE.MeshStandardMaterial({ color: 'yellow' })
-				const mesh = new THREE.Mesh(geometry, material)
-				mesh.position.set(-.05, plane.position.y + .025, -.055)
-				scene.add(mesh)
-				otherMeshes.push(mesh)
-				selects.push(mesh)
-			}
+			
 			{
 				const geometry = new THREE.PlaneBufferGeometry(8, 8);
 				groundReflector = new Reflector(geometry, {
@@ -145,6 +93,63 @@
 				groundReflector.rotation.x = -Math.PI / 2
 				groundReflector.visible = params.isGroundReflector
 				scene.add(groundReflector);
+			}
+
+			// Lights
+			const hemiLight = new THREE.HemisphereLight(0x443333, 0x111122);
+			scene.add(hemiLight);
+			sceneObjects.add(hemiLight);
+
+			const spotLight = new THREE.SpotLight();
+			spotLight.angle = Math.PI / 16;
+			spotLight.penumbra = 0.5;
+			// spotLight.castShadow = true;
+			spotLight.position.set(- 1, 1, 1);
+			scene.add(spotLight);
+			sceneObjects.add(spotLight);
+
+			dracoLoader.load('models/draco/bunny.drc', function (geometry) {
+
+				geometry.computeVertexNormals();
+
+				const material = new THREE.MeshStandardMaterial({ color: 0x606060 });
+				const mesh = new THREE.Mesh(geometry, material);
+				// mesh.castShadow = true;
+				// mesh.receiveShadow = true;
+				sceneObjects.add(mesh);
+				selects.push(mesh)
+
+				// Release decoder resources.
+				dracoLoader.dispose();
+
+			});
+
+			{
+				const geometry = new THREE.BoxBufferGeometry(.05, .05, .05);
+				const material = new THREE.MeshStandardMaterial({ color: 'green' })
+				const mesh = new THREE.Mesh(geometry, material)
+				mesh.position.set(-.12, plane.position.y + .025, .015)
+				sceneObjects.add(mesh)
+				otherMeshes.push(mesh)
+				selects.push(mesh)
+			}
+			{
+				const geometry = new THREE.IcosahedronBufferGeometry(.025, 4);
+				const material = new THREE.MeshStandardMaterial({ color: 'cyan' })
+				const mesh = new THREE.Mesh(geometry, material)
+				mesh.position.set(-.05, plane.position.y + .025, .08)
+				sceneObjects.add(mesh)
+				otherMeshes.push(mesh)
+				selects.push(mesh)
+			}
+			{
+				const geometry = new THREE.ConeBufferGeometry(.025, .05, 64);
+				const material = new THREE.MeshStandardMaterial({ color: 'yellow' })
+				const mesh = new THREE.Mesh(geometry, material)
+				mesh.position.set(-.05, plane.position.y + .025, -.055)
+				sceneObjects.add(mesh)
+				otherMeshes.push(mesh)
+				selects.push(mesh)
 			}
 
 			// renderer
