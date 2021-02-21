@@ -33,7 +33,7 @@
 
 		let params = {
 			enableSSR: true,
-			autoRotate: true,
+			autoRotate: false,
 			isOtherMeshes: true,
 			isGroundReflector: true,
 		}
@@ -77,6 +77,22 @@
 			plane.position.y = 0.0365;
 			// plane.receiveShadow = true;
 			scene.add(plane);
+
+			{
+				const geometry = new THREE.PlaneBufferGeometry(8, 8);
+				groundReflector = new Reflector(geometry, {
+					clipBias: 0,
+					textureWidth: window.innerWidth,
+					textureHeight: window.innerHeight,
+					color: 0x888888,
+					useDepthTexture: true,
+				});
+				groundReflector.position.y = plane.position.y;
+				groundReflector.rotation.x = -Math.PI / 2
+				groundReflector.visible = params.isGroundReflector
+				groundReflector.material.depthTest = false,
+				scene.add(groundReflector);
+			}
 
 			// Lights
 			const hemiLight = new THREE.HemisphereLight(0x443333, 0x111122);
@@ -132,20 +148,6 @@
 				otherMeshes.push(mesh)
 				selects.push(mesh)
 			}
-			{
-				const geometry = new THREE.PlaneBufferGeometry(8, 8);
-				groundReflector = new Reflector(geometry, {
-					clipBias: 0.003,
-					textureWidth: window.innerWidth,
-					textureHeight: window.innerHeight,
-					color: 0x888888,
-					useDepthTexture: true,
-				});
-				groundReflector.position.y = plane.position.y + .0001;
-				groundReflector.rotation.x = -Math.PI / 2
-				groundReflector.visible = params.isGroundReflector
-				scene.add(groundReflector);
-			}
 
 			// renderer
 			renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -181,6 +183,7 @@
 				encoding: THREE.sRGBEncoding,
 				isPerspectiveCamera: isPerspectiveCamera,
 				selects: params.isGroundReflector ? selects : null,
+				selects: true,
 				// morphTargets: true,
 			});
 			// window.ssrPass = ssrPass
@@ -192,9 +195,11 @@
 			gui.add(params, 'enableSSR').name('Enable SSR');
 			gui.add(params, 'isGroundReflector').onChange(() => {
 				if (params.isGroundReflector) {
+					plane.material.depthWrite = false
 					groundReflector.visible = true
 					ssrPass.selects = selects
 				} else {
+					plane.material.depthWrite = true
 					groundReflector.visible = false
 					ssrPass.selects = null
 				}
@@ -248,7 +253,7 @@
 			gui.add(ssrPass, 'isInfiniteThick');
 			gui.add(ssrPass, 'thickTolerance').min(0).max(.05).step(.0001);
 			gui.add(ssrPass, 'isBlur');
-			gui.close()
+			// gui.close()
 
 		}
 
