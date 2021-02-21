@@ -33,7 +33,7 @@
 
 		let params = {
 			enableSSR: true,
-			autoRotate: true,
+			autoRotate: false,
 			isOtherMeshes: true,
 			isGroundReflector: true,
 		}
@@ -76,6 +76,7 @@
 			plane.rotation.x = - Math.PI / 2;
 			plane.position.y = 0.0365;
 			// plane.receiveShadow = true;
+			plane.visible = params.isGroundReflector ? false : true;
 			scene.add(plane);
 
 			// Lights
@@ -138,10 +139,9 @@
 					clipBias: 0.003,
 					textureWidth: window.innerWidth,
 					textureHeight: window.innerHeight,
-					color: 0x888888,
-					useDepthTexture: true,
+					color: plane.material.color,
 				});
-				groundReflector.position.y = plane.position.y + .0001;
+				groundReflector.position.y = plane.position.y;
 				groundReflector.rotation.x = -Math.PI / 2
 				groundReflector.visible = params.isGroundReflector
 				scene.add(groundReflector);
@@ -192,9 +192,11 @@
 			gui.add(params, 'enableSSR').name('Enable SSR');
 			gui.add(params, 'isGroundReflector').onChange(() => {
 				if (params.isGroundReflector) {
+					plane.visible = false;
 					groundReflector.visible = true
 					ssrPass.selects = selects
 				} else {
+					plane.visible = true;
 					groundReflector.visible = false
 					ssrPass.selects = null
 				}
