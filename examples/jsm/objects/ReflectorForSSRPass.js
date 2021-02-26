@@ -7,6 +7,7 @@ import {
 	PerspectiveCamera,
 	Plane,
 	RGBFormat,
+	RGBAFormat,
 	ShaderMaterial,
 	UniformsUtils,
 	Vector3,
@@ -82,6 +83,7 @@ var Reflector = function ( geometry, options ) {
 
 	var textureMatrix = new Matrix4();
 	var virtualCamera = new PerspectiveCamera();
+	window.virtualCamera=virtualCamera
 
 	var depthTexture = new DepthTexture();
 	depthTexture.type = UnsignedShortType;
@@ -91,8 +93,9 @@ var Reflector = function ( geometry, options ) {
 	var parameters = {
 		minFilter: LinearFilter,
 		magFilter: LinearFilter,
-		format: RGBFormat,
+		format: RGBAFormat,
 		depthTexture: depthTexture,
+		depthBuffer: true
 	};
 
 	var renderTarget = new WebGLRenderTarget( textureWidth, textureHeight, parameters );
@@ -282,12 +285,12 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 
 	vertexShader: [
 		'uniform mat4 textureMatrix;',
-		'varying vec2 vUv;',
+		'varying vec4 vUv;',
 
 		'void main() {',
 
-		// '	vUv = textureMatrix * vec4( position, 1.0 );',
-		'	vUv = uv;',
+		'	vUv = textureMatrix * vec4( position, 1.0 );',
+		// '	vUv = uv;',
 
 		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
 
@@ -303,7 +306,7 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		uniform float fresnel;
 		uniform float cameraNear;
 		uniform float cameraFar;
-		varying vec2 vUv;
+		varying vec4 vUv;
 		#include <packing>
 		float blendOverlay( float base, float blend ) {
 			return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );
@@ -315,15 +318,19 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			return texture2D( tDepth, uv ).x;
 		}
 		float getViewZ( const in float depth ) {
+			return ( cameraNear * cameraFar ) / ( ( cameraFar - cameraNear ) * depth - cameraFar );
+			return depth;
 			return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
 		}
 		void main() {
+			// gl_FragColor=vec4(vec3(cameraNear),1);return;
+			// gl_FragColor=vec4(vec3(cameraFar),1);return;
 
-			// float depth = texture2DProj( tDepth, vUv ).r;
-			float depth = getDepth( vUv );
-			gl_FragColor=vec4(vec3(depth*10.),1);return;
+			float depth = texture2DProj( tDepth, vUv ).r;
+			// float depth = getDepth( vUv );
+			// gl_FragColor=vec4(vec3(depth),1);return;
 			float viewZ = getViewZ( depth );
-			gl_FragColor=vec4(vec3(viewZ*10000000.),1);return;
+			gl_FragColor=vec4(vec3(viewZ),1);return;
 			viewZ*=100.;
 			if(viewZ>maxDistance) discard;
 
