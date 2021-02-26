@@ -319,32 +319,25 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		}
 		float getViewZ( const in float depth ) {
 			return ( cameraNear * cameraFar ) / ( ( cameraFar - cameraNear ) * depth - cameraFar );
-			return depth;
-			return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
+			// return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
 		}
 		void main() {
-			// gl_FragColor=vec4(vec3(cameraNear),1);return;
-			// gl_FragColor=vec4(vec3(cameraFar),1);return;
-
 			float depth = texture2DProj( tDepth, vUv ).r;
-			// float depth = getDepth( vUv );
-			// gl_FragColor=vec4(vec3(depth),1);return;
-			float viewZ = getViewZ( depth );
-			gl_FragColor=vec4(vec3(viewZ),1);return;
-			viewZ*=100.;
-			if(viewZ>maxDistance) discard;
+			float negViewZ = -getViewZ( depth );
+			gl_FragColor=vec4(vec3(negViewZ*5.),1);return;
+			if(negViewZ>maxDistance) discard;
 
-			// vec4 base = texture2DProj( tDiffuse, vUv );
-			// float op=opacity;
-			// #ifdef isDistanceAttenuation
-			// 	float ratio=1.-(viewZ/maxDistance);
-			// 	float attenuation=ratio*ratio;
-			// 	op=opacity*attenuation;
+			vec4 base = texture2DProj( tDiffuse, vUv );
+			float op=opacity;
+			#ifdef isDistanceAttenuation
+				float ratio=1.-(negViewZ/maxDistance);
+				float attenuation=ratio*ratio;
+				op=opacity*attenuation;
+			#endif
+			// #ifdef isFresnel
+			// 	op*=fresnel;
 			// #endif
-			// // #ifdef isFresnel
-			// // 	op*=fresnel;
-			// // #endif
-			// gl_FragColor = vec4( blendOverlay( base.rgb, color ), op );
+			gl_FragColor = vec4( blendOverlay( base.rgb, color ), op );
 		}
 	`,
 };
