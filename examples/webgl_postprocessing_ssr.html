@@ -33,7 +33,7 @@
 
 		const params = {
 			enableSSR: true,
-			autoRotate: true,
+			autoRotate: false,
 			isOtherMeshes: true,
 			isGroundReflector: true,
 		};
@@ -134,8 +134,7 @@
 				textureWidth: window.innerWidth,
 				textureHeight: window.innerHeight,
 				color: 0x888888,
-				useDepthTexture: true,
-			} );
+			});
 			groundReflector.material.depthWrite = false;
 			groundReflector.position.y = plane.position.y + .0001;
 			groundReflector.rotation.x = - Math.PI / 2;
@@ -211,6 +210,8 @@
 				groundReflector.isFresnel = ssrPass.isFresnel;
 
 			} );
+			// ssrPass.isDistanceAttenuation=false
+			// groundReflector.isDistanceAttenuation=ssrPass.isDistanceAttenuation
 			folder.add( ssrPass, 'isDistanceAttenuation' ).onChange( ()=>{
 
 				groundReflector.isDistanceAttenuation = ssrPass.isDistanceAttenuation;
