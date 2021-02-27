@@ -356,6 +356,8 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			return ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
 		}
 		void main() {
+			gl_FragColor=vec4(virtualClipPosition.xyz,1);return;
+
 			// float depth = texture2DProj( tDepth, vUv ).r;
 			// // float depth = texture2D( tDepth, vUv.xy ).r;
 			// float viewZ = getViewZ( depth );
