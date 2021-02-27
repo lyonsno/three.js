@@ -184,32 +184,35 @@ var Reflector = function ( geometry, options ) {
 		textureMatrix.multiply( virtualCamera.matrixWorldInverse );
 		textureMatrix.multiply( scope.matrixWorld );
 
-		// Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
-		// Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
-		reflectorPlane.setFromNormalAndCoplanarPoint( normal, reflectorWorldPosition );
-		reflectorPlane.applyMatrix4( virtualCamera.matrixWorldInverse );
+		// // Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
+		// // Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
+		// reflectorPlane.setFromNormalAndCoplanarPoint( normal, reflectorWorldPosition );
+		// reflectorPlane.applyMatrix4( virtualCamera.matrixWorldInverse );
 
-		clipPlane.set( reflectorPlane.normal.x, reflectorPlane.normal.y, reflectorPlane.normal.z, reflectorPlane.constant );
+		// clipPlane.set( reflectorPlane.normal.x, reflectorPlane.normal.y, reflectorPlane.normal.z, reflectorPlane.constant );
 
-		var projectionMatrix = virtualCamera.projectionMatrix;
+		// var projectionMatrix = virtualCamera.projectionMatrix;
 
-		q.x = ( Math.sign( clipPlane.x ) + projectionMatrix.elements[ 8 ] ) / projectionMatrix.elements[ 0 ];
-		q.y = ( Math.sign( clipPlane.y ) + projectionMatrix.elements[ 9 ] ) / projectionMatrix.elements[ 5 ];
-		q.z = - 1.0;
-		q.w = ( 1.0 + projectionMatrix.elements[ 10 ] ) / projectionMatrix.elements[ 14 ];
+		// q.x = ( Math.sign( clipPlane.x ) + projectionMatrix.elements[ 8 ] ) / projectionMatrix.elements[ 0 ];
+		// q.y = ( Math.sign( clipPlane.y ) + projectionMatrix.elements[ 9 ] ) / projectionMatrix.elements[ 5 ];
+		// q.z = - 1.0;
+		// q.w = ( 1.0 + projectionMatrix.elements[ 10 ] ) / projectionMatrix.elements[ 14 ];
 
-		// Calculate the scaled plane vector
-		clipPlane.multiplyScalar( 2.0 / clipPlane.dot( q ) );
+		// // Calculate the scaled plane vector
+		// clipPlane.multiplyScalar( 2.0 / clipPlane.dot( q ) );
 
-		// Replacing the third row of the projection matrix
-		projectionMatrix.elements[ 2 ] = clipPlane.x;
-		projectionMatrix.elements[ 6 ] = clipPlane.y;
-		projectionMatrix.elements[ 10 ] = clipPlane.z + 1.0 - clipBias;
-		projectionMatrix.elements[ 14 ] = clipPlane.w;
+		// // Replacing the third row of the projection matrix
+		// projectionMatrix.elements[ 2 ] = clipPlane.x;
+		// projectionMatrix.elements[ 6 ] = clipPlane.y;
+		// projectionMatrix.elements[ 10 ] = clipPlane.z + 1.0 - clipBias;
+		// projectionMatrix.elements[ 14 ] = clipPlane.w;
 
 		// set uniforms
-		material.uniforms['cameraNear'].value = virtualCamera.near
-		material.uniforms['cameraFar'].value = virtualCamera.far
+		material.uniforms['virtualCameraNear'].value = virtualCamera.near
+		material.uniforms['virtualCameraFar'].value = virtualCamera.far
+		material.uniforms['virtualCameraMatrixWorld'].value = virtualCamera.matrixWorld
+		material.uniforms['virtualCameraProjectionMatrix'].value = virtualCamera.projectionMatrix
+		material.uniforms['virtualCameraInverseProjectionMatrix'].value = virtualCamera.projectionMatrixInverse
 
 		// Render
 
@@ -278,14 +281,18 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
     maxDistance: { value: 180 },
     opacity: { value: .5 },
     fresnel: { value: null },
-    "cameraNear": { value: null },
-    "cameraFar": { value: null },
+    "virtualCameraNear": { value: null },
+    "virtualCameraFar": { value: null },
+    "virtualCameraMatrixWorld": { value: null },
+    "virtualCameraProjectionMatrix": { value: null },
+    "virtualCameraInverseProjectionMatrix": { value: null },
 
 	},
 
 	vertexShader: [
 		'uniform mat4 textureMatrix;',
 		'varying vec4 vUv;',
+		// 'varying vec2 vUv;',
 
 		'void main() {',
 
@@ -304,9 +311,15 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		uniform float maxDistance;
 		uniform float opacity;
 		uniform float fresnel;
-		uniform float cameraNear;
-		uniform float cameraFar;
+		uniform float virtualCameraNear;
+		uniform float virtualCameraFar;
+		uniform mat4 virtualCameraMatrixWorld;
+		uniform mat4 virtualCameraProjectionMatrix;
+		uniform mat4 virtualCameraInverseProjectionMatrix;
 		varying vec4 vUv;
+		// varying vec2 vUv;
+		varying mat4 cameraProjectionMatrix;
+		varying mat4 cameraModelViewMatrix;
 		#include <packing>
 		float blendOverlay( float base, float blend ) {
 			return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );
@@ -318,26 +331,42 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			return texture2D( tDepth, uv ).x;
 		}
 		float getViewZ( const in float depth ) {
-			return ( cameraNear * cameraFar ) / ( ( cameraFar - cameraNear ) * depth - cameraFar );
-			// return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
+			return ( virtualCameraNear * virtualCameraFar ) / ( ( virtualCameraFar - virtualCameraNear ) * depth - virtualCameraFar );
+			// return perspectiveDepthToViewZ( depth, virtualCameraNear, virtualCameraFar );
+		}
+		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
+			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
+			clipPosition *= clipW; //clip
+			return ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
 		}
 		void main() {
 			float depth = texture2DProj( tDepth, vUv ).r;
-			float negViewZ = -getViewZ( depth );
-			gl_FragColor=vec4(vec3(negViewZ*5.),1);return;
-			if(negViewZ>maxDistance) discard;
+			float viewZ = getViewZ( depth );
+			float clipW = virtualCameraProjectionMatrix[2][3] * viewZ+virtualCameraProjectionMatrix[3][3];
+			vec3 viewPosition=getViewPosition( vUv.xy, depth, clipW );
+			gl_FragColor=vec4(vec3(-viewPosition.z-.5)*20.,1);return;
+			// gl_FragColor=vec4(vec3(-viewPosition.z),1);return;
 
-			vec4 base = texture2DProj( tDiffuse, vUv );
-			float op=opacity;
-			#ifdef isDistanceAttenuation
-				float ratio=1.-(negViewZ/maxDistance);
-				float attenuation=ratio*ratio;
-				op=opacity*attenuation;
-			#endif
-			// #ifdef isFresnel
-			// 	op*=fresnel;
+			// // float depth = texture2D( tDepth, vUv ).r;
+			// depth=((virtualCameraMatrixWorld)*vec4(0,0,depth,1)).z;
+			// gl_FragColor=vec4(vec3(depth-(200./255.))*20.,1);return;
+			// float viewZ = getViewZ( depth );
+			// float viewZNeg = -viewZ;
+			// gl_FragColor=vec4(vec3(viewZNeg-.5)*20.,1);return;
+			// gl_FragColor=vec4(vec3((viewZNeg-.1)*20.),1);return;
+			// if(viewZNeg>maxDistance) discard;
+
+			// vec4 base = texture2DProj( tDiffuse, vUv );
+			// float op=opacity;
+			// #ifdef isDistanceAttenuation
+			// 	float ratio=1.-(viewZNeg/maxDistance);
+			// 	float attenuation=ratio*ratio;
+			// 	op=opacity*attenuation;
 			// #endif
-			gl_FragColor = vec4( blendOverlay( base.rgb, color ), op );
+			// // #ifdef isFresnel
+			// // 	op*=fresnel;
+			// // #endif
+			// gl_FragColor = vec4( blendOverlay( base.rgb, color ), op );
 		}
 	`,
 };
