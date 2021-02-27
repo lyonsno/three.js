@@ -98,7 +98,7 @@ var SSRShader = {
 		}
 		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
 			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
-			clipPosition *= clipW; //clip
+			// clipPosition *= clipW; //clip
 			return ( cameraInverseProjectionMatrix * clipPosition ).xyz;//view
 		}
 		vec3 getViewNormal( const in vec2 uv ) {
