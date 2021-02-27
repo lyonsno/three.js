@@ -82,6 +82,7 @@ var Reflector = function ( geometry, options ) {
 	var q = new Vector4();
 
 	var textureMatrix = new Matrix4();
+	var clipMatrix = new Matrix4();
 	var virtualCamera = new PerspectiveCamera();
 	window.virtualCamera=virtualCamera
 
@@ -117,6 +118,7 @@ var Reflector = function ( geometry, options ) {
 	material.uniforms[ 'tDiffuse' ].value = renderTarget.texture;
 	material.uniforms[ 'color' ].value = color;
 	material.uniforms[ 'textureMatrix' ].value = textureMatrix;
+	material.uniforms[ 'clipMatrix' ].value = clipMatrix;
 	material.uniforms[ 'tDepth' ].value = renderTarget.depthTexture;
 
 	this.material = material;
@@ -182,7 +184,11 @@ var Reflector = function ( geometry, options ) {
 		);
 		textureMatrix.multiply( virtualCamera.projectionMatrix );
 		textureMatrix.multiply( virtualCamera.matrixWorldInverse );
-		textureMatrix.multiply( scope.matrixWorld );
+		textureMatrix.multiply(scope.matrixWorld);
+
+		clipMatrix.multiply( virtualCamera.projectionMatrix );
+		clipMatrix.multiply( virtualCamera.matrixWorldInverse );
+		clipMatrix.multiply( scope.matrixWorld );
 
 		// // Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
 		// // Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
@@ -278,6 +284,7 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		tDiffuse: { value: null },
 		tDepth: { value: null },
 		textureMatrix: { value: null },
+		clipMatrix: { value: null },
     maxDistance: { value: 180 },
     opacity: { value: .5 },
     fresnel: { value: null },
@@ -291,20 +298,28 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 
 	vertexShader: [
 		'uniform mat4 textureMatrix;',
+		'uniform mat4 clipMatrix;',
 		'varying vec4 vUv;',
 		// 'varying vec2 vUv;',
+		'varying vec4 virtualClipPosition;',
 
 		'void main() {',
 
 		'	vUv = textureMatrix * vec4( position, 1.0 );',
 		// '	vUv = uv;',
 
+		'	virtualClipPosition = clipMatrix * vec4( position, 1.0 );',
+
+		// '	virtualClipPosition = textureMatrix * vec4( position, 1.0 );',
+		// '	vUv.xyz = virtualClipPosition.xyz*.5+.5;',
+		// '	vUv.w = virtualClipPosition.w;',
+
 		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
 
 		'}'
 	].join( '\n' ),
 
-	fragmentShader: `
+	fragmentShader: /*glsl*/`
 		uniform vec3 color;
 		uniform sampler2D tDiffuse;
 		uniform sampler2D tDepth;
@@ -318,6 +333,7 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		uniform mat4 virtualCameraInverseProjectionMatrix;
 		varying vec4 vUv;
 		// varying vec2 vUv;
+		varying vec4 virtualClipPosition;
 		varying mat4 cameraProjectionMatrix;
 		varying mat4 cameraModelViewMatrix;
 		#include <packing>
@@ -340,12 +356,13 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			return ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
 		}
 		void main() {
-			float depth = texture2DProj( tDepth, vUv ).r;
-			float viewZ = getViewZ( depth );
-			float clipW = virtualCameraProjectionMatrix[2][3] * viewZ+virtualCameraProjectionMatrix[3][3];
-			vec3 viewPosition=getViewPosition( vUv.xy, depth, clipW );
-			gl_FragColor=vec4(vec3(-viewPosition.z-.5)*20.,1);return;
-			// gl_FragColor=vec4(vec3(-viewPosition.z),1);return;
+			// float depth = texture2DProj( tDepth, vUv ).r;
+			// // float depth = texture2D( tDepth, vUv.xy ).r;
+			// float viewZ = getViewZ( depth );
+			// float clipW = virtualCameraProjectionMatrix[2][3] * viewZ+virtualCameraProjectionMatrix[3][3];
+			// vec3 viewPosition=getViewPosition( vUv.xy, depth, clipW );
+			// gl_FragColor=vec4(vec3(-viewPosition.z-.5)*20.,1);return;
+			// // gl_FragColor=vec4(vec3(-viewPosition.z),1);return;
 
 			// // float depth = texture2D( tDepth, vUv ).r;
 			// depth=((virtualCameraMatrixWorld)*vec4(0,0,depth,1)).z;
@@ -356,17 +373,17 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			// gl_FragColor=vec4(vec3((viewZNeg-.1)*20.),1);return;
 			// if(viewZNeg>maxDistance) discard;
 
-			// vec4 base = texture2DProj( tDiffuse, vUv );
-			// float op=opacity;
-			// #ifdef isDistanceAttenuation
-			// 	float ratio=1.-(viewZNeg/maxDistance);
-			// 	float attenuation=ratio*ratio;
-			// 	op=opacity*attenuation;
+			vec4 base = texture2DProj( tDiffuse, vUv );
+			float op=opacity;
+			#ifdef isDistanceAttenuation
+				// float ratio=1.-(viewZNeg/maxDistance);
+				// float attenuation=ratio*ratio;
+				// op=opacity*attenuation;
+			#endif
+			// #ifdef isFresnel
+			// 	op*=fresnel;
 			// #endif
-			// // #ifdef isFresnel
-			// // 	op*=fresnel;
-			// // #endif
-			// gl_FragColor = vec4( blendOverlay( base.rgb, color ), op );
+			gl_FragColor = vec4( blendOverlay( base.rgb, color ), op );
 		}
 	`,
 };

@@ -114,12 +114,12 @@ var Reflector = function ( geometry, options ) {
 		virtualCamera.projectionMatrix.copy( camera.projectionMatrix );
 
 		// Update the texture matrix
-		textureMatrix.set(
-			0.5, 0.0, 0.0, 0.5,
-			0.0, 0.5, 0.0, 0.5,
-			0.0, 0.0, 0.5, 0.5,
-			0.0, 0.0, 0.0, 1.0
-		);
+		// textureMatrix.set(
+		// 	0.5, 0.0, 0.0, 0.5,
+		// 	0.0, 0.5, 0.0, 0.5,
+		// 	0.0, 0.0, 0.5, 0.5,
+		// 	0.0, 0.0, 0.0, 1.0
+		// );
 		textureMatrix.multiply( virtualCamera.projectionMatrix );
 		textureMatrix.multiply( virtualCamera.matrixWorldInverse );
 		textureMatrix.multiply( scope.matrixWorld );
@@ -219,10 +219,12 @@ Reflector.ReflectorShader = {
 	vertexShader: [
 		'uniform mat4 textureMatrix;',
 		'varying vec4 vUv;',
+		'varying vec4 virtualPosition;',
 
 		'void main() {',
 
-		'	vUv = textureMatrix * vec4( position, 1.0 );',
+		'	virtualPosition = textureMatrix * vec4( position, 1.0 );',
+		'	vUv = virtualPosition*.5+.5;',
 
 		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
 
@@ -233,6 +235,7 @@ Reflector.ReflectorShader = {
 		'uniform vec3 color;',
 		'uniform sampler2D tDiffuse;',
 		'varying vec4 vUv;',
+		'varying vec4 virtualPosition;',
 
 		'float blendOverlay( float base, float blend ) {',
 
