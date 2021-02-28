@@ -75,19 +75,19 @@
 
     //// Make a regular mesh
 
-    const mesh1 = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(1, 1, 1),
-      new THREE.MeshStandardMaterial({
-        color: 'red',
-        metalness: 0.5,
-        roughness: 0.5
-      })
-    );
-    mesh1.position.set(0, 1, 0);
+    // const mesh1 = new THREE.Mesh(
+    //   new THREE.BoxBufferGeometry(1, 1, 1),
+    //   new THREE.MeshStandardMaterial({
+    //     color: 'red',
+    //     metalness: 0.5,
+    //     roughness: 0.5
+    //   })
+    // );
+    // mesh1.position.set(0, 1, 0);
 
     //// Now, add meshes (instanced mesh + regular mesh) to the scene
 
-    scene.add(mesh0, mesh1);
+    scene.add(mesh0);
 		scene.overrideMaterial = new THREE.MeshNormalMaterial()
 
     //// Set render loop
