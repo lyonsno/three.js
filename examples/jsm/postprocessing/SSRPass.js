@@ -254,6 +254,12 @@ var SSRPass = function ( { renderer, scene, camera, width, height, selects, enco
 	this.normalMaterial = new MeshNormalMaterial( { morphTargets } );
 	this.normalMaterial.blending = NoBlending;
 
+	this.scene.traverseVisible( child => {
+
+		child._normalMaterial = new MeshNormalMaterial();
+
+	});
+
 	// if (this.isSelective) {
 	// metalnessOn material
 
@@ -573,9 +579,19 @@ SSRPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 
 		}
 
-		this.scene.overrideMaterial = overrideMaterial;
+		this.scene.traverseVisible( child => {
+
+			child._SSRPassMaterialBack = child.material;
+
+			child.material = child._normalMaterial;
+
+		} );
 		renderer.render( this.scene, this.camera );
-		this.scene.overrideMaterial = null;
+		this.scene.traverseVisible( child => {
+
+			child.material = child._SSRPassMaterialBack;
+
+		} );
 
 		// restore original state
 
