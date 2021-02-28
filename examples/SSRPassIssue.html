@@ -27,15 +27,6 @@
     import {
       OrbitControls
     } from '../examples/jsm/controls/OrbitControls.js'
-    import {
-      EffectComposer
-    } from '../examples/jsm/postprocessing/EffectComposer.js'
-    import {
-      RenderPass
-    } from '../examples/jsm/postprocessing/RenderPass.js'
-    import {
-      SSRPass
-    } from '../examples/jsm/postprocessing/SSRPass.js'
 
 
     const renderer = new THREE.WebGLRenderer({});
@@ -97,22 +88,12 @@
     //// Now, add meshes (instanced mesh + regular mesh) to the scene
 
     scene.add(mesh0, mesh1);
-
-    //// Make composer 
-
-    const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    composer.addPass(new SSRPass({
-      renderer,
-      scene,
-      camera
-    }));
+		scene.overrideMaterial = new THREE.MeshNormalMaterial()
 
     //// Set render loop
 
     renderer.setAnimationLoop(() => {
-      composer.render();
-      // renderer.render(scene, camera)
+      renderer.render(scene, camera)
       controls.update();
     });
 
