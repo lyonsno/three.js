@@ -186,8 +186,14 @@ var Reflector = function ( geometry, options ) {
 		textureMatrix.multiply( virtualCamera.matrixWorldInverse );
 		textureMatrix.multiply(scope.matrixWorld);
 
+		clipMatrix.set(
+			1, 0.0, 0.0, 0,
+			0.0, 1, 0.0, 0,
+			0.0, 0.0, 1, 0,
+			0.0, 0.0, 0.0, 1
+		);
 		clipMatrix.multiply( virtualCamera.projectionMatrix );
-		clipMatrix.multiply( virtualCamera.matrixWorldInverse );
+		clipMatrix.multiply( virtualCamera.matrixWorld );
 		clipMatrix.multiply( scope.matrixWorld );
 
 		// // Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
@@ -356,7 +362,8 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			return ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
 		}
 		void main() {
-			gl_FragColor=vec4(virtualClipPosition.xyz,1);return;
+			vec4 virtualViewPosition=virtualCameraInverseProjectionMatrix*virtualClipPosition;
+			gl_FragColor=vec4(vec3(virtualViewPosition.z),1);return;
 
 			// float depth = texture2DProj( tDepth, vUv ).r;
 			// // float depth = texture2D( tDepth, vUv.xy ).r;
