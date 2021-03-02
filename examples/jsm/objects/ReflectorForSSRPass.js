@@ -268,7 +268,7 @@ var Reflector = function ( geometry, options ) {
 
 		// scope.visible = true;
 
-		console.log(camera.position,virtualCamera.position)
+		// console.log(camera.position,virtualCamera.position)
 
 
 	};
