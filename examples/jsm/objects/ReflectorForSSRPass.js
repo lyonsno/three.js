@@ -16,7 +16,8 @@ import {
 	DepthTexture,
 	UnsignedShortType,
 	NearestFilter,
-	DoubleSide
+	DoubleSide,
+	Vector2
 } from '../../../build/three.module.js';
 
 var Reflector = function ( geometry, options ) {
@@ -190,6 +191,9 @@ var Reflector = function ( geometry, options ) {
 
 		virtualCamera.updateMatrixWorld();
 		virtualCamera.projectionMatrix.copy( camera.projectionMatrix );
+		material.uniforms['virtualCameraProjectionMatrix'].value = virtualCamera.projectionMatrix
+		material.uniforms['virtualCameraInverseProjectionMatrix'].value = virtualCamera.projectionMatrixInverse
+		material.uniforms['resolution'].value.set(innerWidth,innerHeight)
 
 		// Update the texture matrix
 		textureMatrix.set(
@@ -293,6 +297,11 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
     maxDistance: { value: 180 },
     opacity: { value: .5 },
     fresnel: { value: null },
+    "virtualCameraNear": { value: null },
+    "virtualCameraFar": { value: null },
+    virtualCameraProjectionMatrix: { value: null },
+    "virtualCameraInverseProjectionMatrix": { value: null },
+    "resolution": { value: new Vector2() },
 
 	},
 
@@ -316,14 +325,13 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		uniform float maxDistance;
 		uniform float opacity;
 		uniform float fresnel;
+		uniform float virtualCameraNear;
+		uniform float virtualCameraFar;
+		uniform mat4 virtualCameraProjectionMatrix;
+		uniform mat4 virtualCameraInverseProjectionMatrix;
+		uniform vec2 resolution;
 		varying vec4 vUv;
 		varying vec3 vPosition;
-		float blendOverlay( float base, float blend ) {
-			return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );
-		}
-		vec3 blendOverlay( vec3 base, vec3 blend ) {
-			return vec3( blendOverlay( base.r, blend.r ), blendOverlay( base.g, blend.g ), blendOverlay( base.b, blend.b ) );
-		}
 		#include <packing>
 		float blendOverlay( float base, float blend ) {
 			return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );
@@ -344,8 +352,17 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			return ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
 		}
 		void main() {
+
 			float depth = texture2DProj( tDepth, vUv ).r;
-			gl_FragColor=vec4(vec3(depth),1);return;
+			// gl_FragColor=vec4(vec3(depth),1);return;
+
+			float viewZ = getViewZ( depth );
+
+			float clipW = virtualCameraProjectionMatrix[2][3] * viewZ+virtualCameraProjectionMatrix[3][3];
+
+			vec2 uv=(gl_FragCoord.xy-.5)/resolution.xy;
+			vec3 viewPosition=getViewPosition( uv, depth, clipW );
+			gl_FragColor=vec4(viewPosition+50.,1);return;
 
 			// gl_FragColor=vec4(vPosition,1);return;
 			vec4 base = texture2DProj( tDiffuse, vUv );
