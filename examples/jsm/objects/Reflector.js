@@ -233,6 +233,7 @@ Reflector.ReflectorShader = {
 		"void main() {",
 
 		"	vUv = textureMatrix * vec4( position, 1.0 );",
+		// 'vUv.xyz=vUv.xyz*.5+.5;',
 
 		"	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 

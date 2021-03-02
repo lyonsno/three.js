@@ -45,6 +45,7 @@
 	<script type="module">
 
 		import * as THREE from '../build/three.module.js';
+		window.THREE=THREE
 
 		import { OrbitControls } from './jsm/controls/OrbitControls.js';
 		import { Reflector } from './jsm/objects/Reflector.js';
@@ -83,6 +84,7 @@
 
 			// camera
 			camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+			window.camera=camera
 			camera.position.set(0, 50, 160);
 
 			cameraControls = new OrbitControls(camera, renderer.domElement);
