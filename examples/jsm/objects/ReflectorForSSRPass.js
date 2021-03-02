@@ -15,7 +15,8 @@ import {
 	WebGLRenderTarget,
 	DepthTexture,
 	UnsignedShortType,
-	NearestFilter
+	NearestFilter,
+	DoubleSide
 } from '../../../build/three.module.js';
 
 var Reflector = function ( geometry, options ) {
@@ -123,6 +124,7 @@ var Reflector = function ( geometry, options ) {
 
 	var material = new ShaderMaterial( {
 		transparent: true,
+		// side:DoubleSide,
     defines: Object.assign({}, Reflector.ReflectorShader.defines),
 		uniforms: UniformsUtils.clone( shader.uniforms ),
 		fragmentShader: shader.fragmentShader,
@@ -294,7 +296,7 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 
 	},
 
-	vertexShader: `
+	vertexShader: /*glsl*/`
 		uniform mat4 textureMatrix;
 		uniform mat4 myMatrix;
 		varying vec4 vUv;
@@ -307,7 +309,7 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		}
 	`,
 
-	fragmentShader: `
+	fragmentShader: /*glsl*/`
 		uniform vec3 color;
 		uniform sampler2D tDiffuse;
 		uniform sampler2D tDepth;
@@ -322,9 +324,28 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		vec3 blendOverlay( vec3 base, vec3 blend ) {
 			return vec3( blendOverlay( base.r, blend.r ), blendOverlay( base.g, blend.g ), blendOverlay( base.b, blend.b ) );
 		}
+		#include <packing>
+		float blendOverlay( float base, float blend ) {
+			return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );
+		}
+		vec3 blendOverlay( vec3 base, vec3 blend ) {
+			return vec3( blendOverlay( base.r, blend.r ), blendOverlay( base.g, blend.g ), blendOverlay( base.b, blend.b ) );
+		}
+		float getDepth( const in vec2 uv ) {
+			return texture2D( tDepth, uv ).x;
+		}
+		float getViewZ( const in float depth ) {
+			return ( virtualCameraNear * virtualCameraFar ) / ( ( virtualCameraFar - virtualCameraNear ) * depth - virtualCameraFar );
+			// return perspectiveDepthToViewZ( depth, virtualCameraNear, virtualCameraFar );
+		}
+		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
+			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc ///todo: use gl_FragCoord to get uv
+			clipPosition *= clipW; //clip
+			return ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
+		}
 		void main() {
 			float depth = texture2DProj( tDepth, vUv ).r;
-			// gl_FragColor=vec4(vec3(depth),1);return;
+			gl_FragColor=vec4(vec3(depth),1);return;
 
 			// gl_FragColor=vec4(vPosition,1);return;
 			vec4 base = texture2DProj( tDiffuse, vUv );
