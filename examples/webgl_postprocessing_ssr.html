@@ -75,7 +75,7 @@
 				new THREE.MeshPhongMaterial( { color: 0x999999, specular: 0x101010 } )
 			);
 			plane.rotation.x = - Math.PI / 2;
-			plane.position.y = 0.0365;
+			plane.position.y = -.0001;
 			// plane.receiveShadow = true;
 			scene.add( plane );
 
@@ -96,6 +96,7 @@
 
 				const material = new THREE.MeshStandardMaterial( { color: 0x606060 } );
 				const mesh = new THREE.Mesh( geometry, material );
+				mesh.position.y=-0.0365
 				scene.add( mesh );
 				selects.push( mesh );
 
@@ -109,7 +110,7 @@
 			geometry = new THREE.BoxBufferGeometry( .05, .05, .05 );
 			material = new THREE.MeshStandardMaterial( { color: 'green' } );
 			mesh = new THREE.Mesh( geometry, material );
-			mesh.position.set( - .12, plane.position.y + .025, .015 );
+			mesh.position.set( - .12, .025, .015 );
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
@@ -117,7 +118,7 @@
 			geometry = new THREE.IcosahedronBufferGeometry( .025, 4 );
 			material = new THREE.MeshStandardMaterial( { color: 'cyan' } );
 			mesh = new THREE.Mesh( geometry, material );
-			mesh.position.set( - .05, plane.position.y + .025, .08 );
+			mesh.position.set( - .05, .025, .08 );
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
@@ -125,12 +126,13 @@
 			geometry = new THREE.ConeBufferGeometry( .025, .05, 64 );
 			material = new THREE.MeshStandardMaterial( { color: 'yellow' } );
 			mesh = new THREE.Mesh( geometry, material );
-			mesh.position.set( - .05, plane.position.y + .025, - .055 );
+			mesh.position.set( - .05, .025, - .055 );
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
 
 			geometry = new THREE.PlaneBufferGeometry( 8, 8 );
+			geometry.rotateX(- Math.PI / 2)
 			groundReflector = new Reflector( geometry, {
 				clipBias: 0.003,
 				textureWidth: window.innerWidth,
@@ -140,8 +142,9 @@
 			} );
 			window.groundReflector=groundReflector
 			groundReflector.material.depthWrite = false;
-			groundReflector.position.y = plane.position.y + .0001;
-			groundReflector.rotation.x = - Math.PI / 2;
+			// groundReflector.position.y = plane.position.y + .0001;
+			groundReflector.position.y = 0 ;
+			// groundReflector.rotation.x = - Math.PI / 2;
 			groundReflector.visible = false;
 			scene.add( groundReflector );
 
@@ -155,7 +158,7 @@
 
 			controls = new OrbitControls( camera, renderer.domElement );
 			controls.enableDamping = true;
-			controls.target.set( 0, 0.1, 0 );
+			controls.target.set( 0, 0.0365, 0 );
 			controls.update();
 			controls.enabled = ! params.autoRotate;
 
