@@ -168,6 +168,35 @@
 
 			window.addEventListener( 'resize', onWindowResize, false );
 
+			{
+				let geometry=new THREE.PlaneGeometry()
+				let material=new THREE.ShaderMaterial({
+					// depthWrite:false,
+					// depthTest:false,
+					uniforms:{
+						map:{value:groundReflector.getRenderTarget().depthTexture}
+					},
+					vertexShader:`
+						varying vec2 vUv;
+						void main(){
+							vUv=uv;
+							gl_Position=vec4(position*.5-.5,1);
+						}
+					`,
+					fragmentShader:`
+						uniform sampler2D map;
+						varying vec2 vUv;
+						void main(){
+							gl_FragColor=vec4(vec3(texture2D(map,vUv).r),1);
+						}	
+					`
+				})
+				window.mesh_depthTexture=new THREE.Mesh(geometry,material)
+				mesh_depthTexture.visible=false
+				mesh_depthTexture.renderOrder=100
+				scene.add(mesh_depthTexture)
+			}
+
 			// composer
 
 			composer = new EffectComposer( renderer );
@@ -329,8 +358,10 @@
 			// } else {
 
 				groundReflector.visible = false;
+				mesh_depthTexture.visible = false;
 				groundReflector.doRender( renderer, scene, camera );
 				groundReflector.visible = true;
+				mesh_depthTexture.visible = true;
 				renderer.render( scene, camera );
 
 			// }

@@ -115,7 +115,8 @@ var Reflector = function ( geometry, options ) {
 		depthBuffer: true
 	};
 
-	var renderTarget = new WebGLRenderTarget( textureWidth, textureHeight, parameters );
+	var renderTarget = new WebGLRenderTarget(textureWidth, textureHeight, parameters);
+	scope.renderTarget=renderTarget
 
 	if ( ! MathUtils.isPowerOfTwo( textureWidth ) || ! MathUtils.isPowerOfTwo( textureHeight ) ) {
 
