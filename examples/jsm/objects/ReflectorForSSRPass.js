@@ -82,6 +82,12 @@ var Reflector = function ( geometry, options ) {
 	var q = new Vector4();
 
 	var textureMatrix = new Matrix4();
+	var myMatrix=new Matrix4().set(
+		0.5, 0.0, 0.0, 0.5,
+		0.0, 0.5, 0.0, 0.5,
+		0.0, 0.0, 0.5, 0.5,
+		0.0, 0.0, 0.0, 1.0
+	);
 	var clipMatrix = new Matrix4();
 	var virtualCamera = new PerspectiveCamera();
 	window.virtualCamera=virtualCamera
@@ -118,6 +124,7 @@ var Reflector = function ( geometry, options ) {
 	material.uniforms[ 'tDiffuse' ].value = renderTarget.texture;
 	material.uniforms[ 'color' ].value = color;
 	material.uniforms[ 'textureMatrix' ].value = textureMatrix;
+	material.uniforms[ 'myMatrix' ].value = myMatrix;
 	material.uniforms[ 'clipMatrix' ].value = clipMatrix;
 	material.uniforms[ 'tDepth' ].value = renderTarget.depthTexture;
 
@@ -177,9 +184,9 @@ var Reflector = function ( geometry, options ) {
 
 		// Update the texture matrix
 		textureMatrix.set(
-			0.5, 0.0, 0.0, 0.5,
-			0.0, 0.5, 0.0, 0.5,
-			0.0, 0.0, 0.5, 0.5,
+			1.0, 0.0, 0.0, 0.0,
+			0.0, 1.0, 0.0, 0.0,
+			0.0, 0.0, 1.0, 0.0,
 			0.0, 0.0, 0.0, 1.0
 		);
 		textureMatrix.multiply( virtualCamera.projectionMatrix );
@@ -362,10 +369,11 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			return ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
 		}
 		void main() {
-			vec4 virtualViewPosition=virtualCameraInverseProjectionMatrix*virtualClipPosition;
-			gl_FragColor=vec4(vec3(virtualViewPosition.z),1);return;
+			// vec4 virtualViewPosition=virtualCameraInverseProjectionMatrix*virtualClipPosition;
+			// gl_FragColor=vec4(vec3(virtualViewPosition.z),1);return;
 
-			// float depth = texture2DProj( tDepth, vUv ).r;
+			float depth = texture2DProj( tDepth, vUv ).r;
+			gl_FragColor=vec4(vec3(depth),1);return;
 			// // float depth = texture2D( tDepth, vUv.xy ).r;
 			// float viewZ = getViewZ( depth );
 			// float clipW = virtualCameraProjectionMatrix[2][3] * viewZ+virtualCameraProjectionMatrix[3][3];
