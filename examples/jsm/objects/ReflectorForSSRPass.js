@@ -7,6 +7,7 @@ import {
 	PerspectiveCamera,
 	Plane,
 	RGBFormat,
+	RGBAFormat,
 	ShaderMaterial,
 	UniformsUtils,
 	Vector3,
@@ -32,7 +33,6 @@ var Reflector = function ( geometry, options ) {
 	var textureHeight = options.textureHeight || 512;
 	var clipBias = options.clipBias || 0;
 	var shader = options.shader || Reflector.ReflectorShader;
-	var useDepthTexture = options.useDepthTexture
 	var yAxis = new Vector3(0, 1, 0);
 	var vecTemp0 = new Vector3();
 	var vecTemp1 = new Vector3();
@@ -82,20 +82,26 @@ var Reflector = function ( geometry, options ) {
 	var q = new Vector4();
 
 	var textureMatrix = new Matrix4();
+	var myMatrix=new Matrix4().set(
+		0.5, 0.0, 0.0, 0.5,
+		0.0, 0.5, 0.0, 0.5,
+		0.0, 0.0, 0.5, 0.5,
+		0.0, 0.0, 0.0, 1.0
+	);
 	var virtualCamera = new PerspectiveCamera();
+	window.virtualCamera=virtualCamera
 
-	if( useDepthTexture ){
-		var depthTexture = new DepthTexture();
-		depthTexture.type = UnsignedShortType;
-		depthTexture.minFilter = NearestFilter;
-		depthTexture.maxFilter = NearestFilter;
-	}
+	var depthTexture = new DepthTexture();
+	depthTexture.type = UnsignedShortType;
+	depthTexture.minFilter = NearestFilter;
+	depthTexture.maxFilter = NearestFilter;
 
 	var parameters = {
 		minFilter: LinearFilter,
 		magFilter: LinearFilter,
-		format: RGBFormat,
-    depthTexture: useDepthTexture ? depthTexture : null,
+		format: RGBAFormat,
+		depthTexture: depthTexture,
+		depthBuffer: true
 	};
 
 	var renderTarget = new WebGLRenderTarget( textureWidth, textureHeight, parameters );
@@ -107,10 +113,8 @@ var Reflector = function ( geometry, options ) {
 	}
 
 	var material = new ShaderMaterial( {
-		transparent: useDepthTexture,
-    defines: Object.assign({
-      useDepthTexture: useDepthTexture
-    }, Reflector.ReflectorShader.defines),
+		transparent: true,
+    defines: Object.assign({}, Reflector.ReflectorShader.defines),
 		uniforms: UniformsUtils.clone( shader.uniforms ),
 		fragmentShader: shader.fragmentShader,
 		vertexShader: shader.vertexShader
@@ -119,9 +123,8 @@ var Reflector = function ( geometry, options ) {
 	material.uniforms[ 'tDiffuse' ].value = renderTarget.texture;
 	material.uniforms[ 'color' ].value = color;
 	material.uniforms[ 'textureMatrix' ].value = textureMatrix;
-	if (useDepthTexture) {
-		material.uniforms[ 'tDepth' ].value = renderTarget.depthTexture;
-	}
+	material.uniforms[ 'myMatrix' ].value = myMatrix;
+	material.uniforms[ 'tDepth' ].value = renderTarget.depthTexture;
 
 	this.material = material;
 
@@ -179,9 +182,9 @@ var Reflector = function ( geometry, options ) {
 
 		// Update the texture matrix
 		textureMatrix.set(
-			0.5, 0.0, 0.0, 0.5,
-			0.0, 0.5, 0.0, 0.5,
-			0.0, 0.0, 0.5, 0.5,
+			1.0, 0.0, 0.0, 0.0,
+			0.0, 1.0, 0.0, 0.0,
+			0.0, 0.0, 1.0, 0.0,
 			0.0, 0.0, 0.0, 1.0
 		);
 		textureMatrix.multiply( virtualCamera.projectionMatrix );
@@ -275,6 +278,7 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		tDiffuse: { value: null },
 		tDepth: { value: null },
 		textureMatrix: { value: null },
+		myMatrix: { value: null },
     maxDistance: { value: 180 },
     opacity: { value: .5 },
     fresnel: { value: null },
@@ -283,6 +287,7 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 
 	vertexShader: [
 		'uniform mat4 textureMatrix;',
+		'uniform mat4 myMatrix;',
 		'varying vec4 vUv;',
 
 		'void main() {',
@@ -310,22 +315,18 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		}
 		void main() {
 			vec4 base = texture2DProj( tDiffuse, vUv );
-			#ifdef useDepthTexture
-				float op=opacity;
-				float depth = texture2DProj( tDepth, vUv ).r;
-				if(depth>maxDistance) discard;
-				#ifdef isDistanceAttenuation
-					float ratio=1.-(depth/maxDistance);
-					float attenuation=ratio*ratio;
-					op=opacity*attenuation;
-				#endif
-				#ifdef isFresnel
-					op*=fresnel;
-				#endif
-				gl_FragColor = vec4( blendOverlay( base.rgb, color ), op );
-			#else
-				gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );
+			float op=opacity;
+			float depth = texture2DProj( tDepth, vUv ).r;
+			if(depth>maxDistance) discard;
+			#ifdef isDistanceAttenuation
+				float ratio=1.-(depth/maxDistance);
+				float attenuation=ratio*ratio;
+				op=opacity*attenuation;
 			#endif
+			#ifdef isFresnel
+				op*=fresnel;
+			#endif
+			gl_FragColor = vec4( blendOverlay( base.rgb, color ), op );
 		}
 	`,
 };
