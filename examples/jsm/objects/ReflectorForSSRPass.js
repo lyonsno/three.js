@@ -364,7 +364,7 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			// return perspectiveDepthToViewZ( depth, virtualCameraNear, virtualCameraFar );
 		}
 		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
-			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
+			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc ///todo: use gl_FragCoord to get uv
 			clipPosition *= clipW; //clip
 			return ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
 		}
