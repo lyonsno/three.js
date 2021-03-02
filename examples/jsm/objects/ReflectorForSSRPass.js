@@ -293,6 +293,7 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		'void main() {',
 
 		'	vUv = textureMatrix * vec4( position, 1.0 );',
+		'	vUv = myMatrix * vUv;',
 
 		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
 
