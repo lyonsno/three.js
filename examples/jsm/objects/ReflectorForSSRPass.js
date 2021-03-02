@@ -156,8 +156,8 @@ var Reflector = function ( geometry, options ) {
 
 		rotationMatrix.extractRotation( scope.matrixWorld );
 
-		normal.set( 0, 0, 1 );
-		normal.applyMatrix4( rotationMatrix );
+		normal.set( 0, 1, 0 );
+		normal.applyMatrix4(rotationMatrix);
 
 		view.subVectors( reflectorWorldPosition, cameraWorldPosition );
 
