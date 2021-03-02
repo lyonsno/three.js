@@ -132,7 +132,6 @@
 			selects.push( mesh );
 
 			geometry = new THREE.PlaneBufferGeometry( 8, 8 );
-			geometry.rotateX(- Math.PI / 2)
 			groundReflector = new Reflector( geometry, {
 				clipBias: 0.003,
 				textureWidth: window.innerWidth,
@@ -143,8 +142,7 @@
 			window.groundReflector=groundReflector
 			groundReflector.material.depthWrite = false;
 			// groundReflector.position.y = plane.position.y + .0001;
-			groundReflector.position.y = 0 ;
-			// groundReflector.rotation.x = - Math.PI / 2;
+			groundReflector.rotation.x = - Math.PI / 2;
 			groundReflector.visible = false;
 			scene.add( groundReflector );
 
