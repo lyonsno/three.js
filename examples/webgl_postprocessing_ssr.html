@@ -67,7 +67,7 @@
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color( 0x443333 );
-			scene.fog = new THREE.Fog( 0x443333, 1, 4 );
+			// scene.fog = new THREE.Fog( 0x443333, 1, 4 );
 
 			// Ground
 			const plane = new THREE.Mesh(
@@ -144,7 +144,7 @@
 			groundReflector.material.depthWrite = false;
 			// groundReflector.position.y = plane.position.y + .0001;
 			// groundReflector.rotation.x = - Math.PI / 2;
-			groundReflector.visible = false;
+			// groundReflector.visible = false;
 			scene.add( groundReflector );
 
 			// renderer
@@ -320,17 +320,20 @@
 
 			}
 
-			if ( params.enableSSR ) {
+			// if ( params.enableSSR ) {
 
-				///todo: groundReflector has full ground info, need use it to solve reflection gaps problem on objects when camera near ground.
-				///todo: the normal info where groundReflector reflected need to be changed.
-				composer.render();
+			// 	///todo: groundReflector has full ground info, need use it to solve reflection gaps problem on objects when camera near ground.
+			// 	///todo: the normal info where groundReflector reflected need to be changed.
+			// 	composer.render();
 
-			} else {
+			// } else {
 
+				groundReflector.visible = false;
+				groundReflector.doRender( renderer, scene, camera );
+				groundReflector.visible = true;
 				renderer.render( scene, camera );
 
-			}
+			// }
 
 		}
 	</script>
