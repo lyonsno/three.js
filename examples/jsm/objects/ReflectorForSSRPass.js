@@ -141,7 +141,7 @@ var Reflector = function ( geometry, options ) {
 
 	this.material = material;
 
-	this.doRender = function ( renderer, scene, camera ) {
+	this.doRender = function (renderer, scene, camera) {
 
 		material.uniforms['maxDistance'].value = scope.maxDistance * (camera.position.length() / camera.position.y);
 		///todo: Temporary hack,
@@ -167,7 +167,7 @@ var Reflector = function ( geometry, options ) {
 
 		// Avoid rendering when reflector is facing away
 
-		if ( view.dot( normal ) > 0 ) return;
+		// if ( view.dot( normal ) > 0 ) return;
 
 		view.reflect( normal ).negate();
 		view.add( reflectorWorldPosition );
@@ -267,6 +267,9 @@ var Reflector = function ( geometry, options ) {
 		}
 
 		// scope.visible = true;
+
+		console.log(camera.position,virtualCamera.position)
+
 
 	};
 
