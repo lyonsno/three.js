@@ -198,7 +198,7 @@ var Reflector = function ( geometry, options ) {
 		);
 		textureMatrix.multiply( virtualCamera.projectionMatrix );
 		textureMatrix.multiply( virtualCamera.matrixWorldInverse );
-		textureMatrix.multiply( scope.matrixWorld );
+		// textureMatrix.multiply( scope.matrixWorld );
 
 		// Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
 		// Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
