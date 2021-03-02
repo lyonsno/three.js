@@ -285,20 +285,16 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 
 	},
 
-	vertexShader: [
-		'uniform mat4 textureMatrix;',
-		'uniform mat4 myMatrix;',
-		'varying vec4 vUv;',
-
-		'void main() {',
-
-		'	vUv = textureMatrix * vec4( position, 1.0 );',
-		'	vUv = myMatrix * vUv;',
-
-		'	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
-
-		'}'
-	].join( '\n' ),
+	vertexShader: `
+		uniform mat4 textureMatrix;
+		uniform mat4 myMatrix;
+		varying vec4 vUv;
+		void main() {
+			vUv = textureMatrix * vec4( position, 1.0 );
+			vUv = myMatrix * vUv;
+			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+		}
+	`,
 
 	fragmentShader: `
 		uniform vec3 color;
