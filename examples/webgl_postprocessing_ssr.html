@@ -20,6 +20,8 @@
 	<script type="module">
 		import * as THREE from '../build/three.module.js';
 
+		import vs from '/lib/vs_util/vs_util_threejs.js'; window.vs=vs
+
 		import Stats from './jsm/libs/stats.module.js';
 
 		import { OrbitControls } from './jsm/controls/OrbitControls.js';
@@ -136,6 +138,7 @@
 				color: 0x888888,
 				useDepthTexture: true,
 			} );
+			window.groundReflector=groundReflector
 			groundReflector.material.depthWrite = false;
 			groundReflector.position.y = plane.position.y + .0001;
 			groundReflector.rotation.x = - Math.PI / 2;

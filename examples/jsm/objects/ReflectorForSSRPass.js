@@ -43,6 +43,15 @@ var Reflector = function ( geometry, options ) {
 	scope.maxDistance = Reflector.ReflectorShader.uniforms.maxDistance.value
 	scope.opacity = Reflector.ReflectorShader.uniforms.opacity.value
 
+	Object.defineProperty(scope, 'color', {
+		get() {
+			return scope.material.uniforms[ 'color' ].value;
+		},
+		set(val) {
+			scope.material.uniforms[ 'color' ].value = new Color( val );
+		}
+	});
+
   scope._isDistanceAttenuation = Reflector.ReflectorShader.defines.isDistanceAttenuation
   Object.defineProperty(scope, 'isDistanceAttenuation', {
     get() {
@@ -289,7 +298,9 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		uniform mat4 textureMatrix;
 		uniform mat4 myMatrix;
 		varying vec4 vUv;
+		varying vec3 vPosition;
 		void main() {
+			vPosition=position;
 			vUv = textureMatrix * vec4( position, 1.0 );
 			vUv = myMatrix * vUv;
 			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
@@ -304,6 +315,7 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		uniform float opacity;
 		uniform float fresnel;
 		varying vec4 vUv;
+		varying vec3 vPosition;
 		float blendOverlay( float base, float blend ) {
 			return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );
 		}
@@ -311,9 +323,12 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			return vec3( blendOverlay( base.r, blend.r ), blendOverlay( base.g, blend.g ), blendOverlay( base.b, blend.b ) );
 		}
 		void main() {
+			float depth = texture2DProj( tDepth, vUv ).r;
+			// gl_FragColor=vec4(vec3(depth),1);return;
+
+			// gl_FragColor=vec4(vPosition,1);return;
 			vec4 base = texture2DProj( tDiffuse, vUv );
 			float op=opacity;
-			float depth = texture2DProj( tDepth, vUv ).r;
 			if(depth>maxDistance) discard;
 			#ifdef isDistanceAttenuation
 				float ratio=1.-(depth/maxDistance);
