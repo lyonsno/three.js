@@ -64,7 +64,7 @@
 
 			camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 15 );
 			window.camera=camera
-			camera.position.set( 0., 1, 2 );
+			camera.position.set( 0., .26, .6   );
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color( 0x443333 );
@@ -195,7 +195,7 @@
 				window.mesh_depthTexture=new THREE.Mesh(geometry,material)
 				mesh_depthTexture.visible=false
 				mesh_depthTexture.renderOrder=100
-				scene.add(mesh_depthTexture)
+				// scene.add(mesh_depthTexture)
 			}
 
 			// composer

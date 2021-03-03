@@ -361,6 +361,9 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			uv.x=1.-uv.x;
 
 			float depth = texture2D( tDepth, uv ).r;
+			if(depth>.85&&depth<1.){
+				gl_FragColor=vec4(1,0,0,1);return;
+			}
 			gl_FragColor=vec4(vec3(depth),1);return;
 
 			// float depth = texture2DProj( tDepth, vUv ).r;
