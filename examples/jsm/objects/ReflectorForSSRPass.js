@@ -9,6 +9,7 @@ import {
 	RGBFormat,
 	ShaderMaterial,
 	UniformsUtils,
+	Vector2,
 	Vector3,
 	Vector4,
 	WebGLRenderTarget,
@@ -127,11 +128,7 @@ var Reflector = function ( geometry, options ) {
 
 	this.doRender = function ( renderer, scene, camera ) {
 
-		material.uniforms['maxDistance'].value = scope.maxDistance * (camera.position.length() / camera.position.y);
-		///todo: Temporary hack,
-		// need precise calculation like this https://github.com/mrdoob/three.js/pull/20156/commits/8181946068e386d14a283cbd4f8877bc7ae066d3 ,
-		// after fully understand http://www.terathon.com/lengyel/Lengyel-Oblique.pdf .
-
+		material.uniforms['maxDistance'].value = scope.maxDistance;
 		material.uniforms['opacity'].value = scope.opacity;
 
 		vecTemp0.copy(camera.position).normalize();
@@ -177,6 +174,13 @@ var Reflector = function ( geometry, options ) {
 		virtualCamera.updateMatrixWorld();
 		virtualCamera.projectionMatrix.copy( camera.projectionMatrix );
 
+		material.uniforms['virtualCameraNear'].value = virtualCamera.near
+		material.uniforms['virtualCameraFar'].value = virtualCamera.far
+		material.uniforms['virtualCameraMatrixWorld'].value.copy( virtualCamera.matrixWorld )
+		material.uniforms['virtualCameraProjectionMatrix'].value.copy( virtualCamera.projectionMatrix )
+		material.uniforms['virtualCameraInverseProjectionMatrix'].value.copy( virtualCamera.projectionMatrixInverse )
+		material.uniforms['resolution'].value.set( innerWidth, innerHeight ) ///todo:
+
 		// Update the texture matrix
 		textureMatrix.set(
 			0.5, 0.0, 0.0, 0.5,
@@ -188,28 +192,29 @@ var Reflector = function ( geometry, options ) {
 		textureMatrix.multiply( virtualCamera.matrixWorldInverse );
 		textureMatrix.multiply( scope.matrixWorld );
 
-		// Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
-		// Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
-		reflectorPlane.setFromNormalAndCoplanarPoint( normal, reflectorWorldPosition );
-		reflectorPlane.applyMatrix4( virtualCamera.matrixWorldInverse );
+		///todo:
+		// // Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
+		// // Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
+		// reflectorPlane.setFromNormalAndCoplanarPoint( normal, reflectorWorldPosition );
+		// reflectorPlane.applyMatrix4( virtualCamera.matrixWorldInverse );
 
-		clipPlane.set( reflectorPlane.normal.x, reflectorPlane.normal.y, reflectorPlane.normal.z, reflectorPlane.constant );
+		// clipPlane.set( reflectorPlane.normal.x, reflectorPlane.normal.y, reflectorPlane.normal.z, reflectorPlane.constant );
 
-		var projectionMatrix = virtualCamera.projectionMatrix;
+		// var projectionMatrix = virtualCamera.projectionMatrix;
 
-		q.x = ( Math.sign( clipPlane.x ) + projectionMatrix.elements[ 8 ] ) / projectionMatrix.elements[ 0 ];
-		q.y = ( Math.sign( clipPlane.y ) + projectionMatrix.elements[ 9 ] ) / projectionMatrix.elements[ 5 ];
-		q.z = - 1.0;
-		q.w = ( 1.0 + projectionMatrix.elements[ 10 ] ) / projectionMatrix.elements[ 14 ];
+		// q.x = ( Math.sign( clipPlane.x ) + projectionMatrix.elements[ 8 ] ) / projectionMatrix.elements[ 0 ];
+		// q.y = ( Math.sign( clipPlane.y ) + projectionMatrix.elements[ 9 ] ) / projectionMatrix.elements[ 5 ];
+		// q.z = - 1.0;
+		// q.w = ( 1.0 + projectionMatrix.elements[ 10 ] ) / projectionMatrix.elements[ 14 ];
 
-		// Calculate the scaled plane vector
-		clipPlane.multiplyScalar( 2.0 / clipPlane.dot( q ) );
+		// // Calculate the scaled plane vector
+		// clipPlane.multiplyScalar( 2.0 / clipPlane.dot( q ) );
 
-		// Replacing the third row of the projection matrix
-		projectionMatrix.elements[ 2 ] = clipPlane.x;
-		projectionMatrix.elements[ 6 ] = clipPlane.y;
-		projectionMatrix.elements[ 10 ] = clipPlane.z + 1.0 - clipBias;
-		projectionMatrix.elements[ 14 ] = clipPlane.w;
+		// // Replacing the third row of the projection matrix
+		// projectionMatrix.elements[ 2 ] = clipPlane.x;
+		// projectionMatrix.elements[ 6 ] = clipPlane.y;
+		// projectionMatrix.elements[ 10 ] = clipPlane.z + 1.0 - clipBias;
+		// projectionMatrix.elements[ 14 ] = clipPlane.w;
 
 		// Render
 
@@ -274,10 +279,16 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		color: { value: null },
 		tDiffuse: { value: null },
 		tDepth: { value: null },
-		textureMatrix: { value: null },
+		textureMatrix: { value: new Matrix4() },
     maxDistance: { value: 180 },
     opacity: { value: .5 },
     fresnel: { value: null },
+    virtualCameraNear: { value: null },
+    virtualCameraFar: { value: null },
+    virtualCameraProjectionMatrix: { value: new Matrix4() },
+    virtualCameraMatrixWorld: { value: new Matrix4() },
+    virtualCameraInverseProjectionMatrix: { value: new Matrix4() },
+    resolution: { value: new Vector2() },
 
 	},
 
@@ -301,21 +312,48 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		uniform float maxDistance;
 		uniform float opacity;
 		uniform float fresnel;
+		uniform float virtualCameraNear;
+		uniform float virtualCameraFar;
+		uniform mat4 virtualCameraProjectionMatrix;
+		uniform mat4 virtualCameraInverseProjectionMatrix;
+		uniform mat4 virtualCameraMatrixWorld;
+		uniform vec2 resolution;
 		varying vec4 vUv;
+		#include <packing>
 		float blendOverlay( float base, float blend ) {
 			return( base < 0.5 ? ( 2.0 * base * blend ) : ( 1.0 - 2.0 * ( 1.0 - base ) * ( 1.0 - blend ) ) );
 		}
 		vec3 blendOverlay( vec3 base, vec3 blend ) {
 			return vec3( blendOverlay( base.r, blend.r ), blendOverlay( base.g, blend.g ), blendOverlay( base.b, blend.b ) );
 		}
+		float getDepth( const in vec2 uv ) {
+			return texture2D( tDepth, uv ).x;
+		}
+		float getViewZ( const in float depth ) {
+			return perspectiveDepthToViewZ( depth, virtualCameraNear, virtualCameraFar );
+		}
+		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
+			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc ///todo: use gl_FragCoord to get uv
+			clipPosition *= clipW; //clip
+			return ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
+		}
 		void main() {
 			vec4 base = texture2DProj( tDiffuse, vUv );
 			#ifdef useDepthTexture
-				float op=opacity;
+				vec2 uv=(gl_FragCoord.xy-.5)/resolution.xy;
+				uv.x=1.-uv.x;
 				float depth = texture2DProj( tDepth, vUv ).r;
-				if(depth>maxDistance) discard;
+				float viewZ = getViewZ( depth );
+				float clipW = virtualCameraProjectionMatrix[2][3] * viewZ+virtualCameraProjectionMatrix[3][3];
+				vec3 viewPosition=getViewPosition( uv, depth, clipW );
+				vec3 worldPosition=(virtualCameraMatrixWorld*vec4(viewPosition,1)).xyz;
+				// gl_FragColor=vec4(vec3(worldPosition.y),1);return;
+				worldPosition.y-=0.027450980392156862; ///todo: Don't know why not start from zero, need fix afterwards.
+				worldPosition.y=max(0.,worldPosition.y);
+				if(worldPosition.y>maxDistance) discard;
+				float op=opacity;
 				#ifdef isDistanceAttenuation
-					float ratio=1.-(depth/maxDistance);
+					float ratio=1.-(worldPosition.y/maxDistance);
 					float attenuation=ratio*ratio;
 					op=opacity*attenuation;
 				#endif
