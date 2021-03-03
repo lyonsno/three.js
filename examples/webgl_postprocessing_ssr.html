@@ -350,13 +350,13 @@
 
 			}
 
-			// if ( params.enableSSR ) {
+			if ( params.enableSSR ) {
 
-			// 	///todo: groundReflector has full ground info, need use it to solve reflection gaps problem on objects when camera near ground.
-			// 	///todo: the normal info where groundReflector reflected need to be changed.
-			// 	composer.render();
+				///todo: groundReflector has full ground info, need use it to solve reflection gaps problem on objects when camera near ground.
+				///todo: the normal info where groundReflector reflected need to be changed.
+				composer.render();
 
-			// } else {
+			} else {
 
 				groundReflector.visible = false;
 				mesh_depthTexture.visible = false;
@@ -365,7 +365,7 @@
 				mesh_depthTexture.visible = true;
 				renderer.render( scene, camera );
 
-			// }
+			}
 
 		}
 	</script>
