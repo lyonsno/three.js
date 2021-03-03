@@ -381,7 +381,11 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			// gl_FragColor=vec4(vec3(clipW),1);return;
 
 			vec3 viewPosition=getViewPosition( uv, depth, clipW );
-			gl_FragColor=vec4(viewPosition*vec3(3,-3,-1),1);return;
+			// if(-3.*viewPosition.y>.3){
+			// 	gl_FragColor=vec4(1,0,0,1);return;
+			// }
+			// gl_FragColor=vec4(vec3(-3.*viewPosition.y),1);return;
+			gl_FragColor=vec4(viewPosition*vec3(5,-5,-1),1);return;
 
 			// gl_FragColor=vec4(vPosition,1);return;
 			vec4 base = texture2DProj( tDiffuse, vUv );
