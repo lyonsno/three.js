@@ -416,6 +416,12 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 				op=opacity*attenuation;
 			#endif
 			#ifdef isFresnel
+				// #ifdef isPerspectiveCamera
+					vec3 viewIncidenceDir=normalize(viewPosition);
+				// #else
+				// 	vec3 viewIncidenceDir=vec3(0,0,-1);
+				// #endif
+				float fresnel=(dot(viewIncidenceDir,vec3(0,1,0))+1.)/2.;
 				op*=fresnel;
 			#endif
 			gl_FragColor = vec4( blendOverlay( base.rgb, color ), op );
