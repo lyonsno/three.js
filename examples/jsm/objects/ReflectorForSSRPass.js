@@ -394,6 +394,9 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			// gl_FragColor=vec4(viewPosition*vec3(5,-5,-1),1);return;
 
 			vec3 worldPosition=(virtualCameraMatrixWorld*vec4(viewPosition,1)).xyz;
+			if(worldPosition.y*20.>1.){
+				gl_FragColor=vec4(1,0,0,1);discard;
+			}
 			gl_FragColor=vec4(worldPosition*vec3(20,20,-20),1);return;
 
 			// gl_FragColor=vec4(vPosition,1);return;
