@@ -153,8 +153,6 @@ var Reflector = function ( geometry, options ) {
 
 		vecTemp0.copy(camera.position).normalize();
 		vecTemp1.copy(vecTemp0).reflect(yAxis);
-		material.uniforms['fresnel'].value = (vecTemp0.dot( vecTemp1 ) + 1.) / 2.; ///todo: Also need to use glsl viewPosition and viewNormal per pixel.
-		// console.log(material.uniforms['fresnel'].value)
 
 		reflectorWorldPosition.setFromMatrixPosition( scope.matrixWorld );
 		cameraWorldPosition.setFromMatrixPosition( camera.matrixWorld );
@@ -305,7 +303,6 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		myMatrix: { value: null },
     maxDistance: { value: 180 },
     opacity: { value: .5 },
-    fresnel: { value: null },
     "virtualCameraNear": { value: null },
     "virtualCameraFar": { value: null },
     virtualCameraProjectionMatrix: { value: null },
@@ -335,7 +332,6 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		uniform sampler2D tDepth;
 		uniform float maxDistance;
 		uniform float opacity;
-		uniform float fresnel;
 		uniform float virtualCameraNear;
 		uniform float virtualCameraFar;
 		uniform mat4 virtualCameraProjectionMatrix;
@@ -415,15 +411,12 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 				float attenuation=ratio*ratio;
 				op=opacity*attenuation;
 			#endif
-			#ifdef isFresnel
-				// #ifdef isPerspectiveCamera
-					vec3 viewIncidenceDir=normalize(viewPosition);
-				// #else
-				// 	vec3 viewIncidenceDir=vec3(0,0,-1);
-				// #endif
-				float fresnel=(dot(viewIncidenceDir,vec3(0,1,0))+1.)/2.;
+			// #ifdef isFresnel
+				vec3 viewIncidenceDir=normalize(viewPosition);
+				vec3 viewReflectDir=reflect(viewIncidenceDir,vec3(1,-1,0));
+				float fresnel=(dot(viewIncidenceDir,viewReflectDir)+1.)/2.;
 				op*=fresnel;
-			#endif
+			// #endif
 			gl_FragColor = vec4( blendOverlay( base.rgb, color ), op );
 		}
 	`,
