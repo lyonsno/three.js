@@ -143,7 +143,8 @@ var Reflector = function ( geometry, options ) {
 
 	this.doRender = function (renderer, scene, camera) {
 
-		material.uniforms['maxDistance'].value = scope.maxDistance * (camera.position.length() / camera.position.y);
+		// material.uniforms['maxDistance'].value = scope.maxDistance * (camera.position.length() / camera.position.y);
+		material.uniforms['maxDistance'].value = scope.maxDistance
 		///todo: Temporary hack,
 		// need precise calculation like this https://github.com/mrdoob/three.js/pull/20156/commits/8181946068e386d14a283cbd4f8877bc7ae066d3 ,
 		// after fully understand http://www.terathon.com/lengyel/Lengyel-Oblique.pdf .
@@ -394,21 +395,23 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			// gl_FragColor=vec4(viewPosition*vec3(5,-5,-1),1);return;
 
 			vec3 worldPosition=(virtualCameraMatrixWorld*vec4(viewPosition,1)).xyz;
+			// gl_FragColor=vec4(vec3(worldPosition.y),1);return;
 
-			float opacity=1.-worldPosition.y*20./1.;
-			gl_FragColor=vec4(0,0,0,opacity);return;
 
-			if(worldPosition.y*20.>1.){
-				gl_FragColor=vec4(1,0,0,1);discard;
-			}
-			gl_FragColor=vec4(worldPosition*vec3(20,20,-20),1);return;
+			// float opacity=1.-worldPosition.y*20./1.;
+			// gl_FragColor=vec4(0,0,0,opacity);return;
+
+			// if(worldPosition.y*20.>1.){
+			// 	gl_FragColor=vec4(1,0,0,1);discard;
+			// }
+			// gl_FragColor=vec4(worldPosition*vec3(20,20,-20),1);return;
 
 			// gl_FragColor=vec4(vPosition,1);return;
 			vec4 base = texture2DProj( tDiffuse, vUv );
 			float op=opacity;
-			if(depth>maxDistance) discard;
+			if(worldPosition.y>maxDistance) discard;
 			#ifdef isDistanceAttenuation
-				float ratio=1.-(depth/maxDistance);
+				float ratio=1.-(worldPosition.y/maxDistance);
 				float attenuation=ratio*ratio;
 				op=opacity*attenuation;
 			#endif
