@@ -194,6 +194,8 @@ var Reflector = function ( geometry, options ) {
 		virtualCamera.projectionMatrix.copy( camera.projectionMatrix );
 		material.uniforms['virtualCameraNear'].value = virtualCamera.near
 		material.uniforms['virtualCameraFar'].value = virtualCamera.far
+		material.uniforms['virtualCameraMatrixWorld'].value = virtualCamera.matrixWorld
+		material.uniforms['virtualCameraMatrixWorldInverse'].value = virtualCamera.matrixWorldInverse
 		material.uniforms['virtualCameraProjectionMatrix'].value = virtualCamera.projectionMatrix
 		material.uniforms['virtualCameraInverseProjectionMatrix'].value = virtualCamera.projectionMatrixInverse
 		material.uniforms['resolution'].value.set(innerWidth,innerHeight)
@@ -306,6 +308,8 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
     "virtualCameraNear": { value: null },
     "virtualCameraFar": { value: null },
     virtualCameraProjectionMatrix: { value: null },
+    virtualCameraMatrixWorld: { value: null },
+    virtualCameraMatrixWorldInverse: { value: null },
     "virtualCameraInverseProjectionMatrix": { value: null },
     "resolution": { value: new Vector2() },
 
@@ -335,6 +339,8 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 		uniform float virtualCameraFar;
 		uniform mat4 virtualCameraProjectionMatrix;
 		uniform mat4 virtualCameraInverseProjectionMatrix;
+		uniform mat4 virtualCameraMatrixWorld;
+		uniform mat4 virtualCameraMatrixWorldInverse;
 		uniform vec2 resolution;
 		varying vec4 vUv;
 		varying vec3 vPosition;
@@ -385,7 +391,10 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 			// 	gl_FragColor=vec4(1,0,0,1);return;
 			// }
 			// gl_FragColor=vec4(vec3(-3.*viewPosition.y),1);return;
-			gl_FragColor=vec4(viewPosition*vec3(5,-5,-1),1);return;
+			// gl_FragColor=vec4(viewPosition*vec3(5,-5,-1),1);return;
+
+			vec3 worldPosition=(virtualCameraMatrixWorld*vec4(viewPosition,1)).xyz;
+			gl_FragColor=vec4(worldPosition*vec3(20,20,-20),1);return;
 
 			// gl_FragColor=vec4(vPosition,1);return;
 			vec4 base = texture2DProj( tDiffuse, vUv );
