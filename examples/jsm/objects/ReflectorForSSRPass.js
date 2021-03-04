@@ -347,7 +347,7 @@ Reflector.ReflectorShader = { ///todo: Will conflict with Reflector.js?
 				float clipW = virtualCameraProjectionMatrix[2][3] * viewZ+virtualCameraProjectionMatrix[3][3];
 				vec3 viewPosition=getViewPosition( uv, depth, clipW );
 				vec3 worldPosition=(virtualCameraMatrixWorld*vec4(viewPosition,1)).xyz;
-				// gl_FragColor=vec4(vec3(worldPosition.y),1);return;
+				gl_FragColor=vec4((worldPosition),1);return;
 				worldPosition.y-=0.027450980392156862; ///todo: Don't know why not start from zero, need fix afterwards.
 				worldPosition.y=max(0.,worldPosition.y);
 				if(worldPosition.y>maxDistance) discard;
