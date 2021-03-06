@@ -115,7 +115,7 @@ var SSRrShader = {
 		}
 		void main(){
 			float metalness=texture2D(tMetalness,vUv).r;
-			if(metalness==0.) return;
+			if(metalness==0.) discard;
 
 			// TODO: Will if(ior===0.) return; improve performance?
 			// gl_FragColor=vec4(0,0,.5,1);return;
