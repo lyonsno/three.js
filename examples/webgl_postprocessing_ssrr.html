@@ -36,7 +36,7 @@
 
 		const params = {
 			enableSSRr: true,
-			autoRotate: true,
+			autoRotate: false,
 			isOtherMeshes: true,
 		};
 		let composer;
@@ -61,7 +61,9 @@
 		async function init() {
 
 			camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 15);
-			camera.position.set(0.13271600513224902, 0.3489546826045913, 0.43921296427927076);
+			window.camera=camera
+			// camera.position.set(0.13271600513224902, 0.3489546826045913, 0.43921296427927076);
+			camera.position.set(-0.18880406386558846, 0.16289513445459886, 0.49646709311365766);
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color(0x443333);
@@ -246,7 +248,7 @@
 
 			folder.add(ssrrPass, 'isInfiniteThick');
 			folder.add(ssrrPass, 'thickTolerance').min(0).max(.05).step(.0001);
-			// folder.open()
+			folder.open()
 			// gui.close()
 
 			animate();

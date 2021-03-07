@@ -183,8 +183,10 @@ var SSRrShader = {
 					float viewRefractRayZ=viewPosition.z+s*(d1viewPosition.z-viewPosition.z);
 					float sD=surfDist;
 				#endif
+				if(viewRefractRayZ>vZ) continue;
+				float away=pointToLineDistance(vP,viewPosition,d1viewPosition);
 
-				if(viewRefractRayZ<vZ){
+				if(away<sD){
 					vec4 refractColor=texture2D(tDiffuse,uv);
 					gl_FragColor.xyz=refractColor.xyz;
 					gl_FragColor.a=1.;
