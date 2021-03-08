@@ -320,11 +320,11 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		// 	// console.log(child.name,child.visible)
 		// })
 		// debugger
-		mesh_bunny.visible=false
-		mesh_sphere.visible=true
-		mesh_box.visible=true
-		mesh_cone.visible=true
-		mesh_plane.visible=true
+		// mesh_bunny.visible=false
+		// mesh_sphere.visible=true
+		// mesh_box.visible=true
+		// mesh_cone.visible=true
+		// mesh_plane.visible=true
 		renderer.render(this.scene, this.camera);
 
 		renderer.setRenderTarget( this.beautyRenderTargetBunny );
