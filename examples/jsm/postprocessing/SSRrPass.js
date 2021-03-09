@@ -311,13 +311,13 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		if ( this.encoding ) this.beautyRenderTarget.texture.encoding = this.encoding;
 		renderer.setRenderTarget( this.beautyRenderTarget );
 		renderer.clear();
-		this.scene.children.forEach(child => {
-			if (this.selects.includes(child)) {
-				child.visible = false
-			} else {
-				child.visible = true
-			}
-		})
+		// this.scene.children.forEach(child => {
+		// 	if (this.selects.includes(child)) {
+		// 		child.visible = false
+		// 	} else {
+		// 		child.visible = true
+		// 	}
+		// })
 		renderer.render(this.scene, this.camera);
 
 		renderer.setRenderTarget( this.beautyRenderTargetSelects );
