@@ -145,7 +145,7 @@
 			scene.add(mesh);
 			otherMeshes.push(mesh);
 			objects.push( mesh );
-			selects.push( mesh );
+			// selects.push( mesh );
 
 			geometry = new THREE.IcosahedronBufferGeometry(.025, 4);
 			material = new THREE.MeshStandardMaterial({ color: 'cyan' });
@@ -156,7 +156,7 @@
 			scene.add(mesh);
 			otherMeshes.push(mesh);
 			objects.push( mesh );
-			// selects.push( mesh );
+			selects.push( mesh );
 
 			geometry = new THREE.ConeBufferGeometry(.025, .05, 64);
 			material = new THREE.MeshStandardMaterial({ color: 'yellow' });
