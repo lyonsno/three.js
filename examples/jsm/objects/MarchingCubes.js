@@ -4,7 +4,7 @@ import {
 	Color,
 	ImmediateRenderObject,
 	NoColors
-} from '../../../build/three.module.js';
+} from '../../../src/Three.js';
 
 /**
  * Port of http://webglsamples.org/blob/blob.html

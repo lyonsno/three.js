@@ -16,7 +16,7 @@ import {
 	DepthTexture,
 	UnsignedShortType,
 	NearestFilter
-} from '../../../build/three.module.js';
+} from '../../../src/Three.js';
 
 var ReflectorForSSRPass = function ( geometry, options ) {
 

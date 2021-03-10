@@ -17,7 +17,7 @@ import {
 	WebGLRenderTarget,
 	HalfFloatType,
 	MeshStandardMaterial
-} from '../../../build/three.module.js';
+} from '../../../src/Three.js';
 import { Pass } from '../postprocessing/Pass.js';
 import { SSRrShader } from '../shaders/SSRrShader.js';
 import { SSRrDepthShader } from '../shaders/SSRrShader.js';
@@ -319,7 +319,7 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 			}
 		})
 		renderer.render(this.scene, this.camera);
-		debugger
+		// debugger
 
 		renderer.setRenderTarget( this.beautyRenderTargetSelects );
 		renderer.clear();

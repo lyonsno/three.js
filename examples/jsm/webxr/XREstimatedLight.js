@@ -3,7 +3,7 @@ import {
 	Group,
 	LightProbe,
 	WebGLCubeRenderTarget
-} from "../../../build/three.module.js";
+} from "../../../src/Three.js";
 
 class SessionLightProbe {
 

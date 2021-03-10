@@ -1,7 +1,7 @@
 import {
 	DataTextureLoader,
 	LinearMipmapLinearFilter
-} from '../../../build/three.module.js';
+} from '../../../src/Three.js';
 
 var TGALoader = function ( manager ) {
 

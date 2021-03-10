@@ -1,6 +1,6 @@
 import {
 	BackSide
-} from '../../../../build/three.module.js';
+} from '../../../../src/Three.js';
 
 import { TempNode } from '../core/TempNode.js';
 import { Vector2Node } from '../inputs/Vector2Node.js';

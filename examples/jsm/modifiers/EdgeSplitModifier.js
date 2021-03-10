@@ -2,7 +2,7 @@ import {
 	BufferAttribute,
 	BufferGeometry,
 	Vector3
-} from '../../../build/three.module.js';
+} from '../../../src/Three.js';
 import { BufferGeometryUtils } from '../utils/BufferGeometryUtils.js';
 
 var EdgeSplitModifier = function () {
