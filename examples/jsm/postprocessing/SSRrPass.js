@@ -143,7 +143,7 @@ var SSRrPass = function ( { renderer, scene, camera, width, height, selects, enc
 		depthBuffer: true
 	} );
 
-	this.beautyRenderTargetSelects = new WebGLRenderTarget( this.width, this.height, { // TODO: Can merge with metalnessRenderTarget?
+	this.specularRenderTarget = new WebGLRenderTarget( this.width, this.height, { // TODO: Can merge with metalnessRenderTarget?
 		minFilter: LinearFilter,
 		magFilter: LinearFilter,
 		format: RGBAFormat,
@@ -199,7 +199,7 @@ var SSRrPass = function ( { renderer, scene, camera, width, height, selects, enc
 	}
 
 	this.ssrrMaterial.uniforms[ 'tDiffuse' ].value = this.beautyRenderTarget.texture;
-	this.ssrrMaterial.uniforms[ 'tDiffuseSelects' ].value = this.beautyRenderTargetSelects.texture;
+	this.ssrrMaterial.uniforms[ 'tDiffuseSelects' ].value = this.specularRenderTarget.texture;
 	this.ssrrMaterial.uniforms[ 'tNormal' ].value = this.normalRenderTarget.texture;
 	// if (this.isSelective) {
 	this.ssrrMaterial.defines.isSelective = this.isSelective;
@@ -285,7 +285,7 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		// dispose render targets
 
 		this.beautyRenderTarget.dispose();
-		this.beautyRenderTargetSelects.dispose();
+		this.specularRenderTarget.dispose();
 		this.normalRenderTarget.dispose();
 		this.metalnessRenderTarget.dispose();
 		this.ssrrRenderTarget.dispose();
@@ -321,7 +321,7 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		renderer.render(this.scene, this.camera);
 		// debugger
 
-		renderer.setRenderTarget( this.beautyRenderTargetSelects );
+		renderer.setRenderTarget( this.specularRenderTarget );
 		renderer.clear();
 		this.scene.children.forEach(child => {
 			if (this.selects.includes(child)) {
@@ -359,7 +359,7 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		this.ssrrMaterial.uniforms[ 'ior' ].value = this.ior;
 		this.ssrrMaterial.uniforms[ 'surfDist' ].value = this.surfDist;
 		this.ssrrMaterial.uniforms[ 'thickTolerance' ].value = this.thickTolerance;
-		this.ssrrMaterial.uniforms[ 'tDiffuseSelects' ].value = this.beautyRenderTargetSelects.texture;
+		this.ssrrMaterial.uniforms[ 'tDiffuseSelects' ].value = this.specularRenderTarget.texture;
 		this.renderPass( renderer, this.ssrrMaterial, this.ssrrRenderTarget );
 
 		// output result to screen
@@ -551,7 +551,7 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		this.ssrrMaterial.defines.MAX_STEP = Math.sqrt( width * width + height * height );
 		this.ssrrMaterial.needsUpdate = true;
 		this.beautyRenderTarget.setSize( width, height );
-		this.beautyRenderTargetSelects.setSize( width, height );
+		this.specularRenderTarget.setSize( width, height );
 		this.ssrrRenderTarget.setSize( width, height );
 		this.normalRenderTarget.setSize( width, height );
 		this.metalnessRenderTarget.setSize( width, height );
