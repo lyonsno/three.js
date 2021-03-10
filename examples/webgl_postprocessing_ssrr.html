@@ -89,7 +89,7 @@
 			);
 			plane.rotation.x = - Math.PI / 2;
 			plane.position.y = - 0.0001;
-			// plane.receiveShadow = true;
+			plane.receiveShadow = true;
 			scene.add(plane);
 			plane.name='plane'
 			window.mesh_plane=plane
@@ -105,7 +105,7 @@
 			spotLight.name='spotLight'
 			spotLight.angle = Math.PI / 16;
 			spotLight.penumbra = 0.5;
-			// spotLight.castShadow = true;
+			spotLight.castShadow = true;
 			spotLight.position.set(- 1, 1, 1);
 			scene.add(spotLight);
 			window.spotLight=spotLight
@@ -124,6 +124,8 @@
 					scene.add(mesh);
 					objects.push(mesh);
 					selects.push(mesh);
+					mesh.castShadow = true;
+					mesh.receiveShadow = true;
 
 					// Release decoder resources.
 					dracoLoader.dispose();
@@ -172,6 +174,7 @@
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			renderer.outputEncoding = THREE.sRGBEncoding;
 			renderer.autoClear=false
+			renderer.shadowMap.enabled = true;
 			container.appendChild(renderer.domElement);
 
 			//

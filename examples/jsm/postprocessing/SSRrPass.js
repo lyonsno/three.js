@@ -319,6 +319,7 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 			}
 		})
 		renderer.render(this.scene, this.camera);
+		debugger
 
 		renderer.setRenderTarget( this.beautyRenderTargetSelects );
 		renderer.clear();
