@@ -94,6 +94,8 @@ export default /* glsl */`
 
 	float getShadow( sampler2D shadowMap, vec2 shadowMapSize, float shadowBias, float shadowRadius, vec4 shadowCoord ) {
 		///mark
+		// return 1.;
+		// return 0.;
 
 		float shadow = 1.0;
 

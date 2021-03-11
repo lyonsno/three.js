@@ -55,6 +55,7 @@ IncidentLight directLight;
 #endif
 
 #if ( NUM_SPOT_LIGHTS > 0 ) && defined( RE_Direct )
+	///mark
 
 	SpotLight spotLight;
 	#if defined( USE_SHADOWMAP ) && NUM_SPOT_LIGHT_SHADOWS > 0
