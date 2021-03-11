@@ -96,6 +96,8 @@ export default /* glsl */`
 		///mark
 		// return 1.;
 		// return 0.;
+		return sin(shadowCoord.x*100.);
+		// return
 
 		float shadow = 1.0;
 
