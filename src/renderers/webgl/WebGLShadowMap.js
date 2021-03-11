@@ -71,7 +71,8 @@ function WebGLShadowMap( _renderer, _objects, maxTextureSize ) {
 
 	this.type = PCFShadowMap;
 
-	this.render = function ( lights, scene, camera ) {
+	this.render = function (lights, scene, camera) {
+		///mark
 
 		if ( scope.enabled === false ) return;
 		if ( scope.autoUpdate === false && scope.needsUpdate === false ) return;

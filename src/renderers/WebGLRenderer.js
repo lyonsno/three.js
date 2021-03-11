@@ -1045,7 +1045,9 @@ function WebGLRenderer( parameters ) {
 
 		const shadowsArray = currentRenderState.state.shadowsArray;
 
-		shadowMap.render( shadowsArray, scene, camera );
+		shadowMap.render(shadowsArray, scene, camera);
+		///mark
+		window.shadowMap = shadowMap
 
 		currentRenderState.setupLights();
 		currentRenderState.setupLightsView( camera );
