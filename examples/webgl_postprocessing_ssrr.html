@@ -38,7 +38,7 @@
 
 		const params = {
 			enableSSRr: true,
-			autoRotate: true,
+			autoRotate: false,
 			isOtherMeshes: true,
 		};
 		let composer;
@@ -326,6 +326,8 @@
 		}
 
 		function render() {
+
+			// mesh_bunny.rotation.y+=.01
 
 			if (params.autoRotate) {
 

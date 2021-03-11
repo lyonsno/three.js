@@ -96,8 +96,9 @@ export default /* glsl */`
 		///mark
 		// return 1.;
 		// return 0.;
-		return sin(shadowCoord.x*100.);
-		// return
+		// return sin((shadowCoord.w)*100.);
+		// return texture2D(shadowMap, shadowCoord.xy).z;
+		// return unpackRGBAToDepth( texture2D( shadowMap, shadowCoord.xy ));
 
 		float shadow = 1.0;
 
