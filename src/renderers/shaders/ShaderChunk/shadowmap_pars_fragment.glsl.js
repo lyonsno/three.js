@@ -95,7 +95,6 @@ export default /* glsl */`
 	float getShadow( sampler2D shadowMap, vec2 shadowMapSize, float shadowBias, float shadowRadius, vec4 shadowCoord ) {
 		///mark
 		// return 1.;
-		// return 0.;
 		// return sin((shadowCoord.w)*100.);
 		// return texture2D(shadowMap, shadowCoord.xy).z;
 		// return unpackRGBAToDepth( texture2D( shadowMap, shadowCoord.xy ));
@@ -117,7 +116,7 @@ export default /* glsl */`
 
 		if ( frustumTest ) {
 
-		#if defined( SHADOWMAP_TYPE_PCF )
+		#if defined( SHADOWMAP_TYPE_PCF ) //default
 
 			vec2 texelSize = vec2( 1.0 ) / shadowMapSize;
 
@@ -148,7 +147,7 @@ export default /* glsl */`
 				texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx0, dy1 ), shadowCoord.z ) +
 				texture2DCompare( shadowMap, shadowCoord.xy + vec2( 0.0, dy1 ), shadowCoord.z ) +
 				texture2DCompare( shadowMap, shadowCoord.xy + vec2( dx1, dy1 ), shadowCoord.z )
-			) * ( 1.0 / 17.0 );
+			) * ( 1.0 / 17.0 )*.5+.5;
 
 		#elif defined( SHADOWMAP_TYPE_PCF_SOFT )
 
