@@ -97,7 +97,7 @@ export default /* glsl */`
 		// return 1.;
 		// return sin((shadowCoord.w)*100.);
 		// return texture2D(shadowMap, shadowCoord.xy).z;
-		return unpackRGBAToDepth( texture2D( shadowMap, shadowCoord.xy ));
+		// return unpackRGBAToDepth( texture2D( shadowMap, shadowCoord.xy ));
 
 		float shadow = 1.0;
 
@@ -191,7 +191,9 @@ export default /* glsl */`
 
 		#else // no percentage-closer filtering:
 
-			shadow = texture2DCompare( shadowMap, shadowCoord.xy, shadowCoord.z );
+			// shadow = texture2DCompare( shadowMap, shadowCoord.xy, shadowCoord.z );
+			return unpackRGBAToDepth( texture2D( shadowMap, shadowCoord.xy ));
+
 
 		#endif
 
