@@ -528,10 +528,10 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		});
 		this.scene._background=this.scene._background
 		this.scene.background=null
-		this.scene._fog=this.scene.fog // TODO: Formal writing.
-		this.scene.fog=null
+		// this.scene._fog=this.scene.fog // TODO: Formal writing.
+		// this.scene.fog=null
 		renderer.render(this.scene, this.camera);
-		this.scene.fog=this.scene._fog // TODO: Why final result no fog?
+		// this.scene.fog=this.scene._fog // TODO: Why final result no fog?
 		this.scene.background=this.scene._background
 		this.scene.traverse( child => {
 

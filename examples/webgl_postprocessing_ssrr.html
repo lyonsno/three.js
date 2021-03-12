@@ -22,7 +22,8 @@
 	<script>
 		var vConsole = new VConsole();
 	</script> -->
-	<script src='https://unpkg.com/three-rt-helper'></script>
+	<!-- <script src='https://unpkg.com/three-rt-helper'></script> -->
+	<script src='/lib/three-rt-helper_github/dist/three-rt-helper.js'></script>
 	<script type="module">
 		import * as THREE from '../build/three.module.js';
 
@@ -39,7 +40,7 @@
 		window.RTTs=[]
 
 		const params = {
-			enableSSRr: true,
+			enableSSRr: false,
 			autoRotate: true,
 			isOtherMeshes: true,
 		};
@@ -273,14 +274,14 @@
 			// folder.open()
 			// gui.close()
 
-			RTTs.forEach((RTT,i)=>{
-				let row=i%4
-				let col=Math.floor(i/4)
-				RTT.style.left=`${col*218}px`
-				RTT.style.right='auto'
-				RTT.style.bottom=`${row*218}px`
-				document.body.append(RTT)
-			})
+			// RTTs.forEach((RTT,i)=>{
+			// 	let row=i%4
+			// 	let col=Math.floor(i/4)
+			// 	RTT.style.left=`${col*218}px`
+			// 	RTT.style.right='auto'
+			// 	RTT.style.bottom=`${row*218}px`
+			// 	document.body.append(RTT)
+			// })
 
 			animate();
 			
@@ -336,9 +337,9 @@
 
 		function render() {
 
-			RTTs.forEach(RTT=>{
-				RTT.update()
-			})
+			// RTTs.forEach(RTT=>{
+			// 	RTT.update()
+			// })
 
 			if (params.autoRotate) {
 
