@@ -36,6 +36,8 @@
 
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
+		window.RTTs=[]
+
 		const params = {
 			enableSSRr: true,
 			autoRotate: true,
@@ -271,8 +273,17 @@
 			// folder.open()
 			// gui.close()
 
-			animate();
+			RTTs.forEach((RTT,i)=>{
+				let row=i%4
+				let col=Math.floor(i/4)
+				RTT.style.left=`${col*218}px`
+				RTT.style.right='auto'
+				RTT.style.bottom=`${row*218}px`
+				document.body.append(RTT)
+			})
 
+			animate();
+			
 		}
 
 		function onPointerDown( event ) {
@@ -325,7 +336,9 @@
 
 		function render() {
 
-			renderTargetHelper.update();
+			RTTs.forEach(RTT=>{
+				RTT.update()
+			})
 
 			if (params.autoRotate) {
 

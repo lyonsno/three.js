@@ -141,13 +141,15 @@ var SSRrPass = function ( { renderer, scene, camera, width, height, selects, enc
 		format: RGBAFormat,
 		depthTexture: depthTexture,
 		depthBuffer: true
-	} );
+	});
+	window.RTTs.push( RenderTargetHelper( renderer, this.beautyRenderTarget ) );
 
 	this.specularRenderTarget = new WebGLRenderTarget( this.width, this.height, { // TODO: Can merge with metalnessRenderTarget?
 		minFilter: LinearFilter,
 		magFilter: LinearFilter,
 		format: RGBAFormat,
 	} );
+	window.RTTs.push( RenderTargetHelper( renderer, this.specularRenderTarget ) );
 
 	// normal render target
 
@@ -157,6 +159,7 @@ var SSRrPass = function ( { renderer, scene, camera, width, height, selects, enc
 		format: RGBAFormat,
 		type: HalfFloatType,
 	} );
+	window.RTTs.push( RenderTargetHelper( renderer, this.normalRenderTarget ) );
 
 	// metalness render target
 
@@ -165,6 +168,7 @@ var SSRrPass = function ( { renderer, scene, camera, width, height, selects, enc
 		magFilter: NearestFilter,
 		format: RGBAFormat
 	} );
+	window.RTTs.push( RenderTargetHelper( renderer, this.metalnessRenderTarget ) );
 
 	// ssrr render target
 
@@ -173,6 +177,7 @@ var SSRrPass = function ( { renderer, scene, camera, width, height, selects, enc
 		magFilter: LinearFilter,
 		format: RGBAFormat
 	} );
+	window.RTTs.push( RenderTargetHelper( renderer, this.ssrrRenderTarget ) );
 
 	// ssrr material
 
