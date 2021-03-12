@@ -157,6 +157,10 @@ function WebGLShadowMap( _renderer, _objects, maxTextureSize ) {
 
 				shadow.camera.updateProjectionMatrix();
 
+				console.log('add RenderTargetHelper')
+				window.renderTargetHelper_shadow = RenderTargetHelper( _renderer, shadow.map );
+				document.body.append( renderTargetHelper_shadow );
+
 			}
 
 			_renderer.setRenderTarget( shadow.map );

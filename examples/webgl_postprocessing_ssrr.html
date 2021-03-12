@@ -22,6 +22,7 @@
 	<script>
 		var vConsole = new VConsole();
 	</script> -->
+	<script src='https://unpkg.com/three-rt-helper'></script>
 	<script type="module">
 		// import * as THREE from '../src/Three.js';
 		import * as THREE from '../src/Three.js';
@@ -326,6 +327,8 @@
 		}
 
 		function render() {
+
+			if(window.renderTargetHelper_shadow) renderTargetHelper_shadow.update();
 
 			// mesh_bunny.rotation.y+=.01
 
