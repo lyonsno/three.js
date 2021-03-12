@@ -22,6 +22,7 @@
 	<script>
 		var vConsole = new VConsole();
 	</script> -->
+	<script src='https://unpkg.com/three-rt-helper'></script>
 	<script type="module">
 		import * as THREE from '../build/three.module.js';
 
@@ -169,6 +170,7 @@
 
 			// renderer
 			renderer = new THREE.WebGLRenderer({ antialias: false });
+			window.renderer=renderer
 			renderer.setSize(window.innerWidth, window.innerHeight);
 			renderer.outputEncoding = THREE.sRGBEncoding;
 			renderer.autoClear=false
@@ -322,6 +324,8 @@
 		}
 
 		function render() {
+
+			renderTargetHelper.update();
 
 			if (params.autoRotate) {
 
