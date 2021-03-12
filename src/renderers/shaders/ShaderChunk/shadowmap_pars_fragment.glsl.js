@@ -101,7 +101,7 @@ export default /* glsl */`
 
 		float shadow = 1.0;
 
-		shadowCoord.xyz /= shadowCoord.w;
+		shadowCoord.xyz /= shadowCoord.w; ///note: Is same as texture2DProj ?
 		shadowCoord.z += shadowBias;
 
 		// if ( something && something ) breaks ATI OpenGL shader compiler
