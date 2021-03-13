@@ -158,6 +158,15 @@ var SSRrPass = function ( { renderer, scene, camera, width, height, selects, enc
 		type: HalfFloatType,
 	} );
 
+	// normal render target
+
+	this.normalRenderTargetBack = new WebGLRenderTarget( this.width, this.height, {
+		minFilter: NearestFilter,
+		magFilter: NearestFilter,
+		format: RGBAFormat,
+		type: HalfFloatType,
+	} );
+
 	// metalness render target
 
 	this.metalnessRenderTarget = new WebGLRenderTarget( this.width, this.height, {
@@ -201,6 +210,7 @@ var SSRrPass = function ( { renderer, scene, camera, width, height, selects, enc
 	this.ssrrMaterial.uniforms[ 'tDiffuse' ].value = this.beautyRenderTarget.texture;
 	this.ssrrMaterial.uniforms[ 'tSpecular' ].value = this.specularRenderTarget.texture;
 	this.ssrrMaterial.uniforms[ 'tNormal' ].value = this.normalRenderTarget.texture;
+	this.ssrrMaterial.uniforms[ 'tNormalBack' ].value = this.normalRenderTargetBack.texture;
 	// if (this.isSelective) {
 	this.ssrrMaterial.defines.isSelective = this.isSelective;
 	this.ssrrMaterial.needsUpdate = true;
@@ -208,6 +218,7 @@ var SSRrPass = function ( { renderer, scene, camera, width, height, selects, enc
 	// }
 	this.ssrrMaterial.uniforms[ 'tDepth' ].value = this.beautyRenderTarget.depthTexture;
 	this.ssrrMaterial.uniforms[ 'tDepthSelects' ].value = this.normalRenderTarget.depthTexture;
+	this.ssrrMaterial.uniforms[ 'tDepthSelectsBack' ].value = this.normalRenderTargetBack.depthTexture;
 	this.ssrrMaterial.uniforms[ 'cameraNear' ].value = this.camera.near;
 	this.ssrrMaterial.uniforms[ 'cameraFar' ].value = this.camera.far;
 	this.ssrrMaterial.uniforms[ 'surfDist' ].value = this.surfDist;
@@ -287,6 +298,7 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		this.beautyRenderTarget.dispose();
 		this.specularRenderTarget.dispose();
 		this.normalRenderTarget.dispose();
+		this.normalRenderTargetBack.dispose();
 		this.metalnessRenderTarget.dispose();
 		this.ssrrRenderTarget.dispose();
 
@@ -350,12 +362,13 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		})
 
 		this.renderOverride(renderer, this.normalMaterial, this.normalRenderTarget, 0, 0);
+		this.renderOverride(renderer, this.normalMaterial, this.normalRenderTargetBack, 0, 0);
 
 		this.renderMetalness( renderer, this.metalnessOnMaterial, this.metalnessRenderTarget, 0, 0 );
 
 		// render SSRr
 
-		this.ssrrMaterial.uniforms[ 'ior' ].value = 1 / this.ior;
+		this.ssrrMaterial.uniforms[ 'ior' ].value = this.ior;
 		this.ssrrMaterial.uniforms[ 'surfDist' ].value = this.surfDist;
 		this.ssrrMaterial.uniforms[ 'thickTolerance' ].value = this.thickTolerance;
 		this.ssrrMaterial.uniforms[ 'tSpecular' ].value = this.specularRenderTarget.texture;
@@ -402,6 +415,7 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 			case SSRrPass.OUTPUT.Normal:
 
 				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.normalRenderTarget.texture;
+				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.normalRenderTargetBack.texture;
 				this.copyMaterial.blending = NoBlending;
 				this.renderPass( renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer );
 
@@ -553,6 +567,7 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		this.specularRenderTarget.setSize( width, height );
 		this.ssrrRenderTarget.setSize( width, height );
 		this.normalRenderTarget.setSize( width, height );
+		this.normalRenderTargetBack.setSize( width, height );
 		this.metalnessRenderTarget.setSize( width, height );
 
 		this.ssrrMaterial.uniforms[ 'resolution' ].value.set( width, height );

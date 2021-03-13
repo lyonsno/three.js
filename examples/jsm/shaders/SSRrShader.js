@@ -19,9 +19,11 @@ var SSRrShader = {
     "tDiffuse": { value: null },
     "tSpecular": { value: null },
     "tNormal": { value: null },
+    "tNormalBack": { value: null },
     "tMetalness": { value: null },
     "tDepth": { value: null },
     "tDepthSelects": { value: null },
+    "tDepthSelectsBack": { value: null },
     "cameraNear": { value: null },
     "cameraFar": { value: null },
     "resolution": { value: new Vector2() },
@@ -54,7 +56,9 @@ var SSRrShader = {
 		varying vec2 vUv;
 		uniform sampler2D tDepth;
 		uniform sampler2D tDepthSelects;
+		uniform sampler2D tDepthSelectsBack;
 		uniform sampler2D tNormal;
+		uniform sampler2D tNormalBack;
 		uniform sampler2D tMetalness;
 		uniform sampler2D tDiffuse;
 		uniform sampler2D tSpecular;
@@ -90,6 +94,9 @@ var SSRrShader = {
 		float getDepthSelects( const in vec2 uv ) {
 			return texture2D( tDepthSelects, uv ).x;
 		}
+		float getDepthSelectsBack( const in vec2 uv ) {
+			return texture2D( tDepthSelectsBack, uv ).x;
+		}
 		float getViewZ( const in float depth ) {
 			#ifdef isPerspectiveCamera
 				return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
@@ -104,6 +111,9 @@ var SSRrShader = {
 		}
 		vec3 getViewNormal( const in vec2 uv ) {
 			return unpackRGBToNormal( texture2D( tNormal, uv ).xyz );
+		}
+		vec3 getViewNormalBack( const in vec2 uv ) {
+			return unpackRGBToNormal( texture2D( tNormalBack, uv ).xyz );
 		}
 		vec2 viewPositionToXY(vec3 viewPosition){
 			vec2 xy;
@@ -121,15 +131,14 @@ var SSRrShader = {
 			float metalness=texture2D(tMetalness,vUv).r;
 			if(metalness<=0.) return;
 
-			// gl_FragColor=vec4(0,0,.5,1);return;
 			vec3 viewNormal=getViewNormal( vUv );
-			// gl_FragColor=vec4(viewNormal,1);return;
-
-			// if(viewNormal.x<=0.&&viewNormal.y<=0.&&viewNormal.z<=0.) return;
-
 			float depth = getDepthSelects( vUv );
 			float viewZ = getViewZ( depth );
-			// if(-viewZ>=cameraFar) return;
+			if(-viewZ>=cameraFar) return;
+
+			vec3 viewNormalBack=getViewNormalBack( vUv );
+			float depthBack = getDepthSelectsBack( vUv );
+			float viewZBack = getViewZ( depth );
 
 			float clipW = cameraProjectionMatrix[2][3] * viewZ+cameraProjectionMatrix[3][3];
 			vec3 viewPosition=getViewPosition( vUv, depth, clipW );
@@ -143,7 +152,7 @@ var SSRrShader = {
 				vec3 viewIncidentDir=vec3(0,0,-1);
 			#endif
 
-			vec3 viewRefractDir=refract(viewIncidentDir,viewNormal,ior);
+			vec3 viewRefractDir=refract(viewIncidentDir,viewNormal,1./ior);
 			// https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/refract.xhtml
 
 			float maxDistance=100.;
