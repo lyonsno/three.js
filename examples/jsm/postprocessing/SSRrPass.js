@@ -16,7 +16,9 @@ import {
 	UnsignedShortType,
 	WebGLRenderTarget,
 	HalfFloatType,
-	MeshStandardMaterial
+	MeshStandardMaterial,
+	BackSide,
+	FrontSide
 } from '../../../build/three.module.js';
 import { Pass } from '../postprocessing/Pass.js';
 import { SSRrShader } from '../shaders/SSRrShader.js';
@@ -361,7 +363,9 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 			}
 		})
 
+		this.normalMaterial.side=FrontSide
 		this.renderOverride(renderer, this.normalMaterial, this.normalRenderTarget, 0, 0);
+		this.normalMaterial.side=BackSide
 		this.renderOverride(renderer, this.normalMaterial, this.normalRenderTargetBack, 0, 0);
 
 		this.renderMetalness( renderer, this.metalnessOnMaterial, this.metalnessRenderTarget, 0, 0 );
