@@ -195,7 +195,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		textureMatrix.multiply( virtualCamera.matrixWorldInverse );
 		textureMatrix.multiply( scope.matrixWorld );
 
-		if (0) {
+		if (1) {
 			/*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************** */
 			// Note: For the sake of accurate tDepth, temporarily turned off this Oblique Near-Plane Clipping feature. https://github.com/mrdoob/three.js/pull/21403
 
@@ -221,6 +221,9 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 			projectionMatrix.elements[6] = clipPlane.y;
 			projectionMatrix.elements[10] = clipPlane.z + 1.0 - clipBias;
 			projectionMatrix.elements[14] = clipPlane.w;
+
+			// material.uniforms[ 'virtualCameraProjectionMatrix' ].value= projectionMatrix;
+			// material.uniforms[ 'virtualCameraInverseProjectionMatrix' ].value= projectionMatrix.clone().invert();
 		}
 
 
@@ -360,7 +363,7 @@ ReflectorForSSRPass.ReflectorShader = {
 				vec3 viewPosition=getViewPosition( uv, depth, clipW );
 				vec3 worldPosition=(virtualCameraMatrixWorld*vec4(viewPosition,1)).xyz;
 				// worldPosition.y=0.;
-				gl_FragColor=vec4(vec3(worldPosition.y)*1.,1);return;
+				gl_FragColor=vec4(vec3(worldPosition.y)*20.,1);return;
 				// gl_FragColor=vec4(worldPosition*1.,1);return;
 				// gl_FragColor=vec4(worldPosition*10.,1);return;
 				// worldPosition.y+=worldYBias; // TODO: Don't know why not start from zero, temporarily use manually defined bias, need fix afterwards.
