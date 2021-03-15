@@ -69,8 +69,12 @@
 			// camera.position.set( 0.13271600513224902, 0.3489546826045913, 0.43921296427927076 );
 			camera.position.set( 0, 0, 3 );
 			camera.lookAt(0,0,0)
+
 			camera.fov=Math.atan(1/camera.position.z)*2*THREE.Math.RAD2DEG
+			camera.near=1
+			camera.far=11
 			camera.updateProjectionMatrix()
+			vs.print(camera.projectionMatrix)
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color( 0x443333 );
