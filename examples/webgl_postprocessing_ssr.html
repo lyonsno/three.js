@@ -50,6 +50,7 @@
 		const otherMeshes = [];
 		let groundReflector;
 		const selects = [];
+		// window.isOrbitControls=true
 
 		const container = document.querySelector( '#container' );
 
@@ -65,7 +66,9 @@
 
 			camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 15 );
 			window.camera=camera
-			camera.position.set( 0.13271600513224902, 0.3489546826045913, 0.43921296427927076 );
+			// camera.position.set( 0.13271600513224902, 0.3489546826045913, 0.43921296427927076 );
+			camera.position.set( 0, 0, 3 );
+			camera.lookAt(0,0,0)
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color( 0x443333 );
@@ -158,11 +161,13 @@
 
 			//
 
-			controls = new OrbitControls( camera, renderer.domElement );
-			controls.enableDamping = true;
-			controls.target.set( 0, 0.0635, 0 );
-			controls.update();
-			controls.enabled = ! params.autoRotate;
+			if(window.isOrbitControls){
+				controls = new OrbitControls( camera, renderer.domElement );
+				controls.enableDamping = true;
+				controls.target.set( 0, 0.0635, 0 );
+				controls.update();
+				controls.enabled = ! params.autoRotate;
+			}
 
 			// STATS
 
@@ -174,6 +179,7 @@
 			const size = 10;
 			const divisions = 10;
 			const gridHelper = new THREE.GridHelper( size, divisions );
+			gridHelper.rotation.x=Math.PI/2
 			scene.add( gridHelper );
 
 			// composer
@@ -213,7 +219,7 @@
 			} );
 			gui.add( params, 'autoRotate' ).onChange( () => {
 
-				controls.enabled = ! params.autoRotate;
+				// controls.enabled = ! params.autoRotate;
 
 			} );
 
@@ -318,7 +324,7 @@
 
 			} else {
 
-				controls.update();
+				if(window.isOrbitControls) controls.update();
 
 			}
 
@@ -334,6 +340,14 @@
 
 			}
 
+		}
+
+		function console_test(){
+			{
+				a=new THREE.Vector4(1,0,0,1).applyMatrix4(camera.matrixWorldInverse).applyMatrix4(camera.projectionMatrix)
+				console.log(a)
+				console.log(a.x/a.w,a.y/a.w,a.z/a.w)
+			}
 		}
 	</script>
 </body>
