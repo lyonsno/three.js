@@ -34,7 +34,7 @@
 		const params = {
 			enableSSR: true,
 			autoRotate: true,
-			showOtherMeshes: true,
+			otherMeshes: true,
 			groundReflector: true,
 		};
 		let composer;
@@ -222,9 +222,9 @@
 				groundReflector.maxDistance = ssrPass.maxDistance;
 
 			} );
-			folder.add( params, 'showOtherMeshes' ).onChange( () => {
+			folder.add( params, 'otherMeshes' ).onChange( () => {
 
-				if ( params.showOtherMeshes ) {
+				if ( params.otherMeshes ) {
 
 					otherMeshes.forEach( mesh => mesh.visible = true );
 
