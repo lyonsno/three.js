@@ -194,32 +194,31 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		textureMatrix.multiply( virtualCamera.matrixWorldInverse );
 		textureMatrix.multiply( scope.matrixWorld );
 
-		/* Note: For the sake of accurate tDepth, temporarily turned off this Oblique Near-Plane Clipping feature. https://github.com/mrdoob/three.js/pull/21403
+		// Note: For the sake of accurate tDepth, temporarily turned off this Oblique Near-Plane Clipping feature. https://github.com/mrdoob/three.js/pull/21403
 
-			// Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
-			// Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
-			reflectorPlane.setFromNormalAndCoplanarPoint( normal, reflectorWorldPosition );
-			reflectorPlane.applyMatrix4( virtualCamera.matrixWorldInverse );
+		// Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
+		// Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
+		reflectorPlane.setFromNormalAndCoplanarPoint( normal, reflectorWorldPosition );
+		reflectorPlane.applyMatrix4( virtualCamera.matrixWorldInverse );
 
-			clipPlane.set( reflectorPlane.normal.x, reflectorPlane.normal.y, reflectorPlane.normal.z, reflectorPlane.constant );
+		clipPlane.set( reflectorPlane.normal.x, reflectorPlane.normal.y, reflectorPlane.normal.z, reflectorPlane.constant );
 
-			var projectionMatrix = virtualCamera.projectionMatrix;
+		var projectionMatrix = virtualCamera.projectionMatrix;
 
-			q.x = ( Math.sign( clipPlane.x ) + projectionMatrix.elements[ 8 ] ) / projectionMatrix.elements[ 0 ];
-			q.y = ( Math.sign( clipPlane.y ) + projectionMatrix.elements[ 9 ] ) / projectionMatrix.elements[ 5 ];
-			q.z = - 1.0;
-			q.w = ( 1.0 + projectionMatrix.elements[ 10 ] ) / projectionMatrix.elements[ 14 ];
+		q.x = ( Math.sign( clipPlane.x ) + projectionMatrix.elements[ 8 ] ) / projectionMatrix.elements[ 0 ];
+		q.y = ( Math.sign( clipPlane.y ) + projectionMatrix.elements[ 9 ] ) / projectionMatrix.elements[ 5 ];
+		q.z = - 1.0;
+		q.w = ( 1.0 + projectionMatrix.elements[ 10 ] ) / projectionMatrix.elements[ 14 ];
 
-			// Calculate the scaled plane vector
-			clipPlane.multiplyScalar( 2.0 / clipPlane.dot( q ) );
+		// Calculate the scaled plane vector
+		clipPlane.multiplyScalar( 2.0 / clipPlane.dot( q ) );
 
-			// Replacing the third row of the projection matrix
-			projectionMatrix.elements[ 2 ] = clipPlane.x;
-			projectionMatrix.elements[ 6 ] = clipPlane.y;
-			projectionMatrix.elements[ 10 ] = clipPlane.z + 1.0 - clipBias;
-			projectionMatrix.elements[ 14 ] = clipPlane.w;
+		// Replacing the third row of the projection matrix
+		projectionMatrix.elements[ 2 ] = clipPlane.x;
+		projectionMatrix.elements[ 6 ] = clipPlane.y;
+		projectionMatrix.elements[ 10 ] = clipPlane.z + 1.0 - clipBias;
+		projectionMatrix.elements[ 14 ] = clipPlane.w;
 
-		*/
 
 		// Render
 
@@ -354,8 +353,9 @@ ReflectorForSSRPass.ReflectorShader = {
 				float clipW = virtualCameraProjectionMatrix[2][3] * viewZ+virtualCameraProjectionMatrix[3][3];
 				vec3 viewPosition=getViewPosition( uv, depth, clipW );
 				vec3 worldPosition=(virtualCameraMatrixWorld*vec4(viewPosition,1)).xyz;
-				worldPosition.y+=worldYBias; // TODO: Don't know why not start from zero, temporarily use manually defined bias, need fix afterwards.
-				worldPosition.y=max(0.,worldPosition.y);
+				gl_FragColor=vec4(worldPosition,1);return;
+				// worldPosition.y+=worldYBias; // TODO: Don't know why not start from zero, temporarily use manually defined bias, need fix afterwards.
+				// worldPosition.y=max(0.,worldPosition.y);
 				if(worldPosition.y>maxDistance) discard;
 				float op=opacity;
 				#ifdef DISTANCE_ATTENUATION
