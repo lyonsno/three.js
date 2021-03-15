@@ -31,6 +31,9 @@
 
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
+		import vs from '/lib/vs_util/vs_util_threejs.js'
+		window.vs=vs
+
 		const params = {
 			enableSSR: true,
 			autoRotate: false,
@@ -60,6 +63,7 @@
 		function init() {
 
 			camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 15 );
+			window.camera=camera
 			camera.position.set( 0.13271600513224902, 0.3489546826045913, 0.43921296427927076 );
 
 			scene = new THREE.Scene();
@@ -111,6 +115,7 @@
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
+			window.cube=mesh
 
 			geometry = new THREE.IcosahedronBufferGeometry( .025, 4 );
 			material = new THREE.MeshStandardMaterial( { color: 'cyan' } );
@@ -119,6 +124,7 @@
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
+			window.sphere=mesh
 
 			geometry = new THREE.ConeBufferGeometry( .025, .05, 64 );
 			material = new THREE.MeshStandardMaterial( { color: 'yellow' } );
@@ -127,6 +133,7 @@
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
+			window.cone=mesh
 
 			geometry = new THREE.PlaneBufferGeometry( 1, 1 );
 			groundReflector = new ReflectorForSSRPass( geometry, {

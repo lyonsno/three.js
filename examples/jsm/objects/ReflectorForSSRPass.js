@@ -86,6 +86,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 
 	var textureMatrix = new Matrix4();
 	var virtualCamera = new PerspectiveCamera();
+	window.virtualCamera=virtualCamera
 
 	if( useDepthTexture ){
 		var depthTexture = new DepthTexture();
@@ -313,7 +314,7 @@ ReflectorForSSRPass.ReflectorShader = {
 		'}'
 	].join( '\n' ),
 
-	fragmentShader: `
+	fragmentShader: /*glsl*/`
 		uniform vec3 color;
 		uniform sampler2D tDiffuse;
 		uniform sampler2D tDepth;
@@ -349,7 +350,8 @@ ReflectorForSSRPass.ReflectorShader = {
 		void main() {
 			vec4 base = texture2DProj( tDiffuse, vUv );
 			#ifdef useDepthTexture
-				vec2 uv=(gl_FragCoord.xy-.5)/resolution.xy;
+				// vec2 uv=(gl_FragCoord.xy-.5)/resolution.xy;
+				vec2 uv=(gl_FragCoord.xy)/resolution.xy;
 				uv.x=1.-uv.x;
 				float depth = texture2DProj( tDepth, vUv ).r;
 				// gl_FragColor=vec4(vec3(depth)*1.,1);return;
