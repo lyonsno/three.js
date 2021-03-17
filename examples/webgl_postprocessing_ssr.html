@@ -30,10 +30,11 @@
 		import { Reflector } from './jsm/objects/ReflectorForSSRPass.js';
 
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
+		import { RGBELoader } from './jsm/loaders/RGBELoader.js';
 
 		const params = {
 			enableSSR: true,
-			autoRotate: true,
+			autoRotate: false,
 			isOtherMeshes: true,
 			isGroundReflector: true,
 		};
@@ -64,8 +65,8 @@
 			camera.position.set( 0.13271600513224902, 0.3489546826045913, 0.43921296427927076 );
 
 			scene = new THREE.Scene();
-			scene.background = new THREE.Color( 0x443333 );
-			scene.fog = new THREE.Fog( 0x443333, 1, 4 );
+			// scene.background = new THREE.Color( 0x443333 );
+			// scene.fog = new THREE.Fog( 0x443333, 1, 4 );
 
 			// Ground
 			const plane = new THREE.Mesh(
@@ -136,6 +137,7 @@
 				color: 0x888888,
 				useDepthTexture: true,
 			} );
+			window.groundReflector=groundReflector
 			groundReflector.material.depthWrite = false;
 			groundReflector.position.y = plane.position.y + .0001;
 			groundReflector.rotation.x = - Math.PI / 2;
@@ -217,7 +219,8 @@
 
 			} );
 			ssrPass.maxDistance = .1;
-			groundReflector.maxDistance = ssrPass.maxDistance;
+			// groundReflector.maxDistance = ssrPass.maxDistance;
+			groundReflector.maxDistance = Infinity;
 			folder.add( ssrPass, 'maxDistance' ).min( 0 ).max( .5 ).step( .001 ).onChange( ()=>{
 
 				groundReflector.maxDistance = ssrPass.maxDistance;
@@ -273,6 +276,22 @@
 			folder.add( ssrPass, 'thickTolerance' ).min( 0 ).max( .05 ).step( .0001 );
 			folder.add( ssrPass, 'isBlur' );
 			// gui.close()
+
+			// 			const light = new THREE.HemisphereLight( 0xffffbb, 0x080820, 1 );
+			// scene.add( light );
+			const pmremGenerator = new THREE.PMREMGenerator( renderer );
+			pmremGenerator.compileEquirectangularShader();
+			new RGBELoader()
+				.setDataType( THREE.UnsignedByteType )
+				.setPath( 'textures/equirectangular/' )
+				.load( 'royal_esplanade_1k.hdr', function ( texture ) {
+						const envMap = pmremGenerator.fromEquirectangular( texture ).texture;
+						scene.background = envMap;
+						scene.environment = envMap;
+						texture.dispose();
+						pmremGenerator.dispose();
+						render();
+				});
 
 		}
 
