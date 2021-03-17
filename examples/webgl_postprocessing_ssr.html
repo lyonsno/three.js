@@ -223,7 +223,7 @@
 			groundReflector.maxDistance = Infinity;
 			folder.add( ssrPass, 'maxDistance' ).min( 0 ).max( .5 ).step( .001 ).onChange( ()=>{
 
-				groundReflector.maxDistance = ssrPass.maxDistance;
+				// groundReflector.maxDistance = ssrPass.maxDistance;
 
 			} );
 			folder.add( params, 'isOtherMeshes' ).onChange( () => {
