@@ -28,6 +28,7 @@
 		import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
 		import { SSRPass } from './jsm/postprocessing/SSRPass.js';
 		import { Reflector } from './jsm/objects/ReflectorForSSRPass.js';
+		import { UnrealBloomPass } from './jsm/postprocessing/UnrealBloomPass.js';
 
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
@@ -36,6 +37,12 @@
 			autoRotate: true,
 			isOtherMeshes: true,
 			isGroundReflector: true,
+		};
+		const paramsBloom = {
+			exposure: 1,
+			bloomStrength: 1,
+			bloomThreshold: .7,
+			bloomRadius: 0
 		};
 		let composer;
 		let ssrPass;
@@ -180,9 +187,42 @@
 
 			composer.addPass( ssrPass );
 
+			const bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
+			bloomPass.threshold = paramsBloom.bloomThreshold;
+			bloomPass.strength = paramsBloom.bloomStrength;
+			bloomPass.radius = paramsBloom.bloomRadius;
+			composer.addPass( bloomPass );
+
 			// GUI
 
 			gui = new GUI();
+
+
+			gui.add( paramsBloom, 'exposure', 0.1, 2 ).onChange( function ( value ) {
+
+				renderer.toneMappingExposure = Math.pow( value, 4.0 );
+
+				} );
+
+				gui.add( paramsBloom, 'bloomThreshold', 0.0, 1.0 ).onChange( function ( value ) {
+
+				bloomPass.threshold = Number( value );
+
+				} );
+
+				gui.add( paramsBloom, 'bloomStrength', 0.0, 3.0 ).onChange( function ( value ) {
+
+				bloomPass.strength = Number( value );
+
+				} );
+
+				gui.add( paramsBloom, 'bloomRadius', 0.0, 1.0 ).step( 0.01 ).onChange( function ( value ) {
+
+				bloomPass.radius = Number( value );
+
+				} );
+
+
 			gui.add( params, 'enableSSR' ).name( 'Enable SSR' );
 			gui.add( params, 'isGroundReflector' ).onChange( () => {
 
