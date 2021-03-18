@@ -50,7 +50,7 @@
 		const otherMeshes = [];
 		let groundReflector;
 		const selects = [];
-		// window.isOrbitControls=true
+		window.isOrbitControls=true
 
 		const container = document.querySelector( '#container' );
 
@@ -66,15 +66,18 @@
 
 			camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 15 );
 			window.camera=camera
+			
 			// camera.position.set( 0.13271600513224902, 0.3489546826045913, 0.43921296427927076 );
-			camera.position.set( 0, 0, 3 );
-			camera.lookAt(0,0,0)
+			camera.position.set( 0, 1, 1 );
 
-			camera.fov=Math.atan(1/camera.position.z)*2*THREE.Math.RAD2DEG
-			camera.near=1
-			camera.far=11
-			camera.updateProjectionMatrix()
-			vs.print(camera.projectionMatrix)
+			// camera.position.set( 0, 0, 3 );
+			// camera.lookAt(0,0,0)
+
+			// camera.fov=Math.atan(1/camera.position.z)*2*THREE.Math.RAD2DEG
+			// camera.near=1
+			// camera.far=11
+			// camera.updateProjectionMatrix()
+			// vs.print(camera.projectionMatrix)
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color( 0x443333 );
@@ -170,7 +173,7 @@
 			if(window.isOrbitControls){
 				controls = new OrbitControls( camera, renderer.domElement );
 				controls.enableDamping = true;
-				controls.target.set( 0, 0.0635, 0 );
+				// controls.target.set( 0, 0.0635, 0 );
 				controls.update();
 				controls.enabled = ! params.autoRotate;
 			}
@@ -326,7 +329,7 @@
 				camera.position.x = Math.sin( timer ) * 0.5;
 				camera.position.y = 0.2135;
 				camera.position.z = Math.cos( timer ) * 0.5;
-				camera.lookAt( 0, 0.0635, 0 );
+				camera.lookAt( 0, 0, 0 );
 
 			} else {
 

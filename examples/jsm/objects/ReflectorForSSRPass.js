@@ -195,7 +195,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		textureMatrix.multiply( virtualCamera.matrixWorldInverse );
 		textureMatrix.multiply( scope.matrixWorld );
 
-		if (0) {
+		if (1) {
 			/*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************** */
 			// Note: For the sake of accurate tDepth, temporarily turned off this Oblique Near-Plane Clipping feature. https://github.com/mrdoob/three.js/pull/21403
 
@@ -204,6 +204,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 			reflectorPlane.setFromNormalAndCoplanarPoint(normal, reflectorWorldPosition);
 			reflectorPlane.applyMatrix4(virtualCamera.matrixWorldInverse);
 
+			if(window.is_debugger) debugger
 			clipPlane.set(reflectorPlane.normal.x, reflectorPlane.normal.y, reflectorPlane.normal.z, reflectorPlane.constant);
 
 			var projectionMatrix = virtualCamera.projectionMatrix;
