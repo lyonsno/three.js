@@ -201,10 +201,10 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 
 			// Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
 			// Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
+			if(window.is_debugger) debugger
 			reflectorPlane.setFromNormalAndCoplanarPoint(normal, reflectorWorldPosition);
 			reflectorPlane.applyMatrix4(virtualCamera.matrixWorldInverse);
 
-			if(window.is_debugger) debugger
 			clipPlane.set(reflectorPlane.normal.x, reflectorPlane.normal.y, reflectorPlane.normal.z, reflectorPlane.constant);
 
 			var projectionMatrix = virtualCamera.projectionMatrix;
