@@ -217,10 +217,12 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 			// Calculate the scaled plane vector
 			clipPlane.multiplyScalar(2.0 / clipPlane.dot(q));
 
-			// renderer.clear()
-			// renderer.setRenderTarget(null)
-			// renderer.render(scene,virtualCamera);
-			// return
+			if (0) {
+				// renderer.clear()
+				// renderer.setRenderTarget(null)
+				renderer.render(scene, virtualCamera);
+				return
+			}
 
 			if(window.is_debugger) debugger
 			// Replacing the third row of the projection matrix
@@ -230,8 +232,8 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 			projectionMatrix.elements[14] = clipPlane.w;
 			if(window.is_debugger) debugger
 
-			renderer.clear()
-			renderer.setRenderTarget(null)
+			// renderer.clear()
+			// renderer.setRenderTarget(null)
 			renderer.render(scene,virtualCamera);
 			return
 
