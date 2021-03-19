@@ -64,7 +64,7 @@
 
 		function init() {
 
-			camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 15 );
+			camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.5, 15 );
 			window.camera=camera
 			
 			// camera.position.set( 0.13271600513224902, 0.3489546826045913, 0.43921296427927076 );
@@ -140,52 +140,71 @@
 			spotLight.position.set( - 1, 1, 1 );
 			scene.add( spotLight );
 
-			dracoLoader.load( 'models/draco/bunny.drc', function ( geometry ) {
+			// dracoLoader.load( 'models/draco/bunny.drc', function ( geometry ) {
 
-				geometry.computeVertexNormals();
+			// 	geometry.computeVertexNormals();
 
-				const material = new THREE.MeshStandardMaterial( { color: 0x606060 } );
-				const mesh = new THREE.Mesh( geometry, material );
-				mesh.position.y = - 0.0365;
-				scene.add( mesh );
-				selects.push( mesh );
+			// 	const material = new THREE.MeshStandardMaterial( { color: 0x606060 } );
+			// 	const mesh = new THREE.Mesh( geometry, material );
+			// 	mesh.position.y = - 0.0365;
+			// 	scene.add( mesh );
+			// 	selects.push( mesh );
 
-				// Release decoder resources.
-				dracoLoader.dispose();
+			// 	// Release decoder resources.
+			// 	dracoLoader.dispose();
 
-			} );
+			// } );
 
 			let geometry, material, mesh;
 
-			geometry = new THREE.BoxBufferGeometry( .05, .05, .05 );
-			material = new THREE.MeshStandardMaterial( { color: 'green' } );
+			// geometry = new THREE.PlaneBufferGeometry( 1, 1, );
+			// material = new THREE.MeshStandardMaterial( { color: 'green', side: THREE.DoubleSide } );
+			// mesh = new THREE.Mesh( geometry, material );
+			// mesh.position.set( 0, 0, 0 );
+			// scene.add( mesh );
+			// otherMeshes.push( mesh );
+			// selects.push( mesh );
+			// window.plane=mesh
+
+			geometry = new THREE.BoxBufferGeometry( 1, 1, 1 );
+			material = new THREE.MeshStandardMaterial( { color: 'green', side: THREE.BackSide } );
 			mesh = new THREE.Mesh( geometry, material );
 			// mesh.position.set( - .12, .025, .015 );
-			mesh.position.set( - .12, 0, .015 );
+			mesh.position.set( 0, 0, 0 );
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
 			window.cube=mesh
 
-			geometry = new THREE.IcosahedronBufferGeometry( .025, 4 );
-			material = new THREE.MeshStandardMaterial( { color: 'cyan' } );
-			mesh = new THREE.Mesh( geometry, material );
-			// mesh.position.set( - .05, .025, .08 );
-			mesh.position.set( - .05, 0, .08 );
-			scene.add( mesh );
-			otherMeshes.push( mesh );
-			selects.push( mesh );
-			window.sphere=mesh
+			// geometry = new THREE.BoxBufferGeometry( .5, .5, .5 );
+			// material = new THREE.MeshStandardMaterial( { color: 'green', side: THREE.DoubleSide } );
+			// mesh = new THREE.Mesh( geometry, material );
+			// // mesh.position.set( - .12, .025, .015 );
+			// mesh.position.set( 0, 0, 0 );
+			// scene.add( mesh );
+			// otherMeshes.push( mesh );
+			// selects.push( mesh );
+			// window.cube=mesh
 
-			geometry = new THREE.ConeBufferGeometry( .025, .05, 64 );
-			material = new THREE.MeshStandardMaterial( { color: 'yellow' } );
-			mesh = new THREE.Mesh( geometry, material );
-			// mesh.position.set( - .05, .025, - .055 );
-			mesh.position.set( - .05, 0, - .055 );
-			scene.add( mesh );
-			otherMeshes.push( mesh );
-			selects.push( mesh );
-			window.cone=mesh
+			// geometry = new THREE.IcosahedronBufferGeometry( .025, 4 );
+			// material = new THREE.MeshStandardMaterial( { color: 'cyan' } );
+			// mesh = new THREE.Mesh( geometry, material );
+			// // mesh.position.set( - .05, .025, .08 );
+			// mesh.position.set( - .05, 0, .08 );
+			// scene.add( mesh );
+			// otherMeshes.push( mesh );
+			// selects.push( mesh );
+			// window.sphere=mesh
+
+			// geometry = new THREE.ConeBufferGeometry( .025, .05, 64 );
+			// material = new THREE.MeshStandardMaterial( { color: 'yellow' } );
+			// mesh = new THREE.Mesh( geometry, material );
+			// // mesh.position.set( - .05, .025, - .055 );
+			// mesh.position.set( - .05, 0, - .055 );
+			// scene.add( mesh );
+			// otherMeshes.push( mesh );
+			// selects.push( mesh );
+			// window.cone=mesh
 
 			geometry = new THREE.PlaneBufferGeometry( 1, 1 );
 			groundReflector = new ReflectorForSSRPass( geometry, {
@@ -225,11 +244,11 @@
 
 			window.addEventListener( 'resize', onWindowResize, false );
 
-			const size = 10;
-			const divisions = 100;
-			const gridHelper = new THREE.GridHelper( size, divisions );
-			// gridHelper.rotation.x=Math.PI/2
-			scene.add( gridHelper );
+			// const size = 10;
+			// const divisions = 100;
+			// const gridHelper = new THREE.GridHelper( size, divisions );
+			// // gridHelper.rotation.x=Math.PI/2
+			// scene.add( gridHelper );
 
 			// composer
 

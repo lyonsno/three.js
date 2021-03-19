@@ -199,7 +199,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		textureMatrix.multiply( virtualCamera.matrixWorldInverse );
 		textureMatrix.multiply( scope.matrixWorld );
 
-		if (1) {
+		// if (1) {
 			/*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************** */
 			// Note: For the sake of accurate tDepth, temporarily turned off this Oblique Near-Plane Clipping feature. https://github.com/mrdoob/three.js/pull/21403
 
@@ -236,7 +236,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 
 			// material.uniforms[ 'virtualCameraProjectionMatrix' ].value= projectionMatrix;
 			// material.uniforms[ 'virtualCameraInverseProjectionMatrix' ].value= projectionMatrix.clone().invert();
-		}
+		// }
 
 
 		// Render
