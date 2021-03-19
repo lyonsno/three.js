@@ -152,7 +152,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		// Avoid rendering when reflector is facing away
 
 		if ( view.dot( normal ) > 0 ) return;
-		console.log('return')
+		// console.log('return')
 
 		view.reflect( normal ).negate();
 		view.add( reflectorWorldPosition );
