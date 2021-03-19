@@ -217,25 +217,19 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 			// Calculate the scaled plane vector
 			clipPlane.multiplyScalar(2.0 / clipPlane.dot(q));
 
-			if (0) {
-				// renderer.clear()
-				// renderer.setRenderTarget(null)
-				renderer.render(scene, virtualCamera);
-				return
+			if (1) {
+				if(window.is_debugger) debugger
+				// Replacing the third row of the projection matrix
+				projectionMatrix.elements[2] = clipPlane.x;
+				projectionMatrix.elements[6] = clipPlane.y;
+				projectionMatrix.elements[10] = clipPlane.z + 1.0 - clipBias;
+				projectionMatrix.elements[14] = clipPlane.w;
+				if(window.is_debugger) debugger
 			}
-
-			if(window.is_debugger) debugger
-			// Replacing the third row of the projection matrix
-			projectionMatrix.elements[2] = clipPlane.x;
-			projectionMatrix.elements[6] = clipPlane.y;
-			projectionMatrix.elements[10] = clipPlane.z + 1.0 - clipBias;
-			projectionMatrix.elements[14] = clipPlane.w;
-			if(window.is_debugger) debugger
 
 			// renderer.clear()
 			// renderer.setRenderTarget(null)
 			renderer.render(scene,virtualCamera);
-			return
 
 			// material.uniforms[ 'virtualCameraProjectionMatrix' ].value= projectionMatrix;
 			// material.uniforms[ 'virtualCameraInverseProjectionMatrix' ].value= projectionMatrix.clone().invert();
