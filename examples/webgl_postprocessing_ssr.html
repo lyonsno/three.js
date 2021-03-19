@@ -126,7 +126,8 @@
 			geometry = new THREE.BoxBufferGeometry( .05, .05, .05 );
 			material = new THREE.MeshStandardMaterial( { color: 'green' } );
 			mesh = new THREE.Mesh( geometry, material );
-			mesh.position.set( - .12, .025, .015 );
+			// mesh.position.set( - .12, .025, .015 );
+			mesh.position.set( - .12, 0, .015 );
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
@@ -135,7 +136,8 @@
 			geometry = new THREE.IcosahedronBufferGeometry( .025, 4 );
 			material = new THREE.MeshStandardMaterial( { color: 'cyan' } );
 			mesh = new THREE.Mesh( geometry, material );
-			mesh.position.set( - .05, .025, .08 );
+			// mesh.position.set( - .05, .025, .08 );
+			mesh.position.set( - .05, 0, .08 );
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
@@ -144,7 +146,8 @@
 			geometry = new THREE.ConeBufferGeometry( .025, .05, 64 );
 			material = new THREE.MeshStandardMaterial( { color: 'yellow' } );
 			mesh = new THREE.Mesh( geometry, material );
-			mesh.position.set( - .05, .025, - .055 );
+			// mesh.position.set( - .05, .025, - .055 );
+			mesh.position.set( - .05, 0, - .055 );
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
