@@ -220,7 +220,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 			// Calculate the scaled plane vector
 			clipPlane.multiplyScalar(2.0 / clipPlane.dot(q));
 
-			if (0) {
+			if (1) {
 				if(window.is_debugger) debugger
 				// Replacing the third row of the projection matrix
 				projectionMatrix.elements[2] = clipPlane.x;
