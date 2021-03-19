@@ -152,6 +152,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		// Avoid rendering when reflector is facing away
 
 		if ( view.dot( normal ) > 0 ) return;
+		console.log('return')
 
 		view.reflect( normal ).negate();
 		view.add( reflectorWorldPosition );
@@ -201,7 +202,6 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 
 			// Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
 			// Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
-			if(window.is_debugger) debugger
 			reflectorPlane.setFromNormalAndCoplanarPoint(normal, reflectorWorldPosition);
 			reflectorPlane.applyMatrix4(virtualCamera.matrixWorldInverse);
 
@@ -217,12 +217,21 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 			// Calculate the scaled plane vector
 			clipPlane.multiplyScalar(2.0 / clipPlane.dot(q));
 
+			renderer.clear()
+			renderer.setRenderTarget(null)
+			renderer.render(scene,virtualCamera);
+			// renderer.render(scene, camera);
+			return
+			if(window.is_debugger) debugger
+
 			// Replacing the third row of the projection matrix
 			projectionMatrix.elements[2] = clipPlane.x;
 			projectionMatrix.elements[6] = clipPlane.y;
 			projectionMatrix.elements[10] = clipPlane.z + 1.0 - clipBias;
 			projectionMatrix.elements[14] = clipPlane.w;
+			// if(window.is_debugger) debugger
 
+			if(window.is_debugger) debugger
 			// material.uniforms[ 'virtualCameraProjectionMatrix' ].value= projectionMatrix;
 			// material.uniforms[ 'virtualCameraInverseProjectionMatrix' ].value= projectionMatrix.clone().invert();
 		}

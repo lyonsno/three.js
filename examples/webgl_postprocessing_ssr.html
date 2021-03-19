@@ -189,7 +189,7 @@
 			window.addEventListener( 'resize', onWindowResize, false );
 
 			const size = 10;
-			const divisions = 10;
+			const divisions = 100;
 			const gridHelper = new THREE.GridHelper( size, divisions );
 			// gridHelper.rotation.x=Math.PI/2
 			scene.add( gridHelper );
@@ -342,9 +342,13 @@
 
 			if ( params.enableSSR ) {
 
+				groundReflector.visible = false;
+				groundReflector.doRender( renderer, scene, camera );
+				groundReflector.visible = true;
+
 				// TODO: groundReflector has full ground info, need use it to solve reflection gaps problem on objects when camera near ground.
 				// TODO: the normal and depth info where groundReflector reflected need to be changed.
-				composer.render();
+				// composer.render();
 
 			} else {
 
