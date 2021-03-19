@@ -375,13 +375,17 @@
 
 			}
 
-
-			groundReflector.visible = false;
+			scene.traverse(child=>{
+				if(child===groundReflector) child.visible=false
+				else if(child===rtdebugger) child.visible=false
+				else child.visible=true
+			})
 			groundReflector.doRender( renderer, scene, camera );
-			groundReflector.visible = true;
+			scene.traverse(child=>{
+				child.visible=true
+			})
 
 			renderer.render( scene, camera );
-
 
 		}
 
