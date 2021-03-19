@@ -102,7 +102,10 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		depthTexture: useDepthTexture ? depthTexture : null,
 	};
 
-	var renderTarget = new WebGLRenderTarget( textureWidth, textureHeight, parameters );
+	var renderTarget = new WebGLRenderTarget(textureWidth, textureHeight, parameters);
+
+	// rtdebugger.material.uniforms.map.value=renderTarget.texture
+	rtdebugger.material.uniforms.map.value=renderTarget.depthTexture
 
 	if ( ! MathUtils.isPowerOfTwo( textureWidth ) || ! MathUtils.isPowerOfTwo( textureHeight ) ) {
 
@@ -151,7 +154,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 
 		// Avoid rendering when reflector is facing away
 
-		if ( view.dot( normal ) > 0 ) return;
+		// if ( view.dot( normal ) > 0 ) return;
 		// console.log('return')
 
 		view.reflect( normal ).negate();
@@ -217,7 +220,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 			// Calculate the scaled plane vector
 			clipPlane.multiplyScalar(2.0 / clipPlane.dot(q));
 
-			if (1) {
+			if (0) {
 				if(window.is_debugger) debugger
 				// Replacing the third row of the projection matrix
 				projectionMatrix.elements[2] = clipPlane.x;
@@ -229,7 +232,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 
 			// renderer.clear()
 			// renderer.setRenderTarget(null)
-			renderer.render(scene,virtualCamera);
+			// renderer.render(scene,virtualCamera);
 
 			// material.uniforms[ 'virtualCameraProjectionMatrix' ].value= projectionMatrix;
 			// material.uniforms[ 'virtualCameraInverseProjectionMatrix' ].value= projectionMatrix.clone().invert();

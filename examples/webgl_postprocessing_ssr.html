@@ -85,6 +85,37 @@
 			// scene.background = new THREE.Color( 0x443333 );
 			// scene.fog = new THREE.Fog( 0x443333, 1, 4 );
 
+			{
+				let geometry=new THREE.PlaneGeometry(2,2)
+				let material=new THREE.ShaderMaterial({
+					uniforms:{
+						map:{value:null}
+					},
+					vertexShader:`
+						varying vec2 vUv;
+						void main(){
+							vUv=uv;
+							gl_Position=vec4(position,1);
+						}
+					`,
+					fragmentShader:`
+						uniform sampler2D map;
+						varying vec2 vUv;
+						void main(){
+							// gl_FragColor=vec4(.5,0,0,1);
+							float depth=texture2D(map,vUv).r;
+							gl_FragColor=vec4(vec3(depth),1);
+						}
+					`
+				})
+				let mesh=new THREE.Mesh(geometry,material)
+				mesh.renderOrder=999999
+				let name='rtdebugger'
+				mesh.name=name
+				window[name]=mesh
+				scene.add(mesh)
+			}
+
 			// Ground
 			const plane = new THREE.Mesh(
 				new THREE.PlaneGeometry( 8, 8 ),
@@ -301,6 +332,7 @@
 			folder.add( ssrPass, 'blur' );
 			// gui.close()
 
+
 		}
 
 
@@ -343,21 +375,13 @@
 
 			}
 
-			if ( params.enableSSR ) {
 
-				groundReflector.visible = false;
-				groundReflector.doRender( renderer, scene, camera );
-				groundReflector.visible = true;
+			groundReflector.visible = false;
+			groundReflector.doRender( renderer, scene, camera );
+			groundReflector.visible = true;
 
-				// TODO: groundReflector has full ground info, need use it to solve reflection gaps problem on objects when camera near ground.
-				// TODO: the normal and depth info where groundReflector reflected need to be changed.
-				// composer.render();
+			renderer.render( scene, camera );
 
-			} else {
-
-				renderer.render( scene, camera );
-
-			}
 
 		}
 
