@@ -64,6 +64,7 @@
 			camera.position.set( 0.13271600513224902, 0.3489546826045913, 0.43921296427927076 );
 
 			scene = new THREE.Scene();
+			window.scene=scene
 			scene.background = new THREE.Color( 0x443333 );
 			scene.fog = new THREE.Fog( 0x443333, 1, 4 );
 
@@ -92,7 +93,7 @@
 
 				geometry.computeVertexNormals();
 
-				const material = new THREE.MeshStandardMaterial( { color: 0x606060 } );
+				const material = new THREE.MeshStandardMaterial( { metalness: .9, color: 0x606060 } );
 				const mesh = new THREE.Mesh( geometry, material );
 				scene.add( mesh );
 				selects.push( mesh );
@@ -105,7 +106,7 @@
 			let geometry, material, mesh;
 
 			geometry = new THREE.BoxBufferGeometry( .05, .05, .05 );
-			material = new THREE.MeshStandardMaterial( { color: 'green' } );
+			material = new THREE.MeshStandardMaterial( { metalness: .6, color: 'green' } );
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( - .12, plane.position.y + .025, .015 );
 			scene.add( mesh );
@@ -113,7 +114,7 @@
 			selects.push( mesh );
 
 			geometry = new THREE.IcosahedronBufferGeometry( .025, 4 );
-			material = new THREE.MeshStandardMaterial( { color: 'cyan' } );
+			material = new THREE.MeshStandardMaterial( { metalness: .3, color: 'cyan' } );
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( - .05, plane.position.y + .025, .08 );
 			scene.add( mesh );
@@ -121,7 +122,7 @@
 			selects.push( mesh );
 
 			geometry = new THREE.ConeBufferGeometry( .025, .05, 64 );
-			material = new THREE.MeshStandardMaterial( { color: 'yellow' } );
+			material = new THREE.MeshStandardMaterial( { metalness: .1, color: 'yellow' } );
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( - .05, plane.position.y + .025, - .055 );
 			scene.add( mesh );
@@ -237,6 +238,7 @@
 
 			} );
 			folder.add( ssrPass, 'isBouncing' );
+			ssrPass.output=SSRPass.OUTPUT.Metalness
 			folder.add( ssrPass, 'output', {
 				'Default': SSRPass.OUTPUT.Default,
 				'SSR Only': SSRPass.OUTPUT.SSR,

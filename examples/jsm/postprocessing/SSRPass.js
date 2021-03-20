@@ -606,26 +606,34 @@ SSRPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 
 		}
 
-		this.scene.traverseVisible( child => {
-
+		this.selects.forEach(child => {
+			this.metalnessOnMaterial.color.setScalar(child.material.metalness)
 			child._SSRPassMaterialBack = child.material;
-			if ( this._selects.includes( child ) ) {
+			child.material = this.metalnessOnMaterial
+			renderer.render(child, this.camera)
+			child.material = child._SSRPassMaterialBack
+		})
 
-				child.material = this.metalnessOnMaterial;
+		// this.scene.traverseVisible( child => {
 
-			} else {
+		// 	child._SSRPassMaterialBack = child.material;
+		// 	if ( this._selects.includes( child ) ) {
 
-				child.material = this.metalnessOffMaterial;
+		// 		child.material = this.metalnessOnMaterial;
 
-			}
+		// 	} else {
 
-		} );
-		renderer.render( this.scene, this.camera );
-		this.scene.traverseVisible( child => {
+		// 		child.material = this.metalnessOffMaterial;
 
-			child.material = child._SSRPassMaterialBack;
+		// 	}
 
-		} );
+		// } );
+		// renderer.render( this.scene, this.camera );
+		// this.scene.traverseVisible( child => {
+
+		// 	child.material = child._SSRPassMaterialBack;
+
+		// } );
 
 		// restore original state
 
