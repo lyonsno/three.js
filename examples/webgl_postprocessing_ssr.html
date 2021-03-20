@@ -33,7 +33,7 @@
 
 		const params = {
 			enableSSR: true,
-			autoRotate: true,
+			autoRotate: false,
 			isOtherMeshes: true,
 			isGroundReflector: true,
 		};
@@ -47,6 +47,7 @@
 		const otherMeshes = [];
 		let groundReflector;
 		const selects = [];
+		let bunny, cube, sphere, cone;
 
 		const container = document.querySelector( '#container' );
 
@@ -56,9 +57,8 @@
 		dracoLoader.setDecoderConfig( { type: 'js' } );
 
 		init();
-		animate();
 
-		function init() {
+		async function init() {
 
 			camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 15 );
 			camera.position.set( 0.13271600513224902, 0.3489546826045913, 0.43921296427927076 );
@@ -89,19 +89,23 @@
 			spotLight.position.set( - 1, 1, 1 );
 			scene.add( spotLight );
 
-			dracoLoader.load( 'models/draco/bunny.drc', function ( geometry ) {
+			await new Promise(resolve=>{
+				dracoLoader.load( 'models/draco/bunny.drc', function ( geometry ) {
 
-				geometry.computeVertexNormals();
+					geometry.computeVertexNormals();
 
-				const material = new THREE.MeshStandardMaterial( { metalness: .9, color: 0x606060 } );
-				const mesh = new THREE.Mesh( geometry, material );
-				scene.add( mesh );
-				selects.push( mesh );
+					const material = new THREE.MeshStandardMaterial( { metalness: 0.9, color: 0x606060 } );
+					const mesh = new THREE.Mesh( geometry, material );
+					scene.add( mesh );
+					selects.push( mesh );
+					bunny=mesh
 
-				// Release decoder resources.
-				dracoLoader.dispose();
+					// Release decoder resources.
+					dracoLoader.dispose();
 
-			} );
+					resolve()
+				} );
+			})
 
 			let geometry, material, mesh;
 
@@ -112,6 +116,7 @@
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
+			cube=mesh
 
 			geometry = new THREE.IcosahedronBufferGeometry( .025, 4 );
 			material = new THREE.MeshStandardMaterial( { metalness: .3, color: 'cyan' } );
@@ -120,6 +125,7 @@
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
+			sphere=mesh
 
 			geometry = new THREE.ConeBufferGeometry( .025, .05, 64 );
 			material = new THREE.MeshStandardMaterial( { metalness: .1, color: 'yellow' } );
@@ -128,6 +134,7 @@
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
+			cone=mesh
 
 			geometry = new THREE.PlaneBufferGeometry( 8, 8 );
 			groundReflector = new Reflector( geometry, {
@@ -251,6 +258,10 @@
 				ssrPass.output = parseInt( value );
 
 			} );
+			folder.add(bunny.material,'metalness').name('bunny metalness').min(0).max(1)
+			folder.add(cube.material,'metalness').name('cube metalness').min(0).max(1)
+			folder.add(sphere.material,'metalness').name('sphere metalness').min(0).max(1)
+			folder.add(cone.material,'metalness').name('cone metalness').min(0).max(1)
 			ssrPass.opacity = 1;
 			groundReflector.opacity = ssrPass.opacity;
 			folder.add( ssrPass, 'opacity' ).min( 0 ).max( 1 ).onChange( ()=>{
@@ -274,7 +285,10 @@
 			folder.add( ssrPass, 'isInfiniteThick' );
 			folder.add( ssrPass, 'thickTolerance' ).min( 0 ).max( .05 ).step( .0001 );
 			folder.add( ssrPass, 'isBlur' );
+			folder.open()
 			// gui.close()
+
+			animate()
 
 		}
 
