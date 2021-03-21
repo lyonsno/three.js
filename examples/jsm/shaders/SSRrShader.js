@@ -197,13 +197,17 @@ var SSRrShader = {
 				}
 			}
 
-			#ifdef SPECULAR
-				// TODO: Codes below can solve ( somewhat a hack ) the tiny gaps display error when viewNormalSelects directly face camera. Need to find the root cause of the problem.
-				vec4 refractColor=texture2D(tDiffuse,vUv);
-				vec4 specularColor=texture2D(tSpecular,vUv);
-				gl_FragColor.xyz=mix(refractColor.xyz,vec3(1),specularColor.r);
-				gl_FragColor.a=1.;
-			#endif
+			discard;
+
+			// gl_FragColor=vec4(1,0,0,1);return;
+
+			// #ifdef SPECULAR
+			// 	// TODO: Codes below can solve ( somewhat a hack ) the tiny gaps display error when viewNormalSelects directly face camera. Need to find the root cause of the problem.
+			// 	vec4 refractColor=texture2D(tDiffuse,vUv);
+			// 	vec4 specularColor=texture2D(tSpecular,vUv);
+			// 	gl_FragColor.xyz=mix(refractColor.xyz,vec3(1),specularColor.r);
+			// 	gl_FragColor.a=1.;
+			// #endif
 		}
 	`
 
