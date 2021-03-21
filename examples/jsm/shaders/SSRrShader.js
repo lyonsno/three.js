@@ -122,18 +122,19 @@ var SSRrShader = {
 
 			// if(viewNormalSelects.x<=0.&&viewNormalSelects.y<=0.&&viewNormalSelects.z<=0.) return;
 
-			float depth = getDepthSelects( vUv );
-			float viewZ = getViewZ( depth );
-			// if(-viewZ>=cameraFar) return;
+			float depthSelects = getDepthSelects( vUv );
+			// gl_FragColor=vec4(vec3(depthSelects),1);return;
+			float viewZSelects = getViewZ( depthSelects );
+			// if(-viewZSelects>=cameraFar) return;
 
-			float clipW = cameraProjectionMatrix[2][3] * viewZ+cameraProjectionMatrix[3][3];
-			vec3 viewPosition=getViewPosition( vUv, depth, clipW );
+			float clipW = cameraProjectionMatrix[2][3] * viewZSelects+cameraProjectionMatrix[3][3];
+			vec3 viewPositionSelects=getViewPosition( vUv, depthSelects, clipW );
 
 			vec2 d0=gl_FragCoord.xy;
 			vec2 d1;
 
 			#ifdef PERSPECTIVE_CAMERA
-				vec3 viewIncidentDir=normalize(viewPosition);
+				vec3 viewIncidentDir=normalize(viewPositionSelects);
 			#else
 				vec3 viewIncidentDir=vec3(0,0,-1);
 			#endif
@@ -142,12 +143,12 @@ var SSRrShader = {
 			// https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/refract.xhtml
 
 			float maxDistance=100.;
-			vec3 d1viewPosition=viewPosition+viewRefractDir*maxDistance;
+			vec3 d1viewPosition=viewPositionSelects+viewRefractDir*maxDistance;
 			#ifdef PERSPECTIVE_CAMERA
 				if(d1viewPosition.z>-cameraNear){
 					//https://tutorial.math.lamar.edu/Classes/CalcIII/EqnsOfLines.aspx
-					float t=(-cameraNear-viewPosition.z)/viewRefractDir.z;
-					d1viewPosition=viewPosition+viewRefractDir*t;
+					float t=(-cameraNear-viewPositionSelects.z)/viewRefractDir.z;
+					d1viewPosition=viewPositionSelects+viewRefractDir*t;
 				}
 			#endif
 			d1=viewPositionToXY(d1viewPosition);
@@ -166,17 +167,18 @@ var SSRrShader = {
 				vec2 uv=xy/resolution;
 
 				float d = getDepth(uv);
+				// if(d>=1.) return;
 				float vZ = getViewZ( d );
 				float cW = cameraProjectionMatrix[2][3] * vZ+cameraProjectionMatrix[3][3];
 				vec3 vP=getViewPosition( uv, d, cW );
 
 				#ifdef PERSPECTIVE_CAMERA
 					// https://www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
-					float recipVPZ=1./viewPosition.z;
+					float recipVPZ=1./viewPositionSelects.z;
 					float viewRefractRayZ=1./(recipVPZ+s*(1./d1viewPosition.z-recipVPZ));
 					float sD=surfDist*cW;
 				#else
-					float viewRefractRayZ=viewPosition.z+s*(d1viewPosition.z-viewPosition.z);
+					float viewRefractRayZ=viewPositionSelects.z+s*(d1viewPosition.z-viewPositionSelects.z);
 					float sD=surfDist;
 				#endif
 
@@ -196,13 +198,15 @@ var SSRrShader = {
 				}
 			}
 
-			#ifdef SPECULAR
-				// TODO: Codes below can solve ( somewhat a hack ) the tiny gaps display error when viewNormalSelects directly face camera. Need to find the root cause of the problem.
-				vec4 refractColor=texture2D(tDiffuse,vUv);
-				vec4 specularColor=texture2D(tSpecular,vUv);
-				gl_FragColor.xyz=mix(refractColor.xyz,vec3(1),specularColor.r);
-				gl_FragColor.a=1.;
-			#endif
+			gl_FragColor=vec4(1,0,0,1);return;
+
+			// #ifdef SPECULAR
+			// 	// TODO: Codes below can solve ( somewhat a hack ) the tiny gaps display error when viewNormalSelects directly face camera. Need to find the root cause of the problem.
+			// 	vec4 refractColor=texture2D(tDiffuse,vUv);
+			// 	vec4 specularColor=texture2D(tSpecular,vUv);
+			// 	gl_FragColor.xyz=mix(refractColor.xyz,vec3(1),specularColor.r);
+			// 	gl_FragColor.a=1.;
+			// #endif
 		}
 	`
 
