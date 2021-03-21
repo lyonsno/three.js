@@ -112,6 +112,17 @@ var SSRrShader = {
 			xy*=resolution;//screen
 			return xy;
 		}
+		void setRefractColor(vec2 uv){
+			vec4 refractColor=texture2D(tDiffuse,uv);
+			#ifdef SPECULAR
+				vec4 specularColor=texture2D(tSpecular,vUv);
+				gl_FragColor.xyz=mix(refractColor.xyz,vec3(1),specularColor.r);
+				// gl_FragColor.xyz=refractColor.xyz*(1.+specularColor.r*3.);
+			#else
+				gl_FragColor.xyz=refractColor.xyz;
+			#endif
+			gl_FragColor.a=1.;
+		}
 		void main(){
 			if(ior==1.) return; // Adding this line may have better performance, but more importantly, it can avoid display errors at the very edges of the model when IOR is equal to 1.
 
@@ -152,19 +163,23 @@ var SSRrShader = {
 				}
 			#endif
 			d1=viewPositionToXY(d1viewPosition);
+			// gl_FragColor=vec4(d1/resolution,0,1);return;
+			// d1=floor(d1)+.5;
 
 			float totalLen=length(d1-d0);
 			float xLen=d1.x-d0.x;
 			float yLen=d1.y-d0.y;
 			float totalStep=max(abs(xLen),abs(yLen));
+			// gl_FragColor=vec4(vec3(totalStep)/10.,1);return;
 			float xSpan=xLen/totalStep;
 			float ySpan=yLen/totalStep;
+			vec2 uv;
 			for(float i=0.;i<float(MAX_STEP);i++){
 				if(i>=totalStep) break;
 				vec2 xy=vec2(d0.x+i*xSpan,d0.y+i*ySpan);
 				if(xy.x<0.||xy.x>resolution.x||xy.y<0.||xy.y>resolution.y) break;
 				float s=length(xy-d0)/totalLen;
-				vec2 uv=xy/resolution;
+				uv=xy/resolution;
 
 				float d = getDepth(uv);
 				float vZ = getViewZ( d );
@@ -184,26 +199,26 @@ var SSRrShader = {
 				// if(viewRefractRayZ<=vZ){
 				float away=vZ-viewRefractRayZ;
 				if(away>=0.&&away<=sD){
-					vec4 refractColor=texture2D(tDiffuse,uv);
-					#ifdef SPECULAR
-						vec4 specularColor=texture2D(tSpecular,vUv);
-						gl_FragColor.xyz=mix(refractColor.xyz,vec3(1),specularColor.r);
-						// gl_FragColor.xyz=refractColor.xyz*(1.+specularColor.r*3.);
-					#else
-						gl_FragColor.xyz=refractColor.xyz;
-					#endif
-					gl_FragColor.a=1.;
+					setRefractColor(uv);
 					return;
 				}
 			}
+			// if(totalStep<=100.){
+			// 	setRefractColor(vUv);
+			// }
+			// setRefractColor(uv);
 
-			#ifdef SPECULAR
-				// TODO: Codes below can solve ( somewhat a hack ) the tiny gaps display error when viewNormalSelects directly face camera. Need to find the root cause of the problem.
-				vec4 refractColor=texture2D(tDiffuse,vUv);
-				vec4 specularColor=texture2D(tSpecular,vUv);
-				gl_FragColor.xyz=mix(refractColor.xyz,vec3(1),specularColor.r);
-				gl_FragColor.a=1.;
-			#endif
+			// discard;
+
+			// gl_FragColor=vec4(1,0,0,1);return;
+
+			// #ifdef SPECULAR
+			// 	// TODO: Codes below can solve ( somewhat a hack ) the tiny gaps display error when viewNormalSelects directly face camera. Need to find the root cause of the problem.
+			// 	vec4 refractColor=texture2D(tDiffuse,vUv);
+			// 	vec4 specularColor=texture2D(tSpecular,vUv);
+			// 	gl_FragColor.xyz=mix(refractColor.xyz,vec3(1),specularColor.r);
+			// 	gl_FragColor.a=1.;
+			// #endif
 		}
 	`
 
