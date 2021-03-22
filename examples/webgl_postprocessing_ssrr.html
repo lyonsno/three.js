@@ -201,7 +201,7 @@
 			folder.add( ssrrPass, 'specular' );
 			folder.add(ssrrPass.specularMaterial, 'metalness').min(0).max(1).step(.01);
 			folder.add(ssrrPass.specularMaterial, 'roughness').min(0).max(1).step(.01);
-			ssrrPass.output=SSRrPass.OUTPUT.SSRr
+			// ssrrPass.output=SSRrPass.OUTPUT.SSRr
 			folder.add(ssrrPass, 'output', {
 				'Default': SSRrPass.OUTPUT.Default,
 				'SSRr Only': SSRrPass.OUTPUT.SSRr,

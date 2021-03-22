@@ -204,9 +204,9 @@ var SSRrShader = {
 				}
 			}
 			// if(totalStep<=100.){
-			// 	setRefractColor(vUv);
+				// setRefractColor(vUv);
 			// }
-			// setRefractColor(uv);
+			setRefractColor(uv);
 
 			// discard;
 
