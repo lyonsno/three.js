@@ -22,7 +22,7 @@ import { SSRrShader } from '../shaders/SSRrShader.js';
 import { SSRrDepthShader } from '../shaders/SSRrShader.js';
 import { CopyShader } from '../shaders/CopyShader.js';
 
-var SSRrPass = function ( { renderer, scene, camera, width, height, selects, encoding, morphTargets = false } ) {
+var SSRrPass = function ( { renderer, scene, camera, width, height, selects, selectsOptions, encoding, morphTargets = false } ) {
 
 	Pass.call( this );
 
@@ -47,6 +47,7 @@ var SSRrPass = function ( { renderer, scene, camera, width, height, selects, enc
 	this.tempColor = new Color();
 
 	this.selects = selects;
+	this.selectsOptions = selectsOptions;
 
 	this._specular = SSRrShader.defines.SPECULAR;
 	Object.defineProperty( this, 'specular', {
@@ -160,12 +161,6 @@ var SSRrPass = function ( { renderer, scene, camera, width, height, selects, enc
 		color: 'white'
 	} );
 
-	// refractiveOff material
-
-	this.refractiveOffMaterial = new MeshBasicMaterial( {
-		color: 'black'
-	});
-
 	// specular material
 	this.specularMaterial = new MeshStandardMaterial({
 		color: 'black',
@@ -228,7 +223,6 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 
 		this.normalMaterial.dispose();
 		this.refractiveOnMaterial.dispose();
-		this.refractiveOffMaterial.dispose();
 		this.copyMaterial.dispose();
 		this.depthRenderMaterial.dispose();
 
@@ -474,8 +468,11 @@ SSRrPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		this.scene._SSRrPassBackupBackground=this.scene.background
 		this.scene.background=null
 		this.scene._SSRrPassBackupFog=this.scene.fog
-		this.scene.fog=null
+		this.scene.fog = null
+
+		this.sceene.children.forEach(child=>{})
 		renderer.render(this.scene, this.camera);
+
 		this.scene.fog=this.scene._SSRrPassBackupFog
 		this.scene.background=this.scene._SSRrPassBackupBackground
 		this.scene.traverse( child => {

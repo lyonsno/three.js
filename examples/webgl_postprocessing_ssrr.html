@@ -43,6 +43,7 @@
 		let camera, scene, renderer;
 		const objects = [];
 		const selects = [];
+		const selectsOptions = [];
 		const raycaster = new THREE.Raycaster();
 		const mouseDown = new THREE.Vector2();
 		const mouse = new THREE.Vector2();
@@ -109,6 +110,7 @@
 				scene.add(mesh);
 				objects.push(mesh);
 				selects.push(mesh);
+				selectsOptions.push({type:'rough'})
 
 				// Release decoder resources.
 				dracoLoader.dispose();
@@ -125,6 +127,7 @@
 			scene.add(mesh);
 			objects.push( mesh );
 			selects.push( mesh );
+			selectsOptions.push({type:'accurate'})
 
 			geometry = new THREE.IcosahedronBufferGeometry(.025, 4);
 			material = new THREE.MeshStandardMaterial({ color: 'cyan' });
@@ -134,6 +137,7 @@
 			scene.add(mesh);
 			objects.push( mesh );
 			// selects.push( mesh );
+			// selectsOptions.push({type:'accurate'})
 
 			geometry = new THREE.ConeBufferGeometry(.025, .05, 64);
 			material = new THREE.MeshStandardMaterial({ color: 'yellow' });
@@ -143,6 +147,7 @@
 			scene.add(mesh);
 			objects.push( mesh );
 			// selects.push( mesh );
+			// selectsOptions.push({type:'accurate'})
 
 			// renderer
 			renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -178,7 +183,8 @@
 				width: innerWidth,
 				height: innerHeight,
 				encoding: THREE.sRGBEncoding,
-				selects: selects
+				selects: selects,
+				selectsOptions: selectsOptions,
 			});
 
 			composer.addPass(ssrrPass);
@@ -243,8 +249,14 @@
 				let index=selects.indexOf(intersect.object)
 				if(index>=0){
 					selects.splice(index,1)
+					selectsOptions.splice(index,1)
 				}else{
 					selects.push(intersect.object)
+					if(intersect.object.name==='bunny'){
+						selectsOptions.push({type:'rought'})
+					}else{
+						selectsOptions.push({type:'accurate'})
+					}
 				}
 			}
 		}
