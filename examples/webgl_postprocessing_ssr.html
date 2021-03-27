@@ -33,7 +33,7 @@
 
 		const params = {
 			enableSSR: true,
-			autoRotate: true,
+			autoRotate: false,
 			otherMeshes: true,
 			groundReflector: true,
 		};
@@ -123,7 +123,7 @@
 			geometry = new THREE.ConeBufferGeometry( .025, .05, 64 );
 			material = new THREE.MeshStandardMaterial( { color: 'yellow' } );
 			mesh = new THREE.Mesh( geometry, material );
-			mesh.position.set( - .05, .025, - .055 );
+			mesh.position.set( - .05, .0, - .055 );
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
