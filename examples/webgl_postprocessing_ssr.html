@@ -217,7 +217,7 @@
 
 			} );
 			ssrPass.maxDistance = .1;
-			ssrPass.maxDistance = .0;
+			// ssrPass.maxDistance = .0;
 			groundReflector.maxDistance = ssrPass.maxDistance;
 			folder.add( ssrPass, 'maxDistance' ).min( 0 ).max( .5 ).step( .001 ).onChange( ()=>{
 

@@ -182,11 +182,11 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		virtualCamera.updateMatrixWorld();
 		virtualCamera.projectionMatrix.copy( camera.projectionMatrix );
 
-		material.uniforms[ 'virtualCameraNear' ].value = virtualCamera.near;
-		material.uniforms[ 'virtualCameraFar' ].value = virtualCamera.far;
+		material.uniforms[ 'virtualCameraNear' ].value = camera.near;
+		material.uniforms[ 'virtualCameraFar' ].value = camera.far;
 		material.uniforms[ 'virtualCameraMatrixWorld' ].value= virtualCamera.matrixWorld;
-		material.uniforms[ 'virtualCameraProjectionMatrix' ].value= virtualCamera.projectionMatrix;
-		material.uniforms[ 'virtualCameraInverseProjectionMatrix' ].value= virtualCamera.projectionMatrixInverse;
+		material.uniforms[ 'virtualCameraProjectionMatrix' ].value= camera.projectionMatrix;
+		material.uniforms[ 'virtualCameraInverseProjectionMatrix' ].value= camera.projectionMatrixInverse;
 		material.uniforms[ 'resolution' ].value = scope.resolution;
 
 		// Update the texture matrix
@@ -361,7 +361,7 @@ ReflectorForSSRPass.ReflectorShader = {
 				vec3 viewPosition=getViewPosition( uv, depth, clipW );
 				vec3 worldPosition=(virtualCameraMatrixWorld*vec4(viewPosition,1)).xyz;
 				// gl_FragColor=vec4(worldPosition*1.,1);return;
-				gl_FragColor=vec4(worldPosition*12.,1);return;
+				// gl_FragColor=vec4(worldPosition*12.,1);return;
 				worldPosition.y+=worldYBias; // TODO: Don't know why not start from zero, temporarily use manually defined bias, need fix afterwards.
 				worldPosition.y=max(0.,worldPosition.y);
 				if(worldPosition.y>maxDistance) discard;
