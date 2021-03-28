@@ -1,6 +1,5 @@
 import {
 	Color,
-	LinearFilter,
 	MathUtils,
 	Matrix4,
 	Mesh,
@@ -99,8 +98,8 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 	}
 
 	var parameters = {
-		minFilter: LinearFilter,
-		magFilter: LinearFilter,
+		minFilter: NearestFilter,
+		magFilter: NearestFilter,
 		format: RGBFormat,
 		depthTexture: useDepthTexture ? depthTexture : null,
 	};

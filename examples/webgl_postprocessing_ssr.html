@@ -137,6 +137,7 @@
 				color: 0x888888,
 				useDepthTexture: true,
 			} );
+			window.groundReflector=groundReflector
 			groundReflector.material.depthWrite = false;
 			groundReflector.rotation.x = - Math.PI / 2;
 			groundReflector.visible = false;
@@ -216,6 +217,7 @@
 
 			} );
 			ssrPass.maxDistance = .1;
+			ssrPass.maxDistance = .0;
 			groundReflector.maxDistance = ssrPass.maxDistance;
 			folder.add( ssrPass, 'maxDistance' ).min( 0 ).max( .5 ).step( .001 ).onChange( ()=>{
 
