@@ -347,7 +347,8 @@ ReflectorForSSRPass.ReflectorShader = {
 		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
 			vec4 ndcPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
 			vec4 clipPosition = ndcPosition*clipW; //clip
-			vec3 viewPosition = ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
+			// vec3 viewPosition = ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
+			vec3 viewPosition = ( inverse(virtualCameraProjectionMatrix) * clipPosition ).xyz;//view
 			viewPosition.z = (
 				virtualCameraProjectionMatrix[1][2]*viewPosition.y+
 				virtualCameraProjectionMatrix[3][2]
@@ -364,6 +365,7 @@ ReflectorForSSRPass.ReflectorShader = {
 				float clipW = virtualCameraProjectionMatrix[2][3] * viewZ+virtualCameraProjectionMatrix[3][3];
 				vec3 viewPosition=getViewPosition( uv, depth, clipW );
 				vec3 worldPosition=(virtualCameraMatrixWorld*vec4(viewPosition,1)).xyz;
+				// worldPosition.y*=-1.;
 				gl_FragColor=vec4(worldPosition,1);return;
 				worldPosition.y+=worldYBias; // TODO: Don't know why not start from zero, temporarily use manually defined bias, need fix afterwards.
 				worldPosition.y=max(0.,worldPosition.y);
