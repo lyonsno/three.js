@@ -364,6 +364,7 @@ ReflectorForSSRPass.ReflectorShader = {
 				float viewZ = getViewZ( depth );
 				float clipW = virtualCameraProjectionMatrix[2][3] * viewZ+virtualCameraProjectionMatrix[3][3];
 				vec3 viewPosition=getViewPosition( uv, depth, clipW );
+				// gl_FragColor=vec4(viewPosition,1);return;
 				vec3 worldPosition=(virtualCameraMatrixWorld*vec4(viewPosition,1)).xyz;
 				// worldPosition.y*=-1.;
 				gl_FragColor=vec4(worldPosition,1);return;
