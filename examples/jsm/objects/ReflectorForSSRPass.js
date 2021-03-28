@@ -348,7 +348,10 @@ ReflectorForSSRPass.ReflectorShader = {
 			vec4 ndcPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
 			vec4 clipPosition = ndcPosition*clipW; //clip
 			vec3 viewPosition = ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
-			viewPosition.z = (virtualCameraProjectionMatrix[1][2]*viewPosition.y+virtualCameraProjectionMatrix[2][2])/(-ndcPosition.z-virtualCameraProjectionMatrix[3][2]);
+			viewPosition.z = (
+				virtualCameraProjectionMatrix[1][2]*viewPosition.y+
+				virtualCameraProjectionMatrix[3][2]
+			)/(-ndcPosition.z-virtualCameraProjectionMatrix[2][2]);
 			return viewPosition;
 		}
 		void main() {
