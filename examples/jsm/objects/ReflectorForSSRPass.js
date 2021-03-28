@@ -361,6 +361,8 @@ ReflectorForSSRPass.ReflectorShader = {
 				float clipW = virtualCameraProjectionMatrix[2][3] * viewZ+virtualCameraProjectionMatrix[3][3];
 				vec3 viewPosition=getViewPosition( uv, depth, clipW );
 				vec3 worldPosition=(virtualCameraMatrixWorld*vec4(viewPosition,1)).xyz;
+				// gl_FragColor=vec4(worldPosition*1.,1);return;
+				gl_FragColor=vec4(worldPosition*12.,1);return;
 				worldPosition.y+=worldYBias; // TODO: Don't know why not start from zero, temporarily use manually defined bias, need fix afterwards.
 				worldPosition.y=max(0.,worldPosition.y);
 				if(worldPosition.y>maxDistance) discard;
@@ -371,7 +373,7 @@ ReflectorForSSRPass.ReflectorShader = {
 					op=opacity*attenuation;
 				#endif
 				#ifdef FRESNEL
-					op*=fresnelCoe;
+					// op*=fresnelCoe;
 				#endif
 				gl_FragColor = vec4( blendOverlay( base.rgb, color ), op );
 			#else
