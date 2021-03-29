@@ -184,8 +184,8 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		material.uniforms[ 'virtualCameraNear' ].value = camera.near;
 		material.uniforms[ 'virtualCameraFar' ].value = camera.far;
 		material.uniforms[ 'virtualCameraMatrixWorld' ].value = virtualCamera.matrixWorld;
-		material.uniforms[ 'virtualCameraProjectionMatrix' ].value = camera.projectionMatrix;
-		material.uniforms[ 'virtualCameraProjectionMatrixInverse' ].value = camera.projectionMatrixInverse;
+		material.uniforms[ 'virtualCameraProjectionMatrix' ].value = virtualCamera.projectionMatrix;
+		material.uniforms[ 'virtualCameraProjectionMatrixInverse' ].value = virtualCamera.projectionMatrixInverse;
 		material.uniforms[ 'resolution' ].value = scope.resolution;
 
 		// Update the texture matrix
@@ -221,6 +221,8 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		projectionMatrix.elements[ 6 ] = clipPlane.y;
 		projectionMatrix.elements[ 10 ] = clipPlane.z + 1.0 - clipBias;
 		projectionMatrix.elements[ 14 ] = clipPlane.w;
+
+		virtualCamera.projectionMatrixInverse.copy(virtualCamera.projectionMatrix).invert();
 
 
 
@@ -320,7 +322,6 @@ ReflectorForSSRPass.ReflectorShader = {
 		uniform float maxDistance;
 		uniform float opacity;
 		uniform float fresnelCoe;
-		uniform mat4 virtualCameraInverseProjectionMatrix;
 		uniform float virtualCameraNear;
 		uniform float virtualCameraFar;
 		uniform mat4 virtualCameraProjectionMatrix;
@@ -348,8 +349,8 @@ ReflectorForSSRPass.ReflectorShader = {
 
 			vec4 ndcPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
 			vec4 clipPosition = ndcPosition*clipW; //clip
-			// vec3 viewPosition = ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
-			vec3 viewPosition = ( inverse(virtualCameraProjectionMatrix) * clipPosition ).xyz;//view
+			vec3 viewPosition = ( virtualCameraProjectionMatrixInverse * clipPosition ).xyz;//view
+			// vec3 viewPosition = ( inverse(virtualCameraProjectionMatrix) * clipPosition ).xyz;//view
 			viewPosition.z = (
 				virtualCameraProjectionMatrix[1][2]*viewPosition.y+
 				virtualCameraProjectionMatrix[3][2]
