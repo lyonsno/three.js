@@ -184,6 +184,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		material.uniforms[ 'virtualCameraNear' ].value = camera.near;
 		material.uniforms[ 'virtualCameraFar' ].value = camera.far;
 		material.uniforms[ 'virtualCameraMatrixWorld' ].value = virtualCamera.matrixWorld;
+		material.uniforms[ 'cameraProjectionMatrix' ].value = camera.projectionMatrix;
 		material.uniforms[ 'virtualCameraProjectionMatrix' ].value = virtualCamera.projectionMatrix;
 		material.uniforms[ 'virtualCameraProjectionMatrixInverse' ].value = virtualCamera.projectionMatrixInverse;
 		material.uniforms[ 'resolution' ].value = scope.resolution;
@@ -295,6 +296,7 @@ ReflectorForSSRPass.ReflectorShader = {
 		fresnelCoe: { value: null },
 		virtualCameraNear: { value: null },
 		virtualCameraFar: { value: null },
+		cameraProjectionMatrix: { value: new Matrix4() },
 		virtualCameraProjectionMatrix: { value: new Matrix4() },
 		virtualCameraMatrixWorld: { value: new Matrix4() },
 		virtualCameraProjectionMatrixInverse: { value: new Matrix4() },
@@ -324,6 +326,7 @@ ReflectorForSSRPass.ReflectorShader = {
 		uniform float fresnelCoe;
 		uniform float virtualCameraNear;
 		uniform float virtualCameraFar;
+		uniform mat4 cameraProjectionMatrix;
 		uniform mat4 virtualCameraProjectionMatrix;
 		uniform mat4 virtualCameraProjectionMatrixInverse;
 		uniform mat4 virtualCameraMatrixWorld;
@@ -349,7 +352,8 @@ ReflectorForSSRPass.ReflectorShader = {
 
 			vec4 ndcPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
 			vec4 clipPosition = ndcPosition*clipW; //clip
-			vec3 viewPosition = ( virtualCameraProjectionMatrixInverse * clipPosition ).xyz;//view
+			vec3 viewPosition = ( inverse(cameraProjectionMatrix) * clipPosition ).xyz;//view
+			// vec3 viewPosition = ( virtualCameraProjectionMatrixInverse * clipPosition ).xyz;//view
 			// vec3 viewPosition = ( inverse(virtualCameraProjectionMatrix) * clipPosition ).xyz;//view
 			viewPosition.z = (
 				virtualCameraProjectionMatrix[1][2]*viewPosition.y+
@@ -362,8 +366,8 @@ ReflectorForSSRPass.ReflectorShader = {
 			#ifdef useDepthTexture
 				vec2 uv=(gl_FragCoord.xy-.5)/resolution.xy;
 				uv.x=1.-uv.x;
-				float depth = texture2DProj( tDepth, vUv ).r;
-				float viewZ = getViewZ( depth );
+				float depth = texture2DProj( tDepth, vUv ).r; // TODO: depth is wrong
+				float viewZ = getViewZ( depth ); // TODO: so viewZ wrong too
 				float clipW = virtualCameraProjectionMatrix[2][3] * viewZ+virtualCameraProjectionMatrix[3][3];
 				vec3 viewPosition=getViewPosition( uv, depth, clipW );
 				// gl_FragColor=vec4(viewPosition,1);return;
