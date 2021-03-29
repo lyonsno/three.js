@@ -138,7 +138,6 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		material.uniforms[ 'maxDistance' ].value = scope.maxDistance;
 		material.uniforms[ 'color' ].value = scope.color;
 		material.uniforms[ 'opacity' ].value = scope.opacity;
-		material.uniforms[ 'worldYBias' ].value = scope.worldYBias;
 
 		vecTemp0.copy( camera.position ).normalize();
 		vecTemp1.copy( vecTemp0 ).reflect( yAxis );
