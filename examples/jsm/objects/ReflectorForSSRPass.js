@@ -44,7 +44,6 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 	scope.maxDistance = ReflectorForSSRPass.ReflectorShader.uniforms.maxDistance.value;
 	scope.opacity = ReflectorForSSRPass.ReflectorShader.uniforms.opacity.value;
 	scope.color = color;
-	scope.worldYBias = options.worldYBias || 0;
 	scope.resolution = options.resolution || new Vector2( window.innerWidth, window.innerHeight );
 
 
@@ -183,11 +182,11 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		virtualCamera.updateMatrixWorld();
 		virtualCamera.projectionMatrix.copy( camera.projectionMatrix );
 
-		material.uniforms[ 'virtualCameraNear' ].value = virtualCamera.near;
-		material.uniforms[ 'virtualCameraFar' ].value = virtualCamera.far;
-		material.uniforms[ 'virtualCameraMatrixWorld' ].value= virtualCamera.matrixWorld;
-		material.uniforms[ 'virtualCameraProjectionMatrix' ].value= virtualCamera.projectionMatrix;
-		material.uniforms[ 'virtualCameraInverseProjectionMatrix' ].value= virtualCamera.projectionMatrixInverse;
+		material.uniforms[ 'virtualCameraNear' ].value = camera.near;
+		material.uniforms[ 'virtualCameraFar' ].value = camera.far;
+		material.uniforms[ 'virtualCameraMatrixWorld' ].value = virtualCamera.matrixWorld;
+		material.uniforms[ 'virtualCameraProjectionMatrix' ].value = camera.projectionMatrix;
+		material.uniforms[ 'virtualCameraProjectionMatrixInverse' ].value = camera.projectionMatrixInverse;
 		material.uniforms[ 'resolution' ].value = scope.resolution;
 
 		// Update the texture matrix
@@ -200,7 +199,6 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		textureMatrix.multiply( virtualCamera.projectionMatrix );
 		textureMatrix.multiply( virtualCamera.matrixWorldInverse );
 		textureMatrix.multiply( scope.matrixWorld );
-
 
 		// Now update projection matrix with new clip plane, implementing code from: http://www.terathon.com/code/oblique.html
 		// Paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
@@ -224,6 +222,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		projectionMatrix.elements[ 6 ] = clipPlane.y;
 		projectionMatrix.elements[ 10 ] = clipPlane.z + 1.0 - clipBias;
 		projectionMatrix.elements[ 14 ] = clipPlane.w;
+
 
 
 		// Render
@@ -293,12 +292,11 @@ ReflectorForSSRPass.ReflectorShader = {
 		maxDistance: { value: 180 },
 		opacity: { value: 0.5 },
 		fresnelCoe: { value: null },
-		worldYBias: { value: null },
 		virtualCameraNear: { value: null },
 		virtualCameraFar: { value: null },
 		virtualCameraProjectionMatrix: { value: new Matrix4() },
 		virtualCameraMatrixWorld: { value: new Matrix4() },
-		virtualCameraInverseProjectionMatrix: { value: new Matrix4() },
+		virtualCameraProjectionMatrixInverse: { value: new Matrix4() },
 		resolution: { value: new Vector2() },
 
 	},
@@ -323,11 +321,11 @@ ReflectorForSSRPass.ReflectorShader = {
 		uniform float maxDistance;
 		uniform float opacity;
 		uniform float fresnelCoe;
-		uniform float worldYBias;
+		uniform mat4 virtualCameraInverseProjectionMatrix;
 		uniform float virtualCameraNear;
 		uniform float virtualCameraFar;
 		uniform mat4 virtualCameraProjectionMatrix;
-		uniform mat4 virtualCameraInverseProjectionMatrix;
+		uniform mat4 virtualCameraProjectionMatrixInverse;
 		uniform mat4 virtualCameraMatrixWorld;
 		uniform vec2 resolution;
 		varying vec4 vUv;
@@ -345,6 +343,10 @@ ReflectorForSSRPass.ReflectorShader = {
 			return perspectiveDepthToViewZ( depth, virtualCameraNear, virtualCameraFar );
 		}
 		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
+			// vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
+			// clipPosition *= clipW; //clip
+			// return ( virtualCameraProjectionMatrixInverse * clipPosition ).xyz;//view
+
 			vec4 ndcPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
 			vec4 clipPosition = ndcPosition*clipW; //clip
 			// vec3 viewPosition = ( virtualCameraInverseProjectionMatrix * clipPosition ).xyz;//view
@@ -368,8 +370,6 @@ ReflectorForSSRPass.ReflectorShader = {
 				vec3 worldPosition=(virtualCameraMatrixWorld*vec4(viewPosition,1)).xyz;
 				// worldPosition.y*=-1.;
 				gl_FragColor=vec4(worldPosition,1);return;
-				worldPosition.y+=worldYBias; // TODO: Don't know why not start from zero, temporarily use manually defined bias, need fix afterwards.
-				worldPosition.y=max(0.,worldPosition.y);
 				if(worldPosition.y>maxDistance) discard;
 				float op=opacity;
 				#ifdef DISTANCE_ATTENUATION
