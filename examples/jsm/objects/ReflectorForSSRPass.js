@@ -223,7 +223,7 @@ var ReflectorForSSRPass = function ( geometry, options ) {
 		projectionMatrix.elements[ 10 ] = clipPlane.z + 1.0 - clipBias;
 		projectionMatrix.elements[ 14 ] = clipPlane.w;
 
-		virtualCamera.projectionMatrixInverse.copy(virtualCamera.projectionMatrix).invert();
+		virtualCamera.projectionMatrixInverse.copy(projectionMatrix).invert();
 
 
 
@@ -346,30 +346,43 @@ ReflectorForSSRPass.ReflectorShader = {
 			return perspectiveDepthToViewZ( depth, virtualCameraNear, virtualCameraFar );
 		}
 		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
-			// vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
-			// clipPosition *= clipW; //clip
-			// return ( virtualCameraProjectionMatrixInverse * clipPosition ).xyz;//view
+			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
+			clipPosition *= clipW; //clip
+			return ( virtualCameraProjectionMatrixInverse * clipPosition ).xyz;//view
 
-			vec4 ndcPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
-			vec4 clipPosition = ndcPosition*clipW; //clip
-			vec3 viewPosition = ( inverse(cameraProjectionMatrix) * clipPosition ).xyz;//view
-			// vec3 viewPosition = ( virtualCameraProjectionMatrixInverse * clipPosition ).xyz;//view
-			// vec3 viewPosition = ( inverse(virtualCameraProjectionMatrix) * clipPosition ).xyz;//view
-			viewPosition.z = (
-				virtualCameraProjectionMatrix[1][2]*viewPosition.y+
-				virtualCameraProjectionMatrix[3][2]
-			)/(-ndcPosition.z-virtualCameraProjectionMatrix[2][2]);
-			return viewPosition;
+			// vec4 ndcPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
+			// vec4 clipPosition = ndcPosition*clipW; //clip
+			// vec3 viewPosition = ( inverse(cameraProjectionMatrix) * clipPosition ).xyz;//view
+			// // vec3 viewPosition = ( virtualCameraProjectionMatrixInverse * clipPosition ).xyz;//view
+			// // vec3 viewPosition = ( inverse(virtualCameraProjectionMatrix) * clipPosition ).xyz;//view
+			// viewPosition.z = (
+			// 	virtualCameraProjectionMatrix[1][2]*viewPosition.y+
+			// 	virtualCameraProjectionMatrix[3][2]
+			// )/(-ndcPosition.z-virtualCameraProjectionMatrix[2][2]);
+			// return viewPosition;
 		}
 		void main() {
 			vec4 base = texture2DProj( tDiffuse, vUv );
 			#ifdef useDepthTexture
 				vec2 uv=(gl_FragCoord.xy-.5)/resolution.xy;
 				uv.x=1.-uv.x;
+
 				float depth = texture2DProj( tDepth, vUv ).r; // TODO: depth is wrong
 				float viewZ = getViewZ( depth ); // TODO: so viewZ wrong too
 				float clipW = virtualCameraProjectionMatrix[2][3] * viewZ+virtualCameraProjectionMatrix[3][3];
 				vec3 viewPosition=getViewPosition( uv, depth, clipW );
+
+				float b=virtualCameraProjectionMatrix[1][2];
+				float c=virtualCameraProjectionMatrix[2][2];
+				float d=virtualCameraProjectionMatrix[3][2];
+				float xn=uv.x*2.-1.;
+				float yn=uv.y*2.-1.;
+				float zn=depth*2.-1.;
+				float ze=(b*viewPosition.y+d)/(-zn-c);
+
+				viewPosition=vec3(viewPosition.x,viewPosition.y,ze);
+
+
 				// gl_FragColor=vec4(viewPosition,1);return;
 				vec3 worldPosition=(virtualCameraMatrixWorld*vec4(viewPosition,1)).xyz;
 				// worldPosition.y*=-1.;
