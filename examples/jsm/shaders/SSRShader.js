@@ -183,7 +183,7 @@ var SSRShader = {
 					float viewReflectRayZ=viewPosition.z+s*(d1viewPosition.z-viewPosition.z);
 					float sD=surfDist;
 				#endif
-				if(viewReflectRayZ-sD>vZ) continue;
+				if(viewReflectRayZ>vZ) continue;
 
 				#ifdef INFINITE_THICK
 					if(viewReflectRayZ<vP.z) break;
