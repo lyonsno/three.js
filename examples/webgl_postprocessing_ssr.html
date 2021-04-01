@@ -33,9 +33,9 @@
 
 		const params = {
 			enableSSR: true,
-			autoRotate: true,
+			autoRotate: false,
 			otherMeshes: true,
-			groundReflector: true,
+			groundReflector: false,
 		};
 		let composer;
 		let ssrPass;
@@ -257,8 +257,8 @@
 			ssrPass.surfDist = 0.0015;
 			folder.add( ssrPass, 'surfDist' ).min( 0 ).max( .005 ).step( .0001 );
 			folder.add( ssrPass, 'infiniteThick' );
-			folder.add( ssrPass, 'thickTolerance' ).min( 0 ).max( .05 ).step( .0001 );
 			folder.add( ssrPass, 'blur' );
+			folder.open()
 			// gui.close()
 
 		}

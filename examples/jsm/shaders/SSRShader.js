@@ -33,7 +33,6 @@ var SSRShader = {
     "maxDistance": { value: 180 },
     "cameraRange": { value: 0 },
     "surfDist": { value: .007 },
-    "thickTolerance": { value: .03 },
 
   },
 
@@ -68,7 +67,6 @@ var SSRShader = {
 		uniform float surfDist;
 		uniform mat4 cameraProjectionMatrix;
 		uniform mat4 cameraInverseProjectionMatrix;
-		uniform float thickTolerance;
 		#include <packing>
 		float pointToLineDistance(vec3 x0, vec3 x1, vec3 x2) {
 			//x0: point, x1: linePointA, x2: linePointB
@@ -188,7 +186,7 @@ var SSRShader = {
 				if(viewReflectRayZ-sD>vZ) continue;
 
 				#ifdef INFINITE_THICK
-					if(viewReflectRayZ+thickTolerance*clipW<vP.z) break;
+					if(viewReflectRayZ<vP.z) break;
 				#endif
 				float away=pointToLineDistance(vP,viewPosition,d1viewPosition);
 

@@ -153,7 +153,6 @@ var SSRPass = function ( { renderer, scene, camera, width, height, selects, enco
 
 		}
 	} );
-	this.thickTolerance = SSRShader.uniforms.thickTolerance.value;
 
 	// beauty render target with depth buffer
 
@@ -394,7 +393,6 @@ SSRPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		this.ssrMaterial.uniforms[ 'opacity' ].value = this.opacity;
 		this.ssrMaterial.uniforms[ 'maxDistance' ].value = this.maxDistance;
 		this.ssrMaterial.uniforms[ 'surfDist' ].value = this.surfDist;
-		this.ssrMaterial.uniforms[ 'thickTolerance' ].value = this.thickTolerance;
 		this.renderPass( renderer, this.ssrMaterial, this.ssrRenderTarget );
 
 
