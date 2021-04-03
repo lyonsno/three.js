@@ -179,6 +179,7 @@ var SSRShader = {
 					float recipVPZ=1./viewPosition.z;
 					float viewReflectRayZ=1./(recipVPZ+s*(1./d1viewPosition.z-recipVPZ));
 					float tk=thickness*cW;
+					// float tk=thickness;
 				#else
 					float viewReflectRayZ=viewPosition.z+s*(d1viewPosition.z-viewPosition.z);
 					float tk=thickness;
@@ -199,6 +200,9 @@ var SSRShader = {
 					if(dot(viewReflectDir,vN)>=0.) continue;
 					float distance=pointPlaneDistance(vP,viewPosition,viewNormal);
 					if(distance>maxDistance) break;
+					// gl_FragColor=vec4(vP,1);return;
+					// gl_FragColor=vec4(uv,0,1);return;
+					gl_FragColor=vec4(vec3(s),1);return;
 					float op=opacity;
 					#ifdef DISTANCE_ATTENUATION
 						float ratio=1.-(distance/maxDistance);
