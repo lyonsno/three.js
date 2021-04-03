@@ -60,7 +60,9 @@
 		function init() {
 
 			camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 15 );
-			camera.position.set( 0.13271600513224902, 0.3489546826045913, 0.43921296427927076 );
+			window.camera=camera
+			// camera.position.set( 0.13271600513224902, 0.3489546826045913, 0.43921296427927076 );
+			camera.position.set( 0.5248894463528577, 0.08816433751514181, 0.12605031294076444 );
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color( 0x443333 );
@@ -207,7 +209,8 @@
 
 			} );
 			// ssrPass.thickness = 0.0015;
-			ssrPass.thickness = 0.03;
+			// ssrPass.thickness = 0.03;
+			ssrPass.thickness = 0.01;
 			gui.add( ssrPass, 'thickness' ).min( 0 ).max( .1 ).step( .0001 );
 			ssrPass.infiniteThick = false
 			gui.add( ssrPass, 'infiniteThick' );
@@ -268,6 +271,7 @@
 				groundReflector.opacity = ssrPass.opacity;
 
 			} );
+			ssrPass.blur=false
 			folder.add( ssrPass, 'blur' );
 			// folder.open()
 			// gui.close()
