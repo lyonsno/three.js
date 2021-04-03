@@ -89,28 +89,13 @@ var SSRShader = {
 		float getDepth( const in vec2 uv ) {
 			return texture2D( tDepth, uv ).x;
 		}
-		float getViewZ( const in float depth ) {
-			#ifdef PERSPECTIVE_CAMERA
-				// return perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
-				return cameraProjectionMatrix[3][2]/(1.-2.*depth-cameraProjectionMatrix[2][2]);
-			#else
-				return orthographicDepthToViewZ( depth, cameraNear, cameraFar );
-			#endif
-		}
-		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
-			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
-			clipPosition *= clipW; //clip
-			return ( cameraInverseProjectionMatrix * clipPosition ).xyz;//view
-		}
 		vec3 getViewNormal( const in vec2 uv ) {
 			return unpackRGBToNormal( texture2D( tNormal, uv ).xyz );
 		}
-		vec2 viewPositionToXY(vec3 viewPosition){
-			vec2 xy;
+		vec2 viewToScreen(vec3 viewPosition){
 			vec4 clip=cameraProjectionMatrix*vec4(viewPosition,1);
-			xy=clip.xy;//clip
-			float clipW=clip.w;
-			xy/=clipW;//NDC
+			vec2 xy=clip.xy;//clip
+			xy/=clip.w;//NDC
 			xy=(xy+1.)/2.;//uv
 			xy*=resolution;//screen
 			return xy;
@@ -122,11 +107,12 @@ var SSRShader = {
 			#endif
 
 			float depth = getDepth( vUv );
-			float viewZ = getViewZ( depth );
-			if(-viewZ>=cameraFar) return;
-
-			float clipW = cameraProjectionMatrix[2][3] * viewZ+cameraProjectionMatrix[3][3];
-			vec3 viewPosition=getViewPosition( vUv, depth, clipW );
+			if(depth==1.) return;
+			vec3 ndcPosition=vec3(vUv,depth)*2.-1.;
+			float viewZ=cameraProjectionMatrix[3][2]/(1.-2.*depth-cameraProjectionMatrix[2][2]);
+			float clipW=-viewZ;
+			vec4 clipPosition=vec4(ndcPosition*clipW,clipW);
+			vec3 viewPosition=(cameraInverseProjectionMatrix*clipPosition).xyz;
 
 			vec2 d0=gl_FragCoord.xy;
 			vec2 d1;
@@ -156,7 +142,7 @@ var SSRShader = {
 					d1viewPosition=viewPosition+viewReflectDir*t;
 				}
 			#endif
-			d1=viewPositionToXY(d1viewPosition);
+			d1=viewToScreen(d1viewPosition);
 
 			float totalLen=length(d1-d0);
 			float xLen=d1.x-d0.x;
@@ -172,10 +158,13 @@ var SSRShader = {
 				vec2 uv=xy/resolution;
 
 				float d = getDepth(uv);
-				float vZ = getViewZ( d );
-				if(-vZ>=cameraFar) continue;
-				float cW = cameraProjectionMatrix[2][3] * vZ+cameraProjectionMatrix[3][3];
-				vec3 vP=getViewPosition( uv, d, cW );
+				if(d==1.) continue;
+
+				vec3 nP=vec3(uv,depth)*2.-1.;
+				float vZ=cameraProjectionMatrix[3][2]/(1.-2.*d-cameraProjectionMatrix[2][2]);
+				float cW=-vZ;
+				vec4 cP=vec4(nP*cW,cW);
+				vec3 vP=(cameraInverseProjectionMatrix*cP).xyz;
 
 				#ifdef PERSPECTIVE_CAMERA
 					// https://www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
