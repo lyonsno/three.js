@@ -252,6 +252,7 @@
 
 			} );
 			folder.add( ssrPass, 'bouncing' );
+			ssrPass.output=SSRPass.OUTPUT.SSR
 			folder.add( ssrPass, 'output', {
 				'Default': SSRPass.OUTPUT.Default,
 				'SSR Only': SSRPass.OUTPUT.SSR,
@@ -273,7 +274,7 @@
 			} );
 			ssrPass.blur=false
 			folder.add( ssrPass, 'blur' );
-			// folder.open()
+			folder.open()
 			// gui.close()
 
 		}
