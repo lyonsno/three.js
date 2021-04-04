@@ -97,21 +97,19 @@ var SSRShader = {
 				return orthographicDepthToViewZ( depth, cameraNear, cameraFar );
 			#endif
 		}
-		vec3 getViewPosition( const in vec2 uv, const in float depth/*clip space*/, const in float clipW ) {
-			vec4 clipPosition = vec4( ( vec3( uv, depth ) - 0.5 ) * 2.0, 1.0 );//ndc
-			clipPosition *= clipW; //clip
+		vec3 uvdToView( const in vec2 uv, const in float depth, const in float clipW ) {
+			vec3 ndcPosition = vec3(vUv,depth)*2.-1.;//ndc
+			vec4 clipPosition = vec4(ndcPosition*clipW,clipW); //clip
 			return ( cameraInverseProjectionMatrix * clipPosition ).xyz;//view
 		}
 		vec3 getViewNormal( const in vec2 uv ) {
 			return unpackRGBToNormal( texture2D( tNormal, uv ).xyz );
 		}
-		vec2 viewPositionToXY(vec3 viewPosition){
-			vec2 xy;
+		vec2 viewToScreen(vec3 viewPosition){
 			vec4 clip=cameraProjectionMatrix*vec4(viewPosition,1);
-			xy=clip.xy;//clip
-			float clipW=clip.w;
-			xy/=clipW;//NDC
-			xy=(xy+1.)/2.;//uv
+			vec2 xy=clip.xy;//clip
+			xy/=clip.w;//NDC
+			xy=(xy+1.)/2.;//uv uvd
 			xy*=resolution;//screen
 			return xy;
 		}
@@ -121,12 +119,13 @@ var SSRShader = {
 				if(metalness==0.) return;
 			#endif
 
+			// screen - uvd - ndc - clip - view
 			float depth = getDepth( vUv );
+			if(depth==1.) return;
 			float viewZ = getViewZ( depth );
-			if(-viewZ>=cameraFar) return;
 
 			float clipW = cameraProjectionMatrix[2][3] * viewZ+cameraProjectionMatrix[3][3];
-			vec3 viewPosition=getViewPosition( vUv, depth, clipW );
+			vec3 viewPosition=uvdToView( vUv, depth, clipW );
 
 			vec2 d0=gl_FragCoord.xy;
 			vec2 d1;
@@ -156,7 +155,7 @@ var SSRShader = {
 					d1viewPosition=viewPosition+viewReflectDir*t;
 				}
 			#endif
-			d1=viewPositionToXY(d1viewPosition);
+			d1=viewToScreen(d1viewPosition);
 
 			float totalLen=length(d1-d0);
 			float xLen=d1.x-d0.x;
@@ -172,10 +171,10 @@ var SSRShader = {
 				vec2 uv=xy/resolution;
 
 				float d = getDepth(uv);
+				if(d==1.) continue;
 				float vZ = getViewZ( d );
-				if(-vZ>=cameraFar) continue;
 				float cW = cameraProjectionMatrix[2][3] * vZ+cameraProjectionMatrix[3][3];
-				vec3 vP=getViewPosition( uv, d, cW );
+				vec3 vP=uvdToView( uv, d, cW );
 
 				#ifdef PERSPECTIVE_CAMERA
 					// https://www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
