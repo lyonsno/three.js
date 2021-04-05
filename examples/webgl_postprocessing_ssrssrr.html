@@ -53,6 +53,7 @@
 		let camera, scene, renderer;
 		const objects = [];
 		const selects = [];
+		const selectsSSR = [];
 		const raycaster = new THREE.Raycaster();
 		const mouseDown = new THREE.Vector2();
 		const mouse = new THREE.Vector2();
@@ -254,7 +255,7 @@
 				height: innerHeight,
 				encoding: THREE.sRGBEncoding,
 				groundReflector: params.groundReflector ? groundReflector : null,
-				selects: params.groundReflector ? selects : null
+				selects: selectsSSR
 			} );
 
 			// GUI
