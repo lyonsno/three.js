@@ -204,8 +204,6 @@
 				selects: selects
 			});
 
-			composer.addPass(ssrrPass);
-
 			// GUI
 
 			gui = new GUI();
@@ -258,8 +256,6 @@
 				groundReflector: params.groundReflector ? groundReflector : null,
 				selects: params.groundReflector ? selects : null
 			} );
-
-			composer.addPass( ssrPass );
 
 			// GUI
 
@@ -342,6 +338,8 @@
 			folder.add( ssrPass, 'blur' );
 			// gui.close()
 
+			composer.addPass( ssrrPass );
+			composer.addPass( ssrPass );
 
 		}
 
