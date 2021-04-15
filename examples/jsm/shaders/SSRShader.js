@@ -208,8 +208,9 @@ var SSRShader = {
 					minThickness*=minThicknessBias;
 					// minThickness+=.0006;
 
-					// float tk=max(minThickness,thickness);
-					float tk=minThickness;
+					float tk=max(minThickness,thickness);
+					// float tk=minThickness;
+					// float tk=thickness;
 				#else
 					float viewReflectRayZ=viewPosition.z+s*(d1viewPosition.z-viewPosition.z);
 					float tk=thickness;
