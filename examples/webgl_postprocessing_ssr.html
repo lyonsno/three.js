@@ -60,7 +60,9 @@
 		function init() {
 
 			camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 15 );
-			camera.position.set( 0.13271600513224902, 0.3489546826045913, 0.43921296427927076 );
+			window.camera=camera
+			// camera.position.set( 0.13271600513224902, 0.3489546826045913, 0.43921296427927076 );
+			camera.position.set( -0.5154379904372837, 0.1452241188749568, -0.1401812692131893 );
 
 			scene = new THREE.Scene();
 			scene.background = new THREE.Color( 0x443333 );
@@ -108,6 +110,14 @@
 			material = new THREE.MeshStandardMaterial( { color: 'green' } );
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( - .12, .025, .015 );
+			scene.add( mesh );
+			otherMeshes.push( mesh );
+			selects.push( mesh );
+
+			geometry = new THREE.BoxBufferGeometry( .5, .5, .1 );
+			material = new THREE.MeshStandardMaterial( { color: 'green' } );
+			mesh = new THREE.Mesh( geometry, material );
+			mesh.position.set( 1.9, .025, .2 );
 			scene.add( mesh );
 			otherMeshes.push( mesh );
 			selects.push( mesh );
@@ -198,8 +208,9 @@
 
 			} );
 			// ssrPass.thickness = 0.0015;
-			ssrPass.thickness = 0.03;
-			gui.add( ssrPass, 'thickness' ).min( 0 ).max( .1 ).step( .0001 );
+			// ssrPass.thickness = 0.03;
+			ssrPass.thickness = 0.0003;
+			gui.add( ssrPass, 'thickness' ).min( 0 ).max( .01 ).step( .00001 );
 			ssrPass.infiniteThick = false
 			gui.add( ssrPass, 'infiniteThick' );
 			gui.add( params, 'autoRotate' ).onChange( () => {
