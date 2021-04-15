@@ -112,6 +112,26 @@ var SSRShader = {
 			xy*=resolution;//screen
 			return xy;
 		}
+
+		// view - clip - ndc - uvd - screen ;
+		vec2 screenToUv(vec2 screen){
+			vec2 uv=screen/resolution;
+			return uv;
+		}
+		vec3 uvToNdc(vec2 uv,float depth){
+			vec3 ndc=vec3(uv,depth)*2.-1.;
+			return ndc;
+		}
+		vec4 ndcToClip(vec3 ndc,float clipW){
+			vec4 clip=vec4(ndc*clipW,clipW);
+			return clip;
+		}
+		vec3 clipToView(vec4 clip){
+			vec3 view=(cameraInverseProjectionMatrix*clip).xyz;
+			return view;
+		}
+
+
 		void main(){
 			#ifdef SELECTIVE
 				float metalness=texture2D(tMetalness,vUv).r;
