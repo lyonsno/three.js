@@ -41,6 +41,7 @@ var SSRPass = function ( { renderer, scene, camera, width, height, selects, enco
 
 	this.maxDistance = SSRShader.uniforms.maxDistance.value;
 	this.thickness = SSRShader.uniforms.thickness.value;
+	this.minThicknessBias = SSRShader.uniforms.minThicknessBias.value;
 
 	this.encoding = encoding;
 
@@ -233,6 +234,7 @@ var SSRPass = function ( { renderer, scene, camera, width, height, selects, enco
 	this.ssrMaterial.uniforms[ 'cameraNear' ].value = this.camera.near;
 	this.ssrMaterial.uniforms[ 'cameraFar' ].value = this.camera.far;
 	this.ssrMaterial.uniforms[ 'thickness' ].value = this.thickness;
+	this.ssrMaterial.uniforms[ 'minThicknessBias' ].value = this.minThicknessBias;
 	this.ssrMaterial.uniforms[ 'resolution' ].value.set( this.width, this.height );
 	this.ssrMaterial.uniforms[ 'cameraProjectionMatrix' ].value.copy( this.camera.projectionMatrix );
 	this.ssrMaterial.uniforms[ 'cameraInverseProjectionMatrix' ].value.copy( this.camera.projectionMatrixInverse );
@@ -392,6 +394,7 @@ SSRPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		this.ssrMaterial.uniforms[ 'opacity' ].value = this.opacity;
 		this.ssrMaterial.uniforms[ 'maxDistance' ].value = this.maxDistance;
 		this.ssrMaterial.uniforms[ 'thickness' ].value = this.thickness;
+		this.ssrMaterial.uniforms[ 'minThicknessBias' ].value = this.minThicknessBias;
 		this.renderPass( renderer, this.ssrMaterial, this.ssrRenderTarget );
 
 

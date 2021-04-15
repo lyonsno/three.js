@@ -33,6 +33,7 @@ var SSRShader = {
     "maxDistance": { value: 180 },
     "cameraRange": { value: 0 },
     "thickness": { value: .007 },
+    "minThicknessBias": { value: 3 },
 
   },
 
@@ -65,6 +66,7 @@ var SSRShader = {
 		uniform float cameraFar;
 		uniform float maxDistance;
 		uniform float thickness;
+		uniform float minThicknessBias;
 		uniform mat4 cameraProjectionMatrix;
 		uniform mat4 cameraInverseProjectionMatrix;
 		#include <packing>
@@ -203,7 +205,7 @@ var SSRShader = {
 					vec2 uv2=vec2(xy.x+1.,xy.y)/resolution;
 					vec3 vP2=getViewPosition(uv2,d,cW);
 					minThickness=vP2.x-vP.x;
-					// minThickness*=2.;
+					minThickness*=minThicknessBias;
 					// minThickness+=.0006;
 
 					// float tk=max(minThickness,thickness);

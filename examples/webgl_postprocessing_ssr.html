@@ -211,6 +211,8 @@
 			// ssrPass.thickness = 0.03;
 			ssrPass.thickness = 0.0003;
 			gui.add( ssrPass, 'thickness' ).min( 0 ).max( .01 ).step( .00001 );
+			ssrPass.minThicknessBias = 3;
+			gui.add( ssrPass, 'minThicknessBias' ).min( 0 ).max( 10 ).step( .01 );
 			ssrPass.infiniteThick = false
 			gui.add( ssrPass, 'infiniteThick' );
 			gui.add( params, 'autoRotate' ).onChange( () => {
