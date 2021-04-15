@@ -198,8 +198,16 @@ var SSRShader = {
 					// https://www.comp.nus.edu.sg/~lowkl/publications/lowk_persp_interp_techrep.pdf
 					float recipVPZ=1./viewPosition.z;
 					float viewReflectRayZ=1./(recipVPZ+s*(1./d1viewPosition.z-recipVPZ));
-					// float minThickness=
-					float tk=thickness;
+
+					float minThickness;
+					vec2 uv2=vec2(xy.x+1.,xy.y)/resolution;
+					vec3 vP2=getViewPosition(uv2,d,cW);
+					minThickness=vP2.x-vP.x;
+					// minThickness*=2.;
+					// minThickness+=.0006;
+
+					// float tk=max(minThickness,thickness);
+					float tk=minThickness;
 				#else
 					float viewReflectRayZ=viewPosition.z+s*(d1viewPosition.z-viewPosition.z);
 					float tk=thickness;
