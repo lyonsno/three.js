@@ -33,7 +33,7 @@
 
 		const params = {
 			enableSSRr: true,
-			autoRotate: true,
+			autoRotate: false,
 		};
 		let composer;
 		let ssrrPass;
@@ -105,10 +105,12 @@
 				const material = new THREE.MeshStandardMaterial({ color: 0x606060 });
 				const mesh = new THREE.Mesh(geometry, material);
 				mesh.position.y = - 0.0365;
+				mesh.position.set(-.12,.01,.015)
+				mesh.scale.setScalar(.2)
 				mesh.name='bunny'
 				scene.add(mesh);
 				objects.push(mesh);
-				selects.push(mesh);
+				// selects.push(mesh);
 
 				// Release decoder resources.
 				dracoLoader.dispose();
@@ -133,7 +135,7 @@
 			mesh.name='sphere'
 			scene.add(mesh);
 			objects.push( mesh );
-			// selects.push( mesh );
+			selects.push( mesh );
 
 			geometry = new THREE.ConeBufferGeometry(.025, .05, 64);
 			material = new THREE.MeshStandardMaterial({ color: 'yellow' });
@@ -142,7 +144,7 @@
 			mesh.name='cone'
 			scene.add(mesh);
 			objects.push( mesh );
-			// selects.push( mesh );
+			selects.push( mesh );
 
 			// renderer
 			renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -189,6 +191,7 @@
 			gui.add(params, 'enableSSRr').name('Enable SSRr');
 			ssrrPass.ior = 1.1;
 			gui.add(ssrrPass, 'ior').name('IOR').min(1).max(1.5).step(.0001);
+			ssrrPass.fillHole=false
 			gui.add( ssrrPass, 'fillHole' );
 			gui.add(params, 'autoRotate').onChange(() => {
 
