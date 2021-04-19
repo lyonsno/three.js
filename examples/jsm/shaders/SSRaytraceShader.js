@@ -146,7 +146,7 @@ const SSRaytraceShader = {
 			vec3 viewPosition=getViewPosition( vUv, depth, clipW );
 
 			vec2 d0=gl_FragCoord.xy;
-			vec2 d1;
+			vec2 d1,d1SSR;
 
 			#ifdef PERSPECTIVE_CAMERA
 				vec3 viewIncidentDir=normalize(viewPosition);
@@ -156,16 +156,20 @@ const SSRaytraceShader = {
 
 			vec3 viewRefractDir=refract(viewIncidentDir,viewNormalSelects,1./ior);
 			// https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/refract.xhtml
+			vec3 viewReflectDir=reflect(viewIncidentDir,viewNormalSelects);
+			float maxReflectRayLen=maxDistance/dot(-viewIncidentDir,viewNormalSelects);
 
 			vec3 d1viewPosition=viewPosition+viewRefractDir*maxDistance;
+			vec3 d1viewPositionSSR=viewPosition+viewReflectDir*maxReflectRayLen;
 			#ifdef PERSPECTIVE_CAMERA
-				if(d1viewPosition.z>-cameraNear){
+				if(d1viewPositionSSR.z>-cameraNear){
 					//https://tutorial.math.lamar.edu/Classes/CalcIII/EqnsOfLines.aspx
 					float t=(-cameraNear-viewPosition.z)/viewRefractDir.z;
-					d1viewPosition=viewPosition+viewRefractDir*t;
+					d1viewPositionSSR=viewPosition+viewRefractDir*t;
 				}
 			#endif
 			d1=viewPositionToXY(d1viewPosition);
+			d1SSR=viewPositionToXY(d1viewPositionSSR);
 
 			float totalLen=length(d1-d0);
 			float xLen=d1.x-d0.x;
