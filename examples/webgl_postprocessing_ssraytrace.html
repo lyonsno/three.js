@@ -14,7 +14,7 @@
 	<div id="container"></div>
 	<div id="info">
 		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> -
-		SSRrPass demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
+		SSRaytracePass demo by <a href="https://github.com/gonnavis" target="_blank">Vis</a>.<br />
 		click object to toggle transparent<br/>
 	</div>
 	
@@ -27,16 +27,16 @@
 
 		import { GUI } from './jsm/libs/dat.gui.module.js';
 		import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
-		import { SSRrPass } from './jsm/postprocessing/SSRrPass.js';
+		import { SSRaytracePass } from './jsm/postprocessing/SSRaytracePass.js';
 
 		import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
 		const params = {
-			enableSSRr: true,
+			enableSSRaytrace: true,
 			autoRotate: true,
 		};
 		let composer;
-		let ssrrPass;
+		let ssraytracePass;
 		let gui;
 		let stats;
 		let controls;
@@ -171,7 +171,7 @@
 			// composer
 
 			composer = new EffectComposer(renderer);
-			ssrrPass = new SSRrPass({
+			ssraytracePass = new SSRaytracePass({
 				renderer,
 				scene,
 				camera,
@@ -181,15 +181,15 @@
 				selects: selects
 			});
 
-			composer.addPass(ssrrPass);
+			composer.addPass(ssraytracePass);
 
 			// GUI
 
 			gui = new GUI();
-			gui.add(params, 'enableSSRr').name('Enable SSRr');
-			ssrrPass.ior = 1.1;
-			gui.add(ssrrPass, 'ior').name('IOR').min(1).max(1.5).step(.0001);
-			gui.add( ssrrPass, 'fillHole' );
+			gui.add(params, 'enableSSRaytrace').name('Enable SSRaytrace');
+			ssraytracePass.ior = 1.1;
+			gui.add(ssraytracePass, 'ior').name('IOR').min(1).max(1.5).step(.0001);
+			gui.add( ssraytracePass, 'fillHole' );
 			gui.add(params, 'autoRotate').onChange(() => {
 
 				controls.enabled = !params.autoRotate;
@@ -197,28 +197,28 @@
 			});
 
 			const folder = gui.addFolder('more settings');
-			folder.add( ssrrPass, 'specular' );
-			folder.add(ssrrPass.specularMaterial, 'metalness').min(0).max(1).step(.01);
-			folder.add(ssrrPass.specularMaterial, 'roughness').min(0).max(1).step(.01);
-			folder.add(ssrrPass, 'output', {
-				'Default': SSRrPass.OUTPUT.Default,
-				'SSRr Only': SSRrPass.OUTPUT.SSRr,
-				'Beauty': SSRrPass.OUTPUT.Beauty,
-				'Depth': SSRrPass.OUTPUT.Depth,
-				'DepthSelects': SSRrPass.OUTPUT.DepthSelects,
-				'NormalSelects': SSRrPass.OUTPUT.NormalSelects,
-				'Refractive': SSRrPass.OUTPUT.Refractive,
-				'Specular': SSRrPass.OUTPUT.Specular,
+			folder.add( ssraytracePass, 'specular' );
+			folder.add(ssraytracePass.specularMaterial, 'metalness').min(0).max(1).step(.01);
+			folder.add(ssraytracePass.specularMaterial, 'roughness').min(0).max(1).step(.01);
+			folder.add(ssraytracePass, 'output', {
+				'Default': SSRaytracePass.OUTPUT.Default,
+				'SSRaytrace Only': SSRaytracePass.OUTPUT.SSRaytrace,
+				'Beauty': SSRaytracePass.OUTPUT.Beauty,
+				'Depth': SSRaytracePass.OUTPUT.Depth,
+				'DepthSelects': SSRaytracePass.OUTPUT.DepthSelects,
+				'NormalSelects': SSRaytracePass.OUTPUT.NormalSelects,
+				'Refractive': SSRaytracePass.OUTPUT.Refractive,
+				'Specular': SSRaytracePass.OUTPUT.Specular,
 			}).onChange(function (value) {
 
-				ssrrPass.output = parseInt(value);
+				ssraytracePass.output = parseInt(value);
 
 			});
-			ssrrPass.surfDist = 0.0015;
-			folder.add( ssrrPass, 'surfDist' ).min( 0 ).max( .005 ).step( .0001 );
-			ssrrPass.maxDistance = 50;
-			folder.add( ssrrPass, 'maxDistance' ).min( 0 ).max( 100 ).step( .001 )
-			folder.add( ssrrPass, 'infiniteThick' );
+			ssraytracePass.surfDist = 0.0015;
+			folder.add( ssraytracePass, 'surfDist' ).min( 0 ).max( .005 ).step( .0001 );
+			ssraytracePass.maxDistance = 50;
+			folder.add( ssraytracePass, 'maxDistance' ).min( 0 ).max( 100 ).step( .001 )
+			folder.add( ssraytracePass, 'infiniteThick' );
 			// folder.open()
 			// gui.close()
 
@@ -289,7 +289,7 @@
 
 			}
 
-			if (params.enableSSRr) {
+			if (params.enableSSRaytrace) {
 
 				composer.render();
 

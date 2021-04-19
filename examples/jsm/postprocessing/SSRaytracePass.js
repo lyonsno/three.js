@@ -18,11 +18,11 @@ import {
 	MeshStandardMaterial
 } from '../../../build/three.module.js';
 import { Pass, FullScreenQuad } from '../postprocessing/Pass.js';
-import { SSRrShader } from '../shaders/SSRrShader.js';
-import { SSRrDepthShader } from '../shaders/SSRrShader.js';
+import { SSRaytraceShader } from '../shaders/SSRaytraceShader.js';
+import { SSRaytraceDepthShader } from '../shaders/SSRaytraceShader.js';
 import { CopyShader } from '../shaders/CopyShader.js';
 
-class SSRrPass extends Pass {
+class SSRaytracePass extends Pass {
 
 	constructor( { renderer, scene, camera, width, height, selects, encoding, morphTargets = false } ) {
 
@@ -40,9 +40,9 @@ class SSRrPass extends Pass {
 		this.output = 0;
 		// this.output = 1;
 
-		this.ior = SSRrShader.uniforms.ior.value;
-		this.maxDistance = SSRrShader.uniforms.maxDistance.value;
-		this.surfDist = SSRrShader.uniforms.surfDist.value;
+		this.ior = SSRaytraceShader.uniforms.ior.value;
+		this.maxDistance = SSRaytraceShader.uniforms.maxDistance.value;
+		this.surfDist = SSRaytraceShader.uniforms.surfDist.value;
 
 		this.encoding = encoding;
 
@@ -50,7 +50,7 @@ class SSRrPass extends Pass {
 
 		this.selects = selects;
 
-		this._specular = SSRrShader.defines.SPECULAR;
+		this._specular = SSRaytraceShader.defines.SPECULAR;
 		Object.defineProperty( this, 'specular', {
 			get() {
 
@@ -61,13 +61,13 @@ class SSRrPass extends Pass {
 
 				if ( this._specular === val ) return;
 				this._specular = val;
-				this.ssrrMaterial.defines.SPECULAR = val;
-				this.ssrrMaterial.needsUpdate = true;
+				this.ssraytraceMaterial.defines.SPECULAR = val;
+				this.ssraytraceMaterial.needsUpdate = true;
 
 			}
 		} );
 
-		this._fillHole = SSRrShader.defines.FILL_HOLE;
+		this._fillHole = SSRaytraceShader.defines.FILL_HOLE;
 		Object.defineProperty( this, 'fillHole', {
 			get() {
 
@@ -78,13 +78,13 @@ class SSRrPass extends Pass {
 
 				if ( this._fillHole === val ) return;
 				this._fillHole = val;
-				this.ssrrMaterial.defines.FILL_HOLE = val;
-				this.ssrrMaterial.needsUpdate = true;
+				this.ssraytraceMaterial.defines.FILL_HOLE = val;
+				this.ssraytraceMaterial.needsUpdate = true;
 
 			}
 		} );
 
-		this._infiniteThick = SSRrShader.defines.INFINITE_THICK;
+		this._infiniteThick = SSRaytraceShader.defines.INFINITE_THICK;
 		Object.defineProperty( this, 'infiniteThick', {
 			get() {
 
@@ -95,8 +95,8 @@ class SSRrPass extends Pass {
 
 				if ( this._infiniteThick === val ) return;
 				this._infiniteThick = val;
-				this.ssrrMaterial.defines.INFINITE_THICK = val;
-				this.ssrrMaterial.needsUpdate = true;
+				this.ssraytraceMaterial.defines.INFINITE_THICK = val;
+				this.ssraytraceMaterial.needsUpdate = true;
 
 			}
 		} );
@@ -146,44 +146,44 @@ class SSRrPass extends Pass {
 			format: RGBAFormat
 		} );
 
-		// ssrr render target
+		// ssraytrace render target
 
-		this.ssrrRenderTarget = new WebGLRenderTarget( this.width, this.height, {
+		this.ssraytraceRenderTarget = new WebGLRenderTarget( this.width, this.height, {
 			minFilter: NearestFilter,
 			magFilter: NearestFilter,
 			format: RGBAFormat
 		} );
 
-		// ssrr material
+		// ssraytrace material
 
-		if ( SSRrShader === undefined ) {
+		if ( SSRaytraceShader === undefined ) {
 
-			console.error( 'THREE.SSRrPass: The pass relies on SSRrShader.' );
+			console.error( 'THREE.SSRaytracePass: The pass relies on SSRaytraceShader.' );
 
 		}
 
-		this.ssrrMaterial = new ShaderMaterial( {
-			defines: Object.assign( {}, SSRrShader.defines, {
+		this.ssraytraceMaterial = new ShaderMaterial( {
+			defines: Object.assign( {}, SSRaytraceShader.defines, {
 				MAX_STEP: Math.sqrt( this.width * this.width + this.height * this.height )
 			} ),
-			uniforms: UniformsUtils.clone( SSRrShader.uniforms ),
-			vertexShader: SSRrShader.vertexShader,
-			fragmentShader: SSRrShader.fragmentShader,
+			uniforms: UniformsUtils.clone( SSRaytraceShader.uniforms ),
+			vertexShader: SSRaytraceShader.vertexShader,
+			fragmentShader: SSRaytraceShader.fragmentShader,
 			blending: NoBlending
 		} );
 
-		this.ssrrMaterial.uniforms[ 'tDiffuse' ].value = this.beautyRenderTarget.texture;
-		this.ssrrMaterial.uniforms[ 'tSpecular' ].value = this.specularRenderTarget.texture;
-		this.ssrrMaterial.uniforms[ 'tNormalSelects' ].value = this.normalSelectsRenderTarget.texture;
-		this.ssrrMaterial.needsUpdate = true;
-		this.ssrrMaterial.uniforms[ 'tRefractive' ].value = this.refractiveRenderTarget.texture;
-		this.ssrrMaterial.uniforms[ 'tDepth' ].value = this.beautyRenderTarget.depthTexture;
-		this.ssrrMaterial.uniforms[ 'tDepthSelects' ].value = this.normalSelectsRenderTarget.depthTexture;
-		this.ssrrMaterial.uniforms[ 'cameraNear' ].value = this.camera.near;
-		this.ssrrMaterial.uniforms[ 'cameraFar' ].value = this.camera.far;
-		this.ssrrMaterial.uniforms[ 'resolution' ].value.set( this.width, this.height );
-		this.ssrrMaterial.uniforms[ 'cameraProjectionMatrix' ].value.copy( this.camera.projectionMatrix );
-		this.ssrrMaterial.uniforms[ 'cameraInverseProjectionMatrix' ].value.copy( this.camera.projectionMatrixInverse );
+		this.ssraytraceMaterial.uniforms[ 'tDiffuse' ].value = this.beautyRenderTarget.texture;
+		this.ssraytraceMaterial.uniforms[ 'tSpecular' ].value = this.specularRenderTarget.texture;
+		this.ssraytraceMaterial.uniforms[ 'tNormalSelects' ].value = this.normalSelectsRenderTarget.texture;
+		this.ssraytraceMaterial.needsUpdate = true;
+		this.ssraytraceMaterial.uniforms[ 'tRefractive' ].value = this.refractiveRenderTarget.texture;
+		this.ssraytraceMaterial.uniforms[ 'tDepth' ].value = this.beautyRenderTarget.depthTexture;
+		this.ssraytraceMaterial.uniforms[ 'tDepthSelects' ].value = this.normalSelectsRenderTarget.depthTexture;
+		this.ssraytraceMaterial.uniforms[ 'cameraNear' ].value = this.camera.near;
+		this.ssraytraceMaterial.uniforms[ 'cameraFar' ].value = this.camera.far;
+		this.ssraytraceMaterial.uniforms[ 'resolution' ].value.set( this.width, this.height );
+		this.ssraytraceMaterial.uniforms[ 'cameraProjectionMatrix' ].value.copy( this.camera.projectionMatrix );
+		this.ssraytraceMaterial.uniforms[ 'cameraInverseProjectionMatrix' ].value.copy( this.camera.projectionMatrixInverse );
 
 		// normal material
 
@@ -212,10 +212,10 @@ class SSRrPass extends Pass {
 		// material for rendering the depth
 
 		this.depthRenderMaterial = new ShaderMaterial( {
-			defines: Object.assign( {}, SSRrDepthShader.defines ),
-			uniforms: UniformsUtils.clone( SSRrDepthShader.uniforms ),
-			vertexShader: SSRrDepthShader.vertexShader,
-			fragmentShader: SSRrDepthShader.fragmentShader,
+			defines: Object.assign( {}, SSRaytraceDepthShader.defines ),
+			uniforms: UniformsUtils.clone( SSRaytraceDepthShader.uniforms ),
+			vertexShader: SSRaytraceDepthShader.vertexShader,
+			fragmentShader: SSRaytraceDepthShader.fragmentShader,
 			blending: NoBlending
 		} );
 		this.depthRenderMaterial.uniforms[ 'tDepth' ].value = this.beautyRenderTarget.depthTexture;
@@ -254,7 +254,7 @@ class SSRrPass extends Pass {
 		this.specularRenderTarget.dispose();
 		this.normalSelectsRenderTarget.dispose();
 		this.refractiveRenderTarget.dispose();
-		this.ssrrRenderTarget.dispose();
+		this.ssraytraceRenderTarget.dispose();
 
 		// dispose materials
 
@@ -299,7 +299,7 @@ class SSRrPass extends Pass {
 			if ( this.selects.includes( child ) ) {
 
 				child.visible = true;
-				child._SSRrPassBackupMaterial = child.material;
+				child._SSRaytracePassBackupMaterial = child.material;
 				child.material = this.specularMaterial;
 
 			} else if ( ! child.isLight ) {
@@ -314,7 +314,7 @@ class SSRrPass extends Pass {
 
 			if ( this.selects.includes( child ) ) {
 
-				child.material = child._SSRrPassBackupMaterial;
+				child.material = child._SSRaytracePassBackupMaterial;
 
 			}
 
@@ -341,39 +341,39 @@ class SSRrPass extends Pass {
 
 		this.renderRefractive( renderer, this.refractiveOnMaterial, this.refractiveRenderTarget, 0, 0 );
 
-		// render SSRr
+		// render SSRaytrace
 
-		this.ssrrMaterial.uniforms[ 'ior' ].value = this.ior;
-		this.ssrrMaterial.uniforms[ 'maxDistance' ].value = this.maxDistance;
-		this.ssrrMaterial.uniforms[ 'surfDist' ].value = this.surfDist;
-		this.ssrrMaterial.uniforms[ 'tSpecular' ].value = this.specularRenderTarget.texture;
-		this.renderPass( renderer, this.ssrrMaterial, this.ssrrRenderTarget );
+		this.ssraytraceMaterial.uniforms[ 'ior' ].value = this.ior;
+		this.ssraytraceMaterial.uniforms[ 'maxDistance' ].value = this.maxDistance;
+		this.ssraytraceMaterial.uniforms[ 'surfDist' ].value = this.surfDist;
+		this.ssraytraceMaterial.uniforms[ 'tSpecular' ].value = this.specularRenderTarget.texture;
+		this.renderPass( renderer, this.ssraytraceMaterial, this.ssraytraceRenderTarget );
 
 		// output result to screen
 
 		switch ( this.output ) {
 
-			case SSRrPass.OUTPUT.Default:
+			case SSRaytracePass.OUTPUT.Default:
 
 
 				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.beautyRenderTarget.texture;
 				this.copyMaterial.blending = NoBlending;
 				this.renderPass( renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer );
 
-				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.ssrrRenderTarget.texture;
+				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.ssraytraceRenderTarget.texture;
 				this.copyMaterial.blending = NormalBlending;
 				this.renderPass( renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer );
 
 				break;
-			case SSRrPass.OUTPUT.SSRr:
+			case SSRaytracePass.OUTPUT.SSRaytrace:
 
-				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.ssrrRenderTarget.texture;
+				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.ssraytraceRenderTarget.texture;
 				this.copyMaterial.blending = NoBlending;
 				this.renderPass( renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer );
 
 				break;
 
-			case SSRrPass.OUTPUT.Beauty:
+			case SSRaytracePass.OUTPUT.Beauty:
 
 				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.beautyRenderTarget.texture;
 				this.copyMaterial.blending = NoBlending;
@@ -381,21 +381,21 @@ class SSRrPass extends Pass {
 
 				break;
 
-			case SSRrPass.OUTPUT.Depth:
+			case SSRaytracePass.OUTPUT.Depth:
 
 				this.depthRenderMaterial.uniforms[ 'tDepth' ].value = this.beautyRenderTarget.depthTexture;
 				this.renderPass( renderer, this.depthRenderMaterial, this.renderToScreen ? null : writeBuffer );
 
 				break;
 
-			case SSRrPass.OUTPUT.DepthSelects:
+			case SSRaytracePass.OUTPUT.DepthSelects:
 
 				this.depthRenderMaterial.uniforms[ 'tDepth' ].value = this.normalSelectsRenderTarget.depthTexture;
 				this.renderPass( renderer, this.depthRenderMaterial, this.renderToScreen ? null : writeBuffer );
 
 				break;
 
-			case SSRrPass.OUTPUT.NormalSelects:
+			case SSRaytracePass.OUTPUT.NormalSelects:
 
 				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.normalSelectsRenderTarget.texture;
 				this.copyMaterial.blending = NoBlending;
@@ -403,7 +403,7 @@ class SSRrPass extends Pass {
 
 				break;
 
-			case SSRrPass.OUTPUT.Refractive:
+			case SSRaytracePass.OUTPUT.Refractive:
 
 				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.refractiveRenderTarget.texture;
 				this.copyMaterial.blending = NoBlending;
@@ -411,7 +411,7 @@ class SSRrPass extends Pass {
 
 				break;
 
-			case SSRrPass.OUTPUT.Specular:
+			case SSRaytracePass.OUTPUT.Specular:
 
 				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.specularRenderTarget.texture;
 				this.copyMaterial.blending = NoBlending;
@@ -420,7 +420,7 @@ class SSRrPass extends Pass {
 				break;
 
 			default:
-				console.warn( 'THREE.SSRrPass: Unknown output type.' );
+				console.warn( 'THREE.SSRaytracePass: Unknown output type.' );
 
 		}
 
@@ -514,7 +514,7 @@ class SSRrPass extends Pass {
 		} );
 		this.scene.traverse( child => {
 
-			child._SSRrPassBackupMaterial = child.material;
+			child._SSRaytracePassBackupMaterial = child.material;
 			if ( this.selects.includes( child ) ) {
 
 				child.material = this.refractiveOnMaterial;
@@ -526,16 +526,16 @@ class SSRrPass extends Pass {
 			}
 
 		} );
-		this.scene._SSRrPassBackupBackground = this.scene.background;
+		this.scene._SSRaytracePassBackupBackground = this.scene.background;
 		this.scene.background = null;
-		this.scene._SSRrPassBackupFog = this.scene.fog;
+		this.scene._SSRaytracePassBackupFog = this.scene.fog;
 		this.scene.fog = null;
 		renderer.render( this.scene, this.camera );
-		this.scene.fog = this.scene._SSRrPassBackupFog;
-		this.scene.background = this.scene._SSRrPassBackupBackground;
+		this.scene.fog = this.scene._SSRaytracePassBackupFog;
+		this.scene.background = this.scene._SSRaytracePassBackupBackground;
 		this.scene.traverse( child => {
 
-			child.material = child._SSRrPassBackupMaterial;
+			child.material = child._SSRaytracePassBackupMaterial;
 
 		} );
 
@@ -552,25 +552,25 @@ class SSRrPass extends Pass {
 		this.width = width;
 		this.height = height;
 
-		this.ssrrMaterial.defines.MAX_STEP = Math.sqrt( width * width + height * height );
-		this.ssrrMaterial.needsUpdate = true;
+		this.ssraytraceMaterial.defines.MAX_STEP = Math.sqrt( width * width + height * height );
+		this.ssraytraceMaterial.needsUpdate = true;
 		this.beautyRenderTarget.setSize( width, height );
 		this.specularRenderTarget.setSize( width, height );
-		this.ssrrRenderTarget.setSize( width, height );
+		this.ssraytraceRenderTarget.setSize( width, height );
 		this.normalSelectsRenderTarget.setSize( width, height );
 		this.refractiveRenderTarget.setSize( width, height );
 
-		this.ssrrMaterial.uniforms[ 'resolution' ].value.set( width, height );
-		this.ssrrMaterial.uniforms[ 'cameraProjectionMatrix' ].value.copy( this.camera.projectionMatrix );
-		this.ssrrMaterial.uniforms[ 'cameraInverseProjectionMatrix' ].value.copy( this.camera.projectionMatrixInverse );
+		this.ssraytraceMaterial.uniforms[ 'resolution' ].value.set( width, height );
+		this.ssraytraceMaterial.uniforms[ 'cameraProjectionMatrix' ].value.copy( this.camera.projectionMatrix );
+		this.ssraytraceMaterial.uniforms[ 'cameraInverseProjectionMatrix' ].value.copy( this.camera.projectionMatrixInverse );
 
 	}
 
 }
 
-SSRrPass.OUTPUT = {
+SSRaytracePass.OUTPUT = {
 	'Default': 0,
-	'SSRr': 1,
+	'SSRaytrace': 1,
 	'Beauty': 3,
 	'Depth': 4,
 	'DepthSelects': 9,
@@ -579,4 +579,4 @@ SSRrPass.OUTPUT = {
 	'Specular': 8,
 };
 
-export { SSRrPass };
+export { SSRaytracePass };
