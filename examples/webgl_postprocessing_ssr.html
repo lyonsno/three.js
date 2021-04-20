@@ -35,7 +35,7 @@
 			enableSSR: true,
 			autoRotate: false,
 			otherMeshes: true,
-			groundReflector: true,
+			groundReflector: false,
 		};
 		let composer;
 		let ssrPass;
@@ -76,6 +76,7 @@
 			plane.position.y = - 0.0001;
 			// plane.receiveShadow = true;
 			scene.add( plane );
+			selects.push(plane)
 
 			// Lights
 			const hemiLight = new THREE.HemisphereLight( 0x443333, 0x111122 );
@@ -181,7 +182,7 @@
 				height: innerHeight,
 				encoding: THREE.sRGBEncoding,
 				groundReflector: params.groundReflector ? groundReflector : null,
-				selects: params.groundReflector ? selects : null
+				selects: selects
 			} );
 
 			composer.addPass( ssrPass );
@@ -228,9 +229,13 @@
 
 			} );
 			gui.add(bunny.material,'metalness').name('bunny metalness').min(0).max(1)
+			gui.add(bunny.material,'roughness').name('bunny roughness').min(0).max(1)
 			gui.add(cube.material,'metalness').name('cube metalness').min(0).max(1)
+			gui.add(cube.material,'roughness').name('cube roughness').min(0).max(1)
 			gui.add(sphere.material,'metalness').name('sphere metalness').min(0).max(1)
+			gui.add(sphere.material,'roughness').name('sphere roughness').min(0).max(1)
 			gui.add(cone.material,'metalness').name('cone metalness').min(0).max(1)
+			gui.add(cone.material,'roughness').name('cone roughness').min(0).max(1)
 
 			const folder = gui.addFolder( 'more settings' );
 			folder.add( ssrPass, 'fresnel' ).onChange( ()=>{
