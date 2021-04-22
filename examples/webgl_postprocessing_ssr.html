@@ -76,7 +76,7 @@
 			plane.position.y = - 0.0001;
 			// plane.receiveShadow = true;
 			scene.add( plane );
-			// selects.push(plane)
+			selects.push(plane)
 
 			// Lights
 			const hemiLight = new THREE.HemisphereLight( 0x443333, 0x111122 );
@@ -94,7 +94,7 @@
 
 					geometry.computeVertexNormals();
 
-					const material = new THREE.MeshStandardMaterial( { metalness: 1, roughness:.5, color: 0x606060 } );
+					const material = new THREE.MeshStandardMaterial( { metalness: .6, roughness:0, color: 0x606060 } );
 					const mesh = new THREE.Mesh( geometry, material );
 					mesh.position.y = - 0.0365;
 					scene.add( mesh );
@@ -111,7 +111,7 @@
 			let geometry, material, mesh;
 
 			geometry = new THREE.BoxBufferGeometry( .05, .05, .05 );
-			material = new THREE.MeshStandardMaterial( { metalness: 1, roughness:.5, color: 'green' } );
+			material = new THREE.MeshStandardMaterial( { metalness: .6, roughness:.5, color: 'green' } );
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( - .12, .025, .015 );
 			scene.add( mesh );
@@ -120,7 +120,7 @@
 			cube=mesh
 
 			geometry = new THREE.IcosahedronBufferGeometry( .025, 4 );
-			material = new THREE.MeshStandardMaterial( { metalness: 1, roughness:.5, color: 'cyan' } );
+			material = new THREE.MeshStandardMaterial( { metalness: .6, roughness:.5, color: 'cyan' } );
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( - .05, .025, .08 );
 			scene.add( mesh );
@@ -129,7 +129,7 @@
 			sphere=mesh
 
 			geometry = new THREE.ConeBufferGeometry( .025, .05, 64 );
-			material = new THREE.MeshStandardMaterial( { metalness: 1, roughness:.5, color: 'yellow' } );
+			material = new THREE.MeshStandardMaterial( { metalness: .6, roughness:.5, color: 'yellow' } );
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( - .05, .025, - .055 );
 			scene.add( mesh );
@@ -207,8 +207,9 @@
 				width: innerWidth,
 				height: innerHeight,
 				encoding: THREE.sRGBEncoding,
-				groundReflector: params.groundReflector ? groundReflector : null,
-				selects: selects
+				// groundReflector: params.groundReflector ? groundReflector : null,
+				// selects: params.groundReflector ? selects : null
+				selects,
 			} );
 
 			composer.addPass( ssrPass );
@@ -217,25 +218,23 @@
 
 			gui = new GUI( { width: 260 } );
 			gui.add( params, 'enableSSR' ).name( 'Enable SSR' );
-			gui.add( params, 'groundReflector' ).onChange( () => {
+			// gui.add( params, 'groundReflector' ).onChange( () => {
 
-				if ( params.groundReflector ) {
+			// 	if ( params.groundReflector ) {
 
-					ssrPass.groundReflector = groundReflector,
-					ssrPass.selects = selects;
+			// 		ssrPass.groundReflector = groundReflector,
+			// 		ssrPass.selects = selects;
 
-				} else {
+			// 	} else {
 
-					ssrPass.groundReflector = null,
-					ssrPass.selects = null;
+			// 		ssrPass.groundReflector = null,
+			// 		ssrPass.selects = null;
 
-				}
+			// 	}
 
-			} );
+			// } );
 			ssrPass.thickness = 0.018;
 			gui.add( ssrPass, 'thickness' ).min( 0 ).max( .1 ).step( .0001 );
-			ssrPass.infiniteThick = false;
-			gui.add( ssrPass, 'infiniteThick' );
 			gui.add( params, 'autoRotate' ).onChange( () => {
 
 				controls.enabled = ! params.autoRotate;
@@ -319,6 +318,8 @@
 
 			} );
 			folder.add( ssrPass, 'blur' );
+			ssrPass.infiniteThick = false;
+			folder.add( ssrPass, 'infiniteThick' );
 			// folder.open()
 			// gui.close()
 
