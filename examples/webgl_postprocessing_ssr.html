@@ -70,16 +70,16 @@
 			// scene.fog = new THREE.Fog( 0x443333, 1, 4 );
 
 			// Ground
-			const plane = new THREE.Mesh(
+			const groundPlane = new THREE.Mesh(
 				new THREE.PlaneGeometry( 8, 8 ),
 				new THREE.MeshPhongMaterial( { color: 0x999999, specular: 0x101010 } )
 			);
-			plane.rotation.x = - Math.PI / 2;
-			plane.position.y = - 0.0001;
-			// plane.receiveShadow = true;
-			scene.add( plane );
-			selects.push(plane)
-			plane.name='plane'
+			groundPlane.rotation.x = - Math.PI / 2;
+			groundPlane.position.y = - 0.0001;
+			// groundPlane.receiveShadow = true;
+			scene.add( groundPlane );
+			selects.push(groundPlane)
+			groundPlane.name='groundPlane'
 
 			// Lights
 			const hemiLight = new THREE.HemisphereLight( 0x443333, 0x111122 );
@@ -115,6 +115,7 @@
 			let geometry, material, mesh;
 			let group=new THREE.Group()
 			scene.add(group)
+			otherMeshes.push(group)
 			selects.push(group)
 			group.name='group'
 
@@ -123,7 +124,7 @@
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( - .12, .025, .015 );
 			group.add( mesh );
-			otherMeshes.push( mesh );
+			// otherMeshes.push( mesh );
 			// selects.push( mesh );
 			cube=mesh
 			mesh.name='cube'
@@ -133,7 +134,7 @@
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( - .05, .025, .08 );
 			group.add( mesh );
-			otherMeshes.push( mesh );
+			// otherMeshes.push( mesh );
 			// selects.push( mesh );
 			sphere=mesh
 			mesh.name='sphere'
@@ -143,8 +144,10 @@
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( - .05, .025, - .055 );
 			scene.add( mesh );
-			otherMeshes.push( mesh );
-			selects.push( mesh );
+			// otherMeshes.push( mesh );
+			// selects.push( mesh );
+			cube.add(mesh)
+			mesh.position.sub(cube.position)
 			cone=mesh
 			mesh.name='cone'
 
@@ -253,7 +256,7 @@
 				controls.enabled = ! params.autoRotate;
 
 			} );
-			// ssrPass.output=SSRPass.OUTPUT.Metalness
+			ssrPass.output=SSRPass.OUTPUT.Metalness
 			gui.add( ssrPass, 'output', {
 				'Default': SSRPass.OUTPUT.Default,
 				'SSR Only': SSRPass.OUTPUT.SSR,

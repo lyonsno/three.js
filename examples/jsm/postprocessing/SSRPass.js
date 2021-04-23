@@ -575,17 +575,34 @@ class SSRPass extends Pass {
 
 		}
 
+		// if selects include groundPlane and not include such as cone, this approach will cause problem.
 		this.selects.forEach(select=>{
 			select.traverseVisible(child => {
 				if(child.material&&typeof(child.material.reflectivity)==='number'){
 					this.metalnessMaterial.color.setScalar( child.material.reflectivity )
 					let materialBack = child.material;
 					child.material = this.metalnessMaterial
-					renderer.render(child, this.camera)
+					renderer.render(child, this.camera) // TODO: Will render all descendants?
 					child.material = materialBack
 				}
 			})
 		})
+
+		// this.scene.traverseVisible(child => {
+		// 	if(this.selects.includes(child)&&child.material&&typeof(child.material.reflectivity)==='number'){
+		// 		this.metalnessMaterial.color.setScalar( child.material.reflectivity )
+		// 		let materialBack = child.material;
+		// 		child.material = this.metalnessMaterial
+		// 		renderer.render(child, this.camera) // TODO: Will render all descendants?
+		// 		child.material = materialBack
+		// 	}else if(child.material){
+		// 		this.metalnessMaterial.color.setScalar( 0 )
+		// 		let materialBack = child.material;
+		// 		child.material = this.metalnessMaterial
+		// 		renderer.render(child, this.camera) // TODO: Will render all descendants?
+		// 		child.material = materialBack
+		// 	}
+		// })
 
 		// restore original state
 
