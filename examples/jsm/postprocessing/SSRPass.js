@@ -575,12 +575,16 @@ class SSRPass extends Pass {
 
 		}
 
-		this.selects.forEach(child => {
-			this.metalnessMaterial.color.setScalar( (typeof(child.material.reflectivity)==='number') ? child.material.reflectivity : 1 )
-			let materialBack = child.material;
-			child.material = this.metalnessMaterial
-			renderer.render(child, this.camera)
-			child.material = materialBack
+		this.selects.forEach(select=>{
+			select.traverseVisible(child => {
+				if(child.material&&typeof(child.material.reflectivity)==='number'){
+					this.metalnessMaterial.color.setScalar( child.material.reflectivity )
+					let materialBack = child.material;
+					child.material = this.metalnessMaterial
+					renderer.render(child, this.camera)
+					child.material = materialBack
+				}
+			})
 		})
 
 		// restore original state
