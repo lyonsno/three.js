@@ -592,10 +592,10 @@ class SSRPass extends Pass {
 		renderer.clear()
 		let materialBack
 
-		this.metalnessMaterial.color.setScalar( .7 )
-		cube.material = this.metalnessMaterial
-		cone.material = this.metalnessMaterial
-		renderer.render(cube, this.camera) // TODO: Will render all descendants?
+		// this.metalnessMaterial.color.setScalar( .7 )
+		// cube.material = this.metalnessMaterial
+		// cone.material = this.metalnessMaterial
+		// renderer.render(cube, this.camera) // TODO: Will render all descendants?
 
 		// this.metalnessMaterial.color.setScalar( group.material.reflectivity )
 		// materialBack = group.material;
@@ -603,11 +603,11 @@ class SSRPass extends Pass {
 		// renderer.render(group, this.camera) // TODO: Will render all descendants?
 		// group.material = materialBack
 
-		// this.metalnessMaterial.color.setScalar( cube.material.reflectivity )
-		// materialBack = cube.material;
-		// cube.material = this.metalnessMaterial
-		// renderer.render(cube, this.camera) // TODO: Will render all descendants?
-		// cube.material = materialBack
+		this.metalnessMaterial.color.setScalar( cube.material.reflectivity )
+		materialBack = cube.material;
+		cube.material = this.metalnessMaterial
+		renderer.render(cube, this.camera) // TODO: Will render all descendants?
+		cube.material = materialBack
 
 		// this.metalnessMaterial.color.setScalar( cone.material.reflectivity )
 		// materialBack = cone.material;

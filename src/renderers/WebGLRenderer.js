@@ -1253,13 +1253,13 @@ function WebGLRenderer( parameters ) {
 
 		}
 
-		const children = object.children;
+		// const children = object.children;
 
-		for ( let i = 0, l = children.length; i < l; i ++ ) {
+		// for ( let i = 0, l = children.length; i < l; i ++ ) {
 
-			projectObject( children[ i ], camera, groupOrder, sortObjects );
+		// 	projectObject( children[ i ], camera, groupOrder, sortObjects );
 
-		}
+		// }
 
 	}
 
