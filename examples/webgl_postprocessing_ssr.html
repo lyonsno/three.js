@@ -114,6 +114,7 @@
 
 			let geometry, material, mesh;
 			let group=new THREE.Group()
+			window.group=group
 			scene.add(group)
 			otherMeshes.push(group)
 			selects.push(group)
@@ -128,6 +129,7 @@
 			// selects.push( mesh );
 			cube=mesh
 			mesh.name='cube'
+			window.cube=cube
 
 			geometry = new THREE.IcosahedronBufferGeometry( .025, 4 );
 			material = new THREE.MeshPhysicalMaterial( { metalness: .5, roughness:.5, color: 'cyan' } );
@@ -138,6 +140,7 @@
 			// selects.push( mesh );
 			sphere=mesh
 			mesh.name='sphere'
+			window.sphere=sphere
 
 			geometry = new THREE.ConeBufferGeometry( .025, .05, 64 );
 			material = new THREE.MeshPhysicalMaterial( { metalness: .5, roughness:.5, color: 'yellow' } );
@@ -150,6 +153,7 @@
 			mesh.position.sub(cube.position)
 			cone=mesh
 			mesh.name='cone'
+			window.cone=cone
 
 			geometry = new THREE.PlaneBufferGeometry( 1, 1 );
 			groundReflector = new ReflectorForSSRPass( geometry, {

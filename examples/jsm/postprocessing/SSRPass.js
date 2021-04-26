@@ -575,18 +575,53 @@ class SSRPass extends Pass {
 
 		}
 
-		// if selects include groundPlane and not include such as cone, this approach will cause problem.
-		this.selects.forEach(select=>{
-			select.traverseVisible(child => {
-				if(child.material&&typeof(child.material.reflectivity)==='number'){
-					this.metalnessMaterial.color.setScalar( child.material.reflectivity )
-					let materialBack = child.material;
-					child.material = this.metalnessMaterial
-					renderer.render(child, this.camera) // TODO: Will render all descendants?
-					child.material = materialBack
-				}
-			})
-		})
+		// // if selects include groundPlane and not include such as cone, this approach will cause problem.
+		// this.selects.forEach(select=>{
+		// 	select.traverseVisible(child => {
+		// 		if(child.material&&typeof(child.material.reflectivity)==='number'){
+		// 			this.metalnessMaterial.color.setScalar( child.material.reflectivity )
+		// 			let materialBack = child.material;
+		// 			child.material = this.metalnessMaterial
+		// 			renderer.render(child, this.camera) // TODO: Will render all descendants?
+		// 			child.material = materialBack
+		// 		}
+		// 	})
+		// })
+
+		renderer.setClearColor('red')
+		renderer.clear()
+		let materialBack
+
+		this.metalnessMaterial.color.setScalar( .7 )
+		cube.material = this.metalnessMaterial
+		cone.material = this.metalnessMaterial
+		renderer.render(cube, this.camera) // TODO: Will render all descendants?
+
+		// this.metalnessMaterial.color.setScalar( group.material.reflectivity )
+		// materialBack = group.material;
+		// group.material = this.metalnessMaterial
+		// renderer.render(group, this.camera) // TODO: Will render all descendants?
+		// group.material = materialBack
+
+		// this.metalnessMaterial.color.setScalar( cube.material.reflectivity )
+		// materialBack = cube.material;
+		// cube.material = this.metalnessMaterial
+		// renderer.render(cube, this.camera) // TODO: Will render all descendants?
+		// cube.material = materialBack
+
+		// this.metalnessMaterial.color.setScalar( cone.material.reflectivity )
+		// materialBack = cone.material;
+		// cone.material = this.metalnessMaterial
+		// renderer.render(cone, this.camera) // TODO: Will render all descendants?
+		// cone.material = materialBack
+
+		// if(window.ddd){
+		// 	this.scene.traverse(child => {
+		// 		console.log(`name: ${child.name} type: ${child.type}`)
+		// 		window.ddd=false
+		// 	})
+		// 	window.ddd=false
+		// }
 
 		// this.scene.traverseVisible(child => {
 		// 	if(this.selects.includes(child)&&child.material&&typeof(child.material.reflectivity)==='number'){
