@@ -1030,6 +1030,7 @@ function WebGLRenderer( parameters ) {
 		_clippingEnabled = clipping.init( this.clippingPlanes, _localClippingEnabled, camera );
 
 		currentRenderList = renderLists.get( scene, renderListStack.length );
+		// debugger
 		currentRenderList.init();
 
 		renderListStack.push( currentRenderList );
