@@ -635,13 +635,13 @@ class SSRPass extends Pass {
 				this.metalnessMaterial.color.setScalar( child.material.envMapIntensity )
 				let materialBack = child.material;
 				child.material = this.metalnessMaterial
-				renderer.render(child, this.camera) // TODO: Will render all descendants?
+				renderer.render(child, this.camera, false) // TODO: Will render all descendants?
 				child.material = materialBack
 			}else if(child.material){
 				this.metalnessMaterial.color.setScalar( 0 )
 				let materialBack = child.material;
 				child.material = this.metalnessMaterial
-				renderer.render(child, this.camera) // TODO: Will render all descendants?
+				renderer.render(child, this.camera, false) // TODO: Will render all descendants?
 				child.material = materialBack
 			}
 		})
