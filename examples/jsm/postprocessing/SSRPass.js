@@ -49,7 +49,6 @@ class SSRPass extends Pass {
 		this.tempColor = new Color();
 
 		this._selects = selects;
-		this.selective = Array.isArray( this._selects );
 		Object.defineProperty( this, 'selects', {
 			get() {
 
@@ -58,21 +57,18 @@ class SSRPass extends Pass {
 			},
 			set( val ) {
 
-				if ( this._selects === val ) return;
-				this._selects = val;
-				if ( Array.isArray( val ) ) {
-
-					this.selective = true;
-					this.ssrMaterial.defines.SELECTIVE = true;
-					this.ssrMaterial.needsUpdate = true;
-
-				} else {
-
-					this.selective = false;
-					this.ssrMaterial.defines.SELECTIVE = false;
-					this.ssrMaterial.needsUpdate = true;
-
-				}
+				let arr=[]
+				val.forEach(obj3d=>{
+					console.log(1)
+					obj3d.traverseVisible(child=>{
+						console.log(2)
+						if(child.material&&typeof child.material.envMapIntensity==='number'){
+							arr.push(child)
+						}
+					})
+				})
+				arr=Array.from(new Set(arr))
+				this._selects=arr
 
 			}
 		} );
@@ -228,7 +224,6 @@ class SSRPass extends Pass {
 
 		this.ssrMaterial.uniforms[ 'tDiffuse' ].value = this.beautyRenderTarget.texture;
 		this.ssrMaterial.uniforms[ 'tNormal' ].value = this.normalRenderTarget.texture;
-		this.ssrMaterial.defines.SELECTIVE = this.selective;
 		this.ssrMaterial.needsUpdate = true;
 		this.ssrMaterial.uniforms[ 'tMetalness' ].value = this.metalnessRenderTarget.texture;
 		this.ssrMaterial.uniforms[ 'tDepth' ].value = this.beautyRenderTarget.depthTexture;
@@ -371,11 +366,7 @@ class SSRPass extends Pass {
 
 		// render metalnesses
 
-		if ( this.selective ) {
-
-			this.renderMetalness( renderer, this.metalnessRenderTarget, 0, 0 );
-
-		}
+		this.renderMetalness( renderer, this.metalnessRenderTarget, 0, 0 );
 
 		// render SSR
 
@@ -603,11 +594,11 @@ class SSRPass extends Pass {
 		// renderer.render(group, this.camera) // TODO: Will render all descendants?
 		// group.material = materialBack
 
-		this.metalnessMaterial.color.setScalar( cube.material.reflectivity )
-		materialBack = cube.material;
-		cube.material = this.metalnessMaterial
-		renderer.render(cube, this.camera) // TODO: Will render all descendants?
-		cube.material = materialBack
+		// this.metalnessMaterial.color.setScalar( cube.material.reflectivity )
+		// materialBack = cube.material;
+		// cube.material = this.metalnessMaterial
+		// renderer.render(cube, this.camera) // TODO: Will render all descendants?
+		// cube.material = materialBack
 
 		// this.metalnessMaterial.color.setScalar( cone.material.reflectivity )
 		// materialBack = cone.material;
@@ -638,6 +629,22 @@ class SSRPass extends Pass {
 		// 		child.material = materialBack
 		// 	}
 		// })
+
+		this.scene.traverseVisible(child => {
+			if(this.selects.includes(child)&&child.material&&typeof(child.material.envMapIntensity)==='number'){
+				this.metalnessMaterial.color.setScalar( child.material.envMapIntensity )
+				let materialBack = child.material;
+				child.material = this.metalnessMaterial
+				renderer.render(child, this.camera) // TODO: Will render all descendants?
+				child.material = materialBack
+			}else if(child.material){
+				this.metalnessMaterial.color.setScalar( 0 )
+				let materialBack = child.material;
+				child.material = this.metalnessMaterial
+				renderer.render(child, this.camera) // TODO: Will render all descendants?
+				child.material = materialBack
+			}
+		})
 
 		// restore original state
 

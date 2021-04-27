@@ -98,7 +98,7 @@
 
 					geometry.computeVertexNormals();
 
-					const material = new THREE.MeshPhysicalMaterial( { metalness: .5, roughness:.5, color: 0x606060 } );
+					const material = new THREE.MeshStandardMaterial( { metalness: .5, roughness:.5, color: 0x606060 } );
 					const mesh = new THREE.Mesh( geometry, material );
 					mesh.position.y = - 0.0365;
 					scene.add( mesh );
@@ -122,7 +122,7 @@
 			group.name='group'
 
 			geometry = new THREE.BoxBufferGeometry( .05, .05, .05 );
-			material = new THREE.MeshPhysicalMaterial( { metalness: .5, roughness:.5, color: 'green' } );
+			material = new THREE.MeshStandardMaterial( { metalness: .5, roughness:.5, color: 'green' } );
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( - .12, .025, .015 );
 			group.add( mesh );
@@ -133,7 +133,7 @@
 			window.cube=cube
 
 			geometry = new THREE.IcosahedronBufferGeometry( .025, 4 );
-			material = new THREE.MeshPhysicalMaterial( { metalness: .5, roughness:.5, color: 'cyan' } );
+			material = new THREE.MeshStandardMaterial( { metalness: .5, roughness:.5, color: 'cyan' } );
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( - .05, .025, .08 );
 			group.add( mesh );
@@ -144,7 +144,7 @@
 			window.sphere=sphere
 
 			geometry = new THREE.ConeBufferGeometry( .025, .05, 64 );
-			material = new THREE.MeshPhysicalMaterial( { metalness: .5, roughness:.5, color: 'yellow' } );
+			material = new THREE.MeshStandardMaterial( { metalness: .5, roughness:.5, color: 'yellow' } );
 			mesh = new THREE.Mesh( geometry, material );
 			mesh.position.set( - .05, .025, - .055 );
 			scene.add( mesh );
@@ -276,25 +276,25 @@
 			} );
 			folder=gui.addFolder('bunny')
 			folder.open()
-			folder.add(bunny.material,'reflectivity').name('ssr & reflectivity').min(0).max(1)
+			// folder.add(bunny.material,'reflectivity').name('ssr & reflectivity').min(0).max(1)
 			folder.add(bunny.material,'envMapIntensity').name('envMapIntensity').min(0).max(1)
 			folder.add(bunny.material,'metalness').name('bunny metalness').min(0).max(1)
 			folder.add(bunny.material,'roughness').name('bunny roughness').min(0).max(1)
 			folder=gui.addFolder('cube')
 			folder.open()
-			folder.add(cube.material,'reflectivity').name('ssr & reflectivity').min(0).max(1)
+			// // folder.add(cube.material,'reflectivity').name('ssr & reflectivity').min(0).max(1)
 			folder.add(cube.material,'envMapIntensity').name('envMapIntensity').min(0).max(1)
 			folder.add(cube.material,'metalness').name('cube metalness').min(0).max(1)
 			folder.add(cube.material,'roughness').name('cube roughness').min(0).max(1)
 			folder=gui.addFolder('sphere')
 			folder.open()
-			folder.add(sphere.material,'reflectivity').name('ssr & reflectivity').min(0).max(1)
+			// // folder.add(sphere.material,'reflectivity').name('ssr & reflectivity').min(0).max(1)
 			folder.add(sphere.material,'envMapIntensity').name('envMapIntensity').min(0).max(1)
 			folder.add(sphere.material,'metalness').name('sphere metalness').min(0).max(1)
 			folder.add(sphere.material,'roughness').name('sphere roughness').min(0).max(1)
 			folder=gui.addFolder('cone')
 			folder.open()
-			folder.add(cone.material,'reflectivity').name('ssr & reflectivity').min(0).max(1)
+			// // folder.add(cone.material,'reflectivity').name('ssr & reflectivity').min(0).max(1)
 			folder.add(cone.material,'envMapIntensity').name('envMapIntensity').min(0).max(1)
 			folder.add(cone.material,'metalness').name('cone metalness').min(0).max(1)
 			folder.add(cone.material,'roughness').name('cone roughness').min(0).max(1)
