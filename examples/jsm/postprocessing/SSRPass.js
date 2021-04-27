@@ -579,8 +579,8 @@ class SSRPass extends Pass {
 		// 	})
 		// })
 
-		renderer.setClearColor('red')
-		renderer.clear()
+		// renderer.setClearColor('red')
+		// renderer.clear()
 		let materialBack
 
 		// this.metalnessMaterial.color.setScalar( .7 )
