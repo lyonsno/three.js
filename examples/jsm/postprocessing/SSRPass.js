@@ -39,6 +39,7 @@ class SSRPass extends Pass {
 		this.groundReflector = groundReflector;
 
 		this.opacity = SSRShader.uniforms.opacity.value;
+		this.defaultIntensity = 1;
 		this.output = 0;
 
 		this.maxDistance = SSRShader.uniforms.maxDistance.value;
@@ -638,7 +639,7 @@ class SSRPass extends Pass {
 				renderer.render(child, this.camera, false) // TODO: Will render all descendants?
 				child.material = materialBack
 			}else if(child.material){
-				this.metalnessMaterial.color.setScalar( 0 )
+				this.metalnessMaterial.color.setScalar( this.defaultIntensity )
 				let materialBack = child.material;
 				child.material = this.metalnessMaterial
 				renderer.render(child, this.camera, false) // TODO: Will render all descendants?
