@@ -231,6 +231,7 @@
 				// selects: params.groundReflector ? selects : null
 				selects,
 			} );
+			ssrPass.selects=selects; // trigger defineProperty watch
 			window.ssrPass=ssrPass
 
 			composer.addPass( ssrPass );
