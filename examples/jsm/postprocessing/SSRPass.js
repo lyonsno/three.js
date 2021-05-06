@@ -61,10 +61,8 @@ class SSRPass extends Pass {
 				let arr = [];
 				val.forEach( obj3d=>{
 
-					console.log( 1 );
 					obj3d.traverseVisible( child=>{
 
-						console.log( 2 );
 						if ( child.material && typeof child.material.envMapIntensity === 'number' ) {
 
 							arr.push( child );
@@ -574,83 +572,28 @@ class SSRPass extends Pass {
 
 		}
 
-		// // if selects include groundPlane and not include such as cone, this approach will cause problem.
-		// this.selects.forEach(select=>{
-		// 	select.traverseVisible(child => {
-		// 		if(child.material&&typeof(child.material.reflectivity)==='number'){
-		// 			this.metalnessMaterial.color.setScalar( child.material.reflectivity )
-		// 			let materialBack = child.material;
-		// 			child.material = this.metalnessMaterial
-		// 			renderer.render(child, this.camera) // TODO: Will render all descendants?
-		// 			child.material = materialBack
-		// 		}
-		// 	})
-		// })
-
-		// renderer.setClearColor('red')
-		// renderer.clear()
-		let materialBack;
-
-		// this.metalnessMaterial.color.setScalar( .7 )
-		// cube.material = this.metalnessMaterial
-		// cone.material = this.metalnessMaterial
-		// renderer.render(cube, this.camera) // TODO: Will render all descendants?
-
-		// this.metalnessMaterial.color.setScalar( group.material.reflectivity )
-		// materialBack = group.material;
-		// group.material = this.metalnessMaterial
-		// renderer.render(group, this.camera) // TODO: Will render all descendants?
-		// group.material = materialBack
-
-		// this.metalnessMaterial.color.setScalar( cube.material.reflectivity )
-		// materialBack = cube.material;
-		// cube.material = this.metalnessMaterial
-		// renderer.render(cube, this.camera) // TODO: Will render all descendants?
-		// cube.material = materialBack
-
-		// this.metalnessMaterial.color.setScalar( cone.material.reflectivity )
-		// materialBack = cone.material;
-		// cone.material = this.metalnessMaterial
-		// renderer.render(cone, this.camera) // TODO: Will render all descendants?
-		// cone.material = materialBack
-
-		// if(window.ddd){
-		// 	this.scene.traverse(child => {
-		// 		console.log(`name: ${child.name} type: ${child.type}`)
-		// 		window.ddd=false
-		// 	})
-		// 	window.ddd=false
-		// }
-
-		// this.scene.traverseVisible(child => {
-		// 	if(this.selects.includes(child)&&child.material&&typeof(child.material.reflectivity)==='number'){
-		// 		this.metalnessMaterial.color.setScalar( child.material.reflectivity )
-		// 		let materialBack = child.material;
-		// 		child.material = this.metalnessMaterial
-		// 		renderer.render(child, this.camera) // TODO: Will render all descendants?
-		// 		child.material = materialBack
-		// 	}else if(child.material){
-		// 		this.metalnessMaterial.color.setScalar( 0 )
-		// 		let materialBack = child.material;
-		// 		child.material = this.metalnessMaterial
-		// 		renderer.render(child, this.camera) // TODO: Will render all descendants?
-		// 		child.material = materialBack
-		// 	}
-		// })
-
 		this.scene.traverseVisible( child => {
 
-			if ( this.selects.includes( child ) && child.material && typeof ( child.material.envMapIntensity ) === 'number' ) {
+			if ( this.selects.includes( child ) && child.material ) {
 
-				this.metalnessMaterial.color.setScalar( child.material.envMapIntensity );
-				let materialBack = child.material;
-				child.material = this.metalnessMaterial;
-				renderer.render( child, this.camera, false ); // TODO: Will render all descendants?
-				child.material = materialBack;
+				if ( child.material.type === 'MeshStandardMaterial' ) {
 
-			} else if ( child.material ) {
+					let reflectivity = .5;
+					let intensity = reflectivity; // TODO: Need calculate intensity from reflectivity, not directly use.
+					this.metalnessMaterial.color.setScalar( intensity );
 
-				this.metalnessMaterial.color.setScalar( this.defaultIntensity );
+				} else if ( child.material.type === 'MeshPhysicalMaterial' ) {
+
+					let reflectivity = child.material.reflectivity;
+					let intensity = reflectivity; // TODO: Need calculate intensity from reflectivity, not directly use.
+					this.metalnessMaterial.color.setScalar( intensity );
+
+				} else {
+
+					this.metalnessMaterial.color.setScalar( this.defaultIntensity );
+
+				}
+
 				let materialBack = child.material;
 				child.material = this.metalnessMaterial;
 				renderer.render( child, this.camera, false ); // TODO: Will render all descendants?
