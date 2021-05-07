@@ -32,6 +32,7 @@ var SSRShader = {
 		'maxDistance': { value: 180 },
 		'cameraRange': { value: 0 },
 		'thickness': { value: .018 },
+		'reflectivity': { value: .5 },
 
 	},
 
@@ -64,6 +65,7 @@ var SSRShader = {
 		uniform float cameraFar;
 		uniform float maxDistance;
 		uniform float thickness;
+		uniform float reflectivity;
 		uniform mat4 cameraProjectionMatrix;
 		uniform mat4 cameraInverseProjectionMatrix;
 		#include <packing>
@@ -220,18 +222,22 @@ var SSRShader = {
 						// op*=metalness;
 
 						
+						vec3 albedo=texture2D(tDiffuse,vUv).rgb;
+						vec3 reflectColor=texture2D(tDiffuse,uv).rgb;
+						vec3 lightColor=reflectColor;
+
 						vec3 N = viewNormal;
 						vec3 V = -viewIncidentDir;
 						float specularCoefficient = 0.16; // https://github.com/mrdoob/three.js/blob/9bbd837deb3e1d43d5c6c7054211eda5864bea06/src/renderers/shaders/ShaderChunk/lights_physical_pars_fragment.glsl.js#L18
 						vec3 F0 = vec3( specularCoefficient * ( reflectivity * reflectivity ) );
-						F0 = mix(F0, albedo, metallic); 
+						F0 = mix(F0, albedo, metalness); 
 
 						// calculate per-light radiance
-						vec3 L = normalize(lightPositions[i] - WorldPos);
+						vec3 L = viewReflectDir;
 						vec3 H = normalize(V + L);
-						float distance = length(lightPositions[i] - WorldPos);
+						// float distance = length(lightPositions[i] - WorldPos);
 						float attenuation = 1.0 / (distance * distance);
-						vec3 radiance = lightColors[i] * attenuation;
+						vec3 radiance = lightColor * attenuation;
 
 						// Cook-Torrance BRDF
 						float NDF = DistributionGGX(N, H, roughness);   
@@ -251,7 +257,7 @@ var SSRShader = {
 						// multiply kD by the inverse metalness such that only non-metals 
 						// have diffuse lighting, or a linear blend if partly metal (pure metals
 						// have no diffuse light).
-						kD *= 1.0 - metallic;	  
+						kD *= 1.0 - metalness;	  
 
 						// scale light by NdotL
 						float NdotL = max(dot(N, L), 0.0);        
@@ -260,8 +266,7 @@ var SSRShader = {
 						vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
 
-						vec4 reflectColor=texture2D(tDiffuse,uv);
-						gl_FragColor.xyz=reflectColor.xyz;
+						gl_FragColor.xyz=reflectColor;
 						gl_FragColor.a=op;
 						break;
 					}
