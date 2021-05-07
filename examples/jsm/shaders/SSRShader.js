@@ -285,6 +285,7 @@ var SSRShader = {
 						// float attenuation = 1.-(distance/maxDistance);;
 						float attenuation=1.;
 						vec3 radiance = lightColor * attenuation;
+						// gl_FragColor.xyz=radiance;gl_FragColor.a=1.;break;
 
 						// Cook-Torrance BRDF
 						float NDF = DistributionGGX(N, H, roughness);   
@@ -294,7 +295,8 @@ var SSRShader = {
 						vec3 nominator    = NDF * G * F; 
 						float denominator = 4. * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
 						vec3 specular = nominator / max(denominator, 0.001); // prevent divide by zero for NdotV=0.0 or NdotL=0.0
-						
+						// gl_FragColor.xyz=specular;gl_FragColor.a=1.;break;
+
 						// kS is equal to Fresnel
 						vec3 kS = F;
 						// for energy conservation, the diffuse and specular light can't
@@ -310,11 +312,13 @@ var SSRShader = {
 						float NdotL = max(dot(N, L), 0.0);        
 
 						// add to outgoing radiance Lo
-						vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+						// vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
 
 
-						gl_FragColor.xyz=Lo;
-						gl_FragColor.a=1.;
+						// gl_FragColor.xyz=Lo;
+						// gl_FragColor.a=1.;
+						gl_FragColor.xyz=specular * radiance;
+						gl_FragColor.a=F.x*NdotL;
 						break;
 					}
 				}
