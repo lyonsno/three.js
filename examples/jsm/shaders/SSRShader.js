@@ -22,6 +22,7 @@ var SSRShader = {
 		'tDiffuse': { value: null },
 		'tNormal': { value: null },
 		'tMetalness': { value: null },
+		'tRoughness': { value: null },
 		'tDepth': { value: null },
 		'cameraNear': { value: null },
 		'cameraFar': { value: null },
@@ -33,7 +34,6 @@ var SSRShader = {
 		'cameraRange': { value: 0 },
 		'thickness': { value: .018 },
 		'reflectivity': { value: .5 },
-		'roughness': { value: .5 },
 
 	},
 
@@ -58,6 +58,7 @@ var SSRShader = {
 		uniform sampler2D tDepth;
 		uniform sampler2D tNormal;
 		uniform sampler2D tMetalness;
+		uniform sampler2D tRoughness;
 		uniform sampler2D tDiffuse;
 		uniform float cameraRange;
 		uniform vec2 resolution;
@@ -67,7 +68,6 @@ var SSRShader = {
 		uniform float maxDistance;
 		uniform float thickness;
 		uniform float reflectivity;
-		uniform float roughness;
 		uniform mat4 cameraProjectionMatrix;
 		uniform mat4 cameraInverseProjectionMatrix;
 		#include <packing>
@@ -159,7 +159,8 @@ var SSRShader = {
 		}
 		void main(){
 			float metalness=texture2D(tMetalness,vUv).r;
-			if(metalness==0.) return;
+			float roughness=texture2D(tRoughness,vUv).r;
+			// if(metalness==0.) return;
 
 			float depth = getDepth( vUv );
 			float viewZ = getViewZ( depth );

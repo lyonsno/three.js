@@ -195,6 +195,14 @@ class SSRPass extends Pass {
 			format: RGBAFormat
 		} );
 
+		// roughness render target
+
+		this.roughnessRenderTarget = new WebGLRenderTarget( this.width, this.height, {
+			minFilter: NearestFilter,
+			magFilter: NearestFilter,
+			format: RGBAFormat
+		} );
+
 
 
 		// ssr render target
@@ -231,6 +239,7 @@ class SSRPass extends Pass {
 		this.ssrMaterial.uniforms[ 'tNormal' ].value = this.normalRenderTarget.texture;
 		this.ssrMaterial.needsUpdate = true;
 		this.ssrMaterial.uniforms[ 'tMetalness' ].value = this.metalnessRenderTarget.texture;
+		this.ssrMaterial.uniforms[ 'tRoughness' ].value = this.roughnessRenderTarget.texture;
 		this.ssrMaterial.uniforms[ 'tDepth' ].value = this.beautyRenderTarget.depthTexture;
 		this.ssrMaterial.uniforms[ 'cameraNear' ].value = this.camera.near;
 		this.ssrMaterial.uniforms[ 'cameraFar' ].value = this.camera.far;
@@ -247,6 +256,12 @@ class SSRPass extends Pass {
 		// metalness material
 
 		this.metalnessMaterial = new MeshBasicMaterial( {
+			color: 'white'
+		} );
+
+		// roughness material
+
+		this.roughnessMaterial = new MeshBasicMaterial( {
 			color: 'white'
 		} );
 
@@ -328,6 +343,7 @@ class SSRPass extends Pass {
 		this.prevRenderTarget.dispose();
 		this.normalRenderTarget.dispose();
 		this.metalnessRenderTarget.dispose();
+		this.roughnessRenderTarget.dispose();
 		this.ssrRenderTarget.dispose();
 		this.blurRenderTarget.dispose();
 		this.blurRenderTarget2.dispose();
@@ -337,6 +353,7 @@ class SSRPass extends Pass {
 
 		this.normalMaterial.dispose();
 		this.metalnessMaterial.dispose();
+		this.roughnessMaterial.dispose();
 		this.blurMaterial.dispose();
 		this.blurMaterial2.dispose();
 		this.copyMaterial.dispose();
@@ -373,6 +390,10 @@ class SSRPass extends Pass {
 		// render metalnesses
 
 		this.renderMetalness( renderer, this.metalnessRenderTarget, 0, 0 );
+
+		// render roughnesses
+
+		this.renderRoughness( renderer, this.roughnessRenderTarget, 0, 0 );
 
 		// render SSR
 
@@ -486,6 +507,14 @@ class SSRPass extends Pass {
 				this.renderPass( renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer );
 
 				break;
+
+				case SSRPass.OUTPUT.Roughness:
+	
+					this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.roughnessRenderTarget.texture;
+					this.copyMaterial.blending = NoBlending;
+					this.renderPass( renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer );
+	
+					break;
 
 			default:
 				console.warn( 'THREE.SSRPass: Unknown output type.' );
@@ -618,6 +647,55 @@ class SSRPass extends Pass {
 
 	}
 
+	renderRoughness( renderer, renderTarget, clearColor, clearAlpha ) {
+
+		this.originalClearColor.copy( renderer.getClearColor( this.tempColor ) );
+		const originalClearAlpha = renderer.getClearAlpha( this.tempColor );
+		const originalAutoClear = renderer.autoClear;
+
+		renderer.setRenderTarget( renderTarget );
+		renderer.autoClear = false;
+
+		if ( ( clearColor !== undefined ) && ( clearColor !== null ) ) {
+
+			renderer.setClearColor( clearColor );
+			renderer.setClearAlpha( clearAlpha || 0.0 );
+			renderer.clear();
+
+		}
+
+		this.scene.traverseVisible( child => {
+
+			if ( this.selects.includes( child ) && child.material ) {
+
+				if ( child.material.type === 'MeshStandardMaterial' || child.material.type === 'MeshPhysicalMaterial' ){
+
+					this.roughnessMaterial.color.setScalar( child.material.roughness );
+
+				}
+				else {
+
+					this.roughnessMaterial.color.setScalar( this.defaultIntensity );
+
+				}
+
+				let materialBack = child.material;
+				child.material = this.roughnessMaterial;
+				renderer.render( child, this.camera, false ); // TODO: Will render all descendants?
+				child.material = materialBack;
+
+			}
+
+		} );
+
+		// restore original state
+
+		renderer.autoClear = originalAutoClear;
+		renderer.setClearColor( this.originalClearColor );
+		renderer.setClearAlpha( originalClearAlpha );
+
+	}
+
 	setSize( width, height ) {
 
 		this.width = width;
@@ -630,6 +708,7 @@ class SSRPass extends Pass {
 		this.ssrRenderTarget.setSize( width, height );
 		this.normalRenderTarget.setSize( width, height );
 		this.metalnessRenderTarget.setSize( width, height );
+		this.roughnessRenderTarget.setSize( width, height );
 		this.blurRenderTarget.setSize( width, height );
 		this.blurRenderTarget2.setSize( width, height );
 		// this.blurRenderTarget3.setSize(width, height);
@@ -652,6 +731,7 @@ SSRPass.OUTPUT = {
 	'Depth': 4,
 	'Normal': 5,
 	'Metalness': 7,
+	'Roughness': 8,
 };
 
 export { SSRPass };
