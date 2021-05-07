@@ -288,6 +288,8 @@
 			folder.add( bunny.material, 'metalness' ).name( 'bunnyMetalness' ).min( 0 ).max( 1 );
 			folder.add( bunny.material, 'roughness' ).name( 'bunnyRoughness' ).min( 0 ).max( 1 );
 			folder.add( bunny.material, 'envMapIntensity' ).name( 'envMapIntensity' ).min( 0 ).max( 1 );
+			bunny.material.metalness=1
+			bunny.material.envMapIntensity=0
 
 			folder = gui.addFolder( 'sphere'+' '+sphere.material.type );
 			folder.open();
