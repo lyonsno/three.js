@@ -280,7 +280,9 @@ var SSRShader = {
 						vec3 L = viewReflectDir;
 						vec3 H = normalize(V + L);
 						// float distance = length(lightPositions[i] - WorldPos);
-						float attenuation = 1.0 / (distance * distance);
+						// float attenuation = 1.0 / (distance * distance);
+						// float attenuation = 1.-(distance/maxDistance);;
+						float attenuation=1.;
 						vec3 radiance = lightColor * attenuation;
 
 						// Cook-Torrance BRDF

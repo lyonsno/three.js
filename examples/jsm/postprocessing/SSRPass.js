@@ -576,19 +576,26 @@ class SSRPass extends Pass {
 
 			if ( this.selects.includes( child ) && child.material ) {
 
-				if ( child.material.type === 'MeshStandardMaterial' ) {
+				if ( child.material.type === 'MeshStandardMaterial' || child.material.type === 'MeshPhysicalMaterial' ){
 
-					let reflectivity = .5;
-					let intensity = reflectivity; // TODO: Need calculate intensity from reflectivity, not directly use.
-					this.metalnessMaterial.color.setScalar( intensity );
+					this.metalnessMaterial.color.setScalar( child.material.metalness );
 
-				} else if ( child.material.type === 'MeshPhysicalMaterial' ) {
+				}
+				// if ( child.material.type === 'MeshStandardMaterial' ) {
 
-					let reflectivity = child.material.reflectivity;
-					let intensity = reflectivity; // TODO: Need calculate intensity from reflectivity, not directly use.
-					this.metalnessMaterial.color.setScalar( intensity );
+				// 	let reflectivity = .5;
+				// 	let intensity = reflectivity; // TODO: Need calculate intensity from reflectivity, not directly use.
+				// 	this.metalnessMaterial.color.setScalar( intensity );
 
-				} else {
+				// } 
+				// else if ( child.material.type === 'MeshPhysicalMaterial' ) {
+
+				// 	let reflectivity = child.material.reflectivity;
+				// 	let intensity = reflectivity; // TODO: Need calculate intensity from reflectivity, not directly use.
+				// 	this.metalnessMaterial.color.setScalar( intensity );
+
+				// } 
+				else {
 
 					this.metalnessMaterial.color.setScalar( this.defaultIntensity );
 
