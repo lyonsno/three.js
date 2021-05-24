@@ -67,6 +67,7 @@ var SSRShader = {
 		uniform float thickness;
 		uniform mat4 cameraProjectionMatrix;
 		uniform mat4 cameraInverseProjectionMatrix;
+		float mipmapLevel=5.;
 		#include <packing>
 		float pointToLineDistance(vec3 x0, vec3 x1, vec3 x2) {
 			//x0: point, x1: linePointA, x2: linePointB
@@ -85,7 +86,7 @@ var SSRShader = {
 			return distance;
 		}
 		float getDepth( const in vec2 uv ) {
-			return texture2D( tDepth, uv ).x;
+			return textureLod( tDepth, uv,mipmapLevel ).x;
 		}
 		float getViewZ( const in float depth ) {
 			#ifdef PERSPECTIVE_CAMERA
@@ -100,7 +101,7 @@ var SSRShader = {
 			return ( cameraInverseProjectionMatrix * clipPosition ).xyz;//view
 		}
 		vec3 getViewNormal( const in vec2 uv ) {
-			return unpackRGBToNormal( texture2D( tNormal, uv ).xyz );
+			return unpackRGBToNormal( textureLod( tNormal, uv,mipmapLevel ).xyz );
 		}
 		vec2 viewPositionToXY(vec3 viewPosition){
 			vec2 xy;
@@ -114,7 +115,7 @@ var SSRShader = {
 		}
 		void main(){
 			#ifdef SELECTIVE
-				float metalness=texture2D(tMetalness,vUv).r;
+				float metalness=textureLod(tMetalness,vUv,mipmapLevel).r;
 				if(metalness==0.) return;
 			#endif
 
@@ -219,7 +220,7 @@ var SSRShader = {
 							float fresnelCoe=(dot(viewIncidentDir,viewReflectDir)+1.)/2.;
 							op*=fresnelCoe;
 						#endif
-						vec4 reflectColor=textureLod(tDiffuse,uv,5.);
+						vec4 reflectColor=textureLod(tDiffuse,uv,mipmapLevel);
 						gl_FragColor.xyz=reflectColor.xyz;
 						gl_FragColor.a=op;
 						break;

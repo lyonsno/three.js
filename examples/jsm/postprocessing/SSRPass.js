@@ -167,10 +167,10 @@ class SSRPass extends Pass {
 		this.beautyRenderTarget = new WebGLRenderTarget( this.width, this.height, {
 			minFilter: LinearMipmapLinearFilter,
 			magFilter: LinearFilter,
+			generateMipmaps: true,
 			format: RGBAFormat,
 			depthTexture: depthTexture,
 			depthBuffer: true,
-			generateMipmaps: true,
 		} );
 
 		//for bouncing
@@ -183,8 +183,9 @@ class SSRPass extends Pass {
 		// normal render target
 
 		this.normalRenderTarget = new WebGLRenderTarget( this.width, this.height, {
-			minFilter: NearestFilter,
-			magFilter: NearestFilter,
+			minFilter: LinearMipmapLinearFilter,
+			magFilter: LinearFilter,
+			generateMipmaps: true,
 			format: RGBAFormat,
 			type: HalfFloatType,
 		} );
@@ -192,8 +193,9 @@ class SSRPass extends Pass {
 		// metalness render target
 
 		this.metalnessRenderTarget = new WebGLRenderTarget( this.width, this.height, {
-			minFilter: NearestFilter,
-			magFilter: NearestFilter,
+			minFilter: LinearMipmapLinearFilter,
+			magFilter: LinearFilter,
+			generateMipmaps: true,
 			format: RGBAFormat
 		} );
 
