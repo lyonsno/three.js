@@ -219,7 +219,7 @@ var SSRShader = {
 							float fresnelCoe=(dot(viewIncidentDir,viewReflectDir)+1.)/2.;
 							op*=fresnelCoe;
 						#endif
-						vec4 reflectColor=textureLod(tDiffuse,uv,5.);
+						vec4 reflectColor=texture2D(tDiffuse,uv);
 						gl_FragColor.xyz=reflectColor.xyz;
 						gl_FragColor.a=op;
 						break;
@@ -327,33 +327,12 @@ var SSRBlurShader = {
 		uniform vec2 resolution;
 		varying vec2 vUv;
 		void main() {
-			//reverse engineering from PhotoShop blur filter, then change coefficient
+			vec4 ct=textureLod(tDiffuse,vUv,4.);
+			gl_FragColor=ct;
 
-			vec2 texelSize = ( 1.0 / resolution );
-
-			vec4 c=texture2D(tDiffuse,vUv);
-
-			vec2 offset;
-
-			offset=(vec2(-1,0))*texelSize;
-			vec4 cl=texture2D(tDiffuse,vUv+offset);
-
-			offset=(vec2(1,0))*texelSize;
-			vec4 cr=texture2D(tDiffuse,vUv+offset);
-
-			offset=(vec2(0,-1))*texelSize;
-			vec4 cb=texture2D(tDiffuse,vUv+offset);
-
-			offset=(vec2(0,1))*texelSize;
-			vec4 ct=texture2D(tDiffuse,vUv+offset);
-
-			// float coeCenter=.5;
-			// float coeSide=.125;
-			float coeCenter=.2;
-			float coeSide=.2;
-			float a=c.a*coeCenter+cl.a*coeSide+cr.a*coeSide+cb.a*coeSide+ct.a*coeSide;
-			vec3 rgb=(c.rgb*c.a*coeCenter+cl.rgb*cl.a*coeSide+cr.rgb*cr.a*coeSide+cb.rgb*cb.a*coeSide+ct.rgb*ct.a*coeSide)/a;
-			gl_FragColor=vec4(rgb,a);
+			// float opacity=texture2D(tDiffuse,vUv).a;
+			// vec3 ct=textureLod(tDiffuse,vUv,3.).rgb;
+			// gl_FragColor=vec4(ct,opacity);
 
 		}
 	`
