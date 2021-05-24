@@ -15,6 +15,8 @@ import {
 	UnsignedShortType,
 	WebGLRenderTarget,
 	HalfFloatType,
+	LinearMipmapLinearFilter,
+	LinearFilter,
 } from '../../../build/three.module.js';
 import { Pass, FullScreenQuad } from '../postprocessing/Pass.js';
 import { SSRShader } from '../shaders/SSRShader.js';
@@ -163,11 +165,12 @@ class SSRPass extends Pass {
 		depthTexture.magFilter = NearestFilter;
 
 		this.beautyRenderTarget = new WebGLRenderTarget( this.width, this.height, {
-			minFilter: NearestFilter,
-			magFilter: NearestFilter,
+			minFilter: LinearMipmapLinearFilter,
+			magFilter: LinearFilter,
 			format: RGBAFormat,
 			depthTexture: depthTexture,
-			depthBuffer: true
+			depthBuffer: true,
+			generateMipmaps: true,
 		} );
 
 		//for bouncing
