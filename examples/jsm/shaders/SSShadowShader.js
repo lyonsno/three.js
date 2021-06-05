@@ -181,17 +181,23 @@ const SSRrShader = {
 					hit=away<=sD;
 				#endif
 				gl_FragColor=texture2D(tDiffuse,vUv);
-				if(hit){
-					vec3 vN=getViewNormal( uv );
+				// if(hit){
+				// 	vec3 vN=getViewNormal( uv );
 
-					// if(dot(viewRefractDir,vN)>=0.) continue;
+				// 	// if(dot(viewRefractDir,vN)>=0.) continue;
 
-					if((length(viewPosition-vP)<doubleSideCheckStartFrom)&&(dot(viewRefractDir,vN)>=0.)) continue;
-					// May not need "doubleSideCheckStartFrom", use "surfDist" or change starting "i" of "for(float i=1.;i<float(MAX_STEP);i++){" instead.
+				// 	if((length(viewPosition-vP)<doubleSideCheckStartFrom)&&(dot(viewRefractDir,vN)>=0.)) continue;
+				// 	// May not need "doubleSideCheckStartFrom", use "surfDist" or change starting "i" of "for(float i=1.;i<float(MAX_STEP);i++){" instead.
 
-					gl_FragColor.rgb*=.5;
-					return;
-				}
+				// 	// gl_FragColor.rgb*=.5;
+				// 	gl_FragColor.rgb*=.5-.5*(length(viewPosition-viewLightPosition)/maxDistance);
+				// 	return;
+				// }else{
+					float attenuation=1.-(length(viewPosition-viewLightPosition)/maxDistance);
+					attenuation*=2.;
+					attenuation=pow(attenuation,10.);
+					gl_FragColor.rgb*=attenuation;
+				// }
 			}
 		}
 	`
