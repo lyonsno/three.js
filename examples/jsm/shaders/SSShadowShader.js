@@ -25,7 +25,7 @@ const SSRrShader = {
 		'cameraProjectionMatrix': { value: new Matrix4() },
 		'cameraInverseProjectionMatrix': { value: new Matrix4() },
 		'cameraMatrixWorldInverse': { value: new Matrix4() },
-		'lightPosition': { value: new Vector3(1.7,1.7,0) },
+		'lightPosition': { value: new Vector3(.3,1,0) },
 		'cameraRange': { value: 0 },
 		'maxDistance': { value: 180 },
 		'surfDist': { value: .007 },
