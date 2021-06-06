@@ -4,7 +4,7 @@ import {
 	Vector3
 } from '../../../build/three.module.js';
 
-const SSRrShader = {
+const SSShadowShader = {
 
 	defines: {
 		MAX_STEP: 0,
@@ -204,7 +204,7 @@ const SSRrShader = {
 
 };
 
-var SSRrDepthShader = {
+var SSShadowDepthShader = {
 
 	defines: {
 		'PERSPECTIVE_CAMERA': 1
@@ -271,4 +271,4 @@ var SSRrDepthShader = {
 
 };
 
-export { SSRrShader, SSRrDepthShader };
+export { SSShadowShader, SSShadowDepthShader };
