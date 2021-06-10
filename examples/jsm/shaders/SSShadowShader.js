@@ -158,6 +158,8 @@ const SSShadowShader = {
 			attenuation*=attenuation;
 			gl_FragColor.rgb*=attenuation;
 
+			float minAway=doubleSideCheckStartFrom;
+
 			for(float i=0.;i<float(MAX_STEP);i++){
 				if(i>=totalStep) break;
 				vec2 xy=vec2(d0.x+i*xSpan,d0.y+i*ySpan);
@@ -180,17 +182,20 @@ const SSShadowShader = {
 					float sD=surfDist;
 				#endif
 
+				vec3 vN=getViewNormal( uv );
+				if(dot(viewRefractDir,vN)>=0.) continue;
+
 				bool hit;
 				#ifdef INFINITE_THICK
 					hit=viewRefractRayZ<=vZ;
 				#else
 					if(viewRefractRayZ-sD>vZ) continue;
 					float away=pointToLineDistance(vP,viewPosition,d1viewPosition);
+					minAway=min(minAway,away);
 					hit=away<=sD;
 				#endif
 				if(hit){
-					vec3 vN=getViewNormal( uv );
-
+					// vec3 vN=getViewNormal( uv );
 					// if(dot(viewRefractDir,vN)>=0.) continue;
 
 					if((length(viewPosition-vP)<doubleSideCheckStartFrom)&&(dot(viewRefractDir,vN)>=0.)) continue;
@@ -203,6 +208,12 @@ const SSShadowShader = {
 			} // end of for loop
 
 			gl_FragColor.rgb*=dot(viewNormal,viewRefractDir)*.5+.5;
+
+			// float softRange=10.1;
+			float softAttenuation=max(0.,min(1.,minAway/doubleSideCheckStartFrom));
+			gl_FragColor.rgb*=.5+.5*softAttenuation;
+			// // gl_FragColor.rgb*=minAway;
+			// gl_FragColor=vec4(vec3(minAway/doubleSideCheckStartFrom),1);
 
 		}
 	`
