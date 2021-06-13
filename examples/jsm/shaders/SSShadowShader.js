@@ -208,11 +208,12 @@ const SSShadowShader = {
 				}
 			} // end of for loop
 
-			gl_FragColor.rgb*=dot(viewNormal,viewRefractDir)*.5+.5; // simple lighting
+			// gl_FragColor.rgb*=dot(viewNormal,viewRefractDir)*.5+.5; // simple lighting
 
 			// float softRange=10.1;
 			float softAttenuation=max(0.,min(1.,minAway/doubleSideCheckStartFrom));
-			gl_FragColor.rgb*=.5+.5*softAttenuation;
+			// gl_FragColor.rgb*=.5+.5*softAttenuation;
+			gl_FragColor.rgb*=dot(viewNormal,viewRefractDir)*.5*softAttenuation+.5;
 			// // gl_FragColor.rgb*=minAway;
 			// gl_FragColor=vec4(vec3(minAway/doubleSideCheckStartFrom),1);
 
