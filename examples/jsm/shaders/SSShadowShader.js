@@ -190,7 +190,7 @@ const SSShadowShader = {
 				#ifdef INFINITE_THICK
 					hit=viewRefractRayZ<=vZ;
 				#else
-					if(viewRefractRayZ-sD>vZ) continue;
+					// if(viewRefractRayZ-sD>vZ) continue;
 					float away=pointToLineDistance(vP,viewPosition,d1viewPosition);
 					minAway=min(minAway,away);
 					hit=away<=sD;
