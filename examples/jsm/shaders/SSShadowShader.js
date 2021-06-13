@@ -183,7 +183,8 @@ const SSShadowShader = {
 				#endif
 
 				vec3 vN=getViewNormal( uv );
-				if(dot(viewRefractDir,vN)>=0.) continue;
+				// if(dot(viewRefractDir,vN)>=0.) continue;
+				if((length(viewPosition-vP)<doubleSideCheckStartFrom)&&(dot(viewRefractDir,vN)>=0.)) continue;
 
 				bool hit;
 				#ifdef INFINITE_THICK
@@ -198,7 +199,7 @@ const SSShadowShader = {
 					// vec3 vN=getViewNormal( uv );
 					// if(dot(viewRefractDir,vN)>=0.) continue;
 
-					if((length(viewPosition-vP)<doubleSideCheckStartFrom)&&(dot(viewRefractDir,vN)>=0.)) continue;
+					// if((length(viewPosition-vP)<doubleSideCheckStartFrom)&&(dot(viewRefractDir,vN)>=0.)) continue;
 					// May not need "doubleSideCheckStartFrom", use "surfDist" or change starting "i" of "for(float i=1.;i<float(MAX_STEP);i++){" instead.
 
 					// gl_FragColor=texture2D(tDiffuse,vUv);
@@ -207,7 +208,7 @@ const SSShadowShader = {
 				}
 			} // end of for loop
 
-			gl_FragColor.rgb*=dot(viewNormal,viewRefractDir)*.5+.5;
+			gl_FragColor.rgb*=dot(viewNormal,viewRefractDir)*.5+.5; // simple lighting
 
 			// float softRange=10.1;
 			float softAttenuation=max(0.,min(1.,minAway/doubleSideCheckStartFrom));
