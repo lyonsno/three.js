@@ -56,10 +56,46 @@
 
 						const loader = new GLTFLoader().setPath( 'models/gltf/' );
 						loader.load( 'IridescentDishWithOlives.glb', function ( gltf ) {
+							window.gltf=gltf
 
 							mixer = new THREE.AnimationMixer( gltf.scene );
 							mixer.clipAction( gltf.animations[ 0 ] ).play();
 							scene.add( gltf.scene );
+
+							{
+
+								const geometry = new THREE.BoxGeometry();
+								const mesh = new THREE.Mesh( geometry, gltf.scene.getObjectByName( 'glassCover' ).material );
+								scene.add( mesh );
+
+							}
+
+							{
+
+								const geometry = new THREE.ConeGeometry( .3, 1, 32 );
+								const material = new THREE.MeshStandardMaterial( { color: 'yellow' } );
+								const mesh = new THREE.Mesh( geometry, material );
+								scene.add( mesh );
+								mesh.position.x = 1;
+
+							}
+
+							{
+
+								const geometry = new THREE.PlaneGeometry( 10, 10 );
+								const map = new THREE.TextureLoader().load( '/lib/three.js_github/examples/textures/uv_grid_opengl.jpg' );
+								map.repeat.set( 10, 10 );
+								map.wrapS = THREE.RepeatWrapping;
+								map.wrapT = THREE.RepeatWrapping;
+								const material = new THREE.MeshStandardMaterial( {
+									map: map
+	 							} );
+								const mesh = new THREE.Mesh( geometry, material );
+								scene.add( mesh );
+								mesh.rotation.x = - Math.PI / 2;
+								mesh.position.y = - .5;
+
+							}
 
 						} );
 
@@ -100,7 +136,7 @@
 
 				requestAnimationFrame( animate );
 
-				if ( mixer ) mixer.update( clock.getDelta() );
+				// if ( mixer ) mixer.update( clock.getDelta() );
 
 				render();
 
