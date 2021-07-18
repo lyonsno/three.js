@@ -21,6 +21,7 @@
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
 			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 			import { RGBELoader } from './jsm/loaders/RGBELoader.js';
+			import { GUI } from './jsm/libs/dat.gui.module.js';
 
 			let camera, scene, renderer, clock, mixer;
 
@@ -109,6 +110,34 @@
 								// mesh.position.y = - .5;
 
 							}
+
+							const gui = new GUI()
+							const params = {
+								'front view'(){
+									camera.position.set(0,1.5,3)
+									camera.lookAt(0,0,0)
+								},
+								'back view'(){
+									camera.position.set(0,1.5,-3)
+									camera.lookAt(0,0,0)
+								},
+								'left view'(){
+									camera.position.set(-3,1.5,0)
+									camera.lookAt(0,0,0)
+								},
+								'right view'(){
+									camera.position.set(3,1.5,0)
+									camera.lookAt(0,0,0)
+								},
+								'toggle box'(){
+									box.visible=!box.visible
+								}
+							}
+							gui.add(params, 'front view')
+							gui.add(params, 'back view')
+							gui.add(params, 'left view')
+							gui.add(params, 'right view')
+							gui.add(params, 'toggle box')
 
 						} );
 
