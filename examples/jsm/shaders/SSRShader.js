@@ -220,8 +220,9 @@ var SSRShader = {
 							op*=fresnelCoe;
 						#endif
 						vec4 reflectColor=texture2D(tDiffuse,uv);
-						gl_FragColor.xyz=reflectColor.xyz;
-						gl_FragColor.a=op;
+						vec4 result=vec4(reflectColor.xyz,op);
+						// https://github.com/mrdoob/three.js/issues/22579#issuecomment-932612673
+						gl_FragColor=result;
 						break;
 					}
 				}
