@@ -115,7 +115,7 @@ var SSRShader = {
 		void main(){
 
 			//https://github.com/mrdoob/three.js/issues/22579#issuecomment-932746032
-			gl_FragColor=vec4(0.);
+			gl_FragColor=vec4(1.,0.,0.,.1);
 
 			#ifdef SELECTIVE
 				float metalness=texture2D(tMetalness,vUv).r;
