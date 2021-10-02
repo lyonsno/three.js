@@ -114,24 +114,18 @@ var SSRShader = {
 		}
 		void main(){
 
+			//https://github.com/mrdoob/three.js/issues/22579#issuecomment-932746032
 			gl_FragColor=vec4(1.,0.,0.,1.);
 			bool isSetFragColor=false;
-			vec4 resultColor=vec4(0.,0.,0.,0.);
 
 			#ifdef SELECTIVE
 				float metalness=texture2D(tMetalness,vUv).r;
-				if(metalness==0.){
-					gl_FragColor=vec4(0.,0.,0.,0.);
-					return;
-				}
+				if(metalness==0.) return;
 			#endif
 
 			float depth = getDepth( vUv );
 			float viewZ = getViewZ( depth );
-			if(-viewZ>=cameraFar){
-				gl_FragColor=vec4(0.,0.,0.,0.);
-				return;
-			}
+			if(-viewZ>=cameraFar) return;
 
 			float clipW = cameraProjectionMatrix[2][3] * viewZ+cameraProjectionMatrix[3][3];
 			vec3 viewPosition=getViewPosition( vUv, depth, clipW );
@@ -231,15 +225,16 @@ var SSRShader = {
 							op*=fresnelCoe;
 						#endif
 						vec4 reflectColor=texture2D(tDiffuse,uv);
-						resultColor.xyz=reflectColor.xyz;
-						resultColor.a=op;
 						isSetFragColor=true;
+						vec4 result=vec4(reflectColor.xyz,op);
+						// https://github.com/mrdoob/three.js/issues/22579#issuecomment-932612673
+						gl_FragColor=result;
 						break;
 					}
 				}
 			}
 
-			gl_FragColor=resultColor;
+			if(!isSetFragColor) gl_FragColor=vec4(0.,0.,0.,0.);
 		}
 	`
 
