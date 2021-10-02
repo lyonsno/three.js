@@ -231,7 +231,7 @@ var SSRShader = {
 				}
 			}
 
-			if(!isSetFragColor) gl_FragColor=vec4(0.,0.,0.,0.);
+			if(!isSetFragColor) gl_FragColor=vec4(0.,0.,0.,1.);
 		}
 	`
 
