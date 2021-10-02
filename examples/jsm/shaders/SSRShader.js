@@ -114,8 +114,7 @@ var SSRShader = {
 		}
 		void main(){
 
-			//https://github.com/mrdoob/three.js/issues/22579#issuecomment-932746032
-			gl_FragColor=vec4(1.,0.,0.,.1);
+			bool isSetFragColor=false;
 
 			#ifdef SELECTIVE
 				float metalness=texture2D(tMetalness,vUv).r;
@@ -224,13 +223,15 @@ var SSRShader = {
 							op*=fresnelCoe;
 						#endif
 						vec4 reflectColor=texture2D(tDiffuse,uv);
-						vec4 result=vec4(reflectColor.xyz,op);
-						// https://github.com/mrdoob/three.js/issues/22579#issuecomment-932612673
-						gl_FragColor=result;
+						gl_FragColor.xyz=reflectColor.xyz;
+						gl_FragColor.a=op;
+						isSetFragColor=true;
 						break;
 					}
 				}
 			}
+
+			if(!isSetFragColor) gl_FragColor=vec4(0.,0.,0.,0.);
 		}
 	`
 
