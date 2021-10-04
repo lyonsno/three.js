@@ -27,6 +27,7 @@
 		import { GUI } from './jsm/libs/dat.gui.module.js';
 		import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
 		import { RenderPass } from './jsm/postprocessing/RenderPass.js';
+		import { SSAOPass } from './jsm/postprocessing/SSAOPass.js';
 		import { SSRPass } from './jsm/postprocessing/SSRPass.js';
 		import { ShaderPass } from './jsm/postprocessing/ShaderPass.js';
 		import { GammaCorrectionShader } from './jsm/shaders/GammaCorrectionShader.js';
@@ -183,7 +184,12 @@
 
 			let renderPass = new RenderPass( scene, camera );
 
+			const ssaoPass = new SSAOPass( scene, camera, innerWidth, innerHeight );
+			ssaoPass.kernelRadius = 16;
+			composer.addPass( ssaoPass );
+
 			composer.addPass( renderPass );
+			composer.addPass( ssaoPass );
 			composer.addPass( ssrPass );
 			composer.addPass( new ShaderPass( GammaCorrectionShader ) );
 
@@ -216,7 +222,7 @@
 
 			} );
 
-			const folder = gui.addFolder( 'more settings' );
+			let folder = gui.addFolder( 'more settings' );
 			folder.add( ssrPass, 'fresnel' ).onChange( ()=>{
 
 				if(params.groundReflector)	groundReflector.fresnel = ssrPass.fresnel;
@@ -271,6 +277,27 @@
 			folder.add( ssrPass, 'blur' );
 			// folder.open()
 			// gui.close()
+
+			folder = gui.addFolder( 'SSAO' );
+			folder.add( ssaoPass, 'output', {
+					'Default': SSAOPass.OUTPUT.Default,
+					'SSAO Only': SSAOPass.OUTPUT.SSAO,
+					'SSAO Only + Blur': SSAOPass.OUTPUT.Blur,
+					'Beauty': SSAOPass.OUTPUT.Beauty,
+					'Depth': SSAOPass.OUTPUT.Depth,
+					'Normal': SSAOPass.OUTPUT.Normal
+				} ).onChange( function ( value ) {
+
+					ssaoPass.output = parseInt( value );
+
+				} );
+			ssaoPass.kernelRadius = .01
+			folder.add( ssaoPass, 'kernelRadius' ).min( 0 ).max( .032 );
+			ssaoPass.minDistance = .0001
+			folder.add( ssaoPass, 'minDistance' ).min( 0.00001 ).max( 0.0002 );
+			ssaoPass.kernelRadius = .02
+			folder.add( ssaoPass, 'maxDistance' ).min( 0.0001 ).max( 0.03 );
+			folder.open();
 
 		}
 
