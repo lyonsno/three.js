@@ -26,6 +26,7 @@
 
 		import { GUI } from './jsm/libs/dat.gui.module.js';
 		import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
+		import { RenderPass } from './jsm/postprocessing/RenderPass.js';
 		import { SSRPass } from './jsm/postprocessing/SSRPass.js';
 		import { ShaderPass } from './jsm/postprocessing/ShaderPass.js';
 		import { GammaCorrectionShader } from './jsm/shaders/GammaCorrectionShader.js';
@@ -176,6 +177,9 @@
 				selects: params.groundReflector ? selects : null
 			} );
 
+			let renderPass = new RenderPass( scene, camera );
+
+			composer.addPass( renderPass );
 			composer.addPass( ssrPass );
 			composer.addPass( new ShaderPass( GammaCorrectionShader ) );
 

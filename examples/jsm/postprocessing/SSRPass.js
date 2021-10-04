@@ -353,22 +353,22 @@ class SSRPass extends Pass {
 
 	}
 
-	render( renderer, writeBuffer /*, readBuffer, deltaTime, maskActive */ ) {
+	render( renderer, writeBuffer, readBuffer /*, deltaTime, maskActive */ ) {
 
 		// render beauty and depth
 
-		renderer.setRenderTarget( this.beautyRenderTarget );
-		renderer.clear();
-		if ( this.groundReflector ) {
+		// renderer.setRenderTarget( this.beautyRenderTarget );
+		// renderer.clear();
+		// if ( this.groundReflector ) {
 
-			this.groundReflector.visible = false;
-			this.groundReflector.doRender( this.renderer, this.scene, this.camera );
-			this.groundReflector.visible = true;
+		// 	this.groundReflector.visible = false;
+		// 	this.groundReflector.doRender( this.renderer, this.scene, this.camera );
+		// 	this.groundReflector.visible = true;
 
-		}
+		// }
 
-		renderer.render( this.scene, this.camera );
-		if ( this.groundReflector ) this.groundReflector.visible = false;
+		// renderer.render( this.scene, this.camera );
+		// if ( this.groundReflector ) this.groundReflector.visible = false;
 
 		// render normals
 
@@ -408,7 +408,7 @@ class SSRPass extends Pass {
 
 				if ( this.bouncing ) {
 
-					this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.beautyRenderTarget.texture;
+					this.copyMaterial.uniforms[ 'tDiffuse' ].value = readBuffer.texture;
 					this.copyMaterial.blending = NoBlending;
 					this.renderPass( renderer, this.copyMaterial, this.prevRenderTarget );
 
@@ -425,7 +425,7 @@ class SSRPass extends Pass {
 
 				} else {
 
-					this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.beautyRenderTarget.texture;
+					this.copyMaterial.uniforms[ 'tDiffuse' ].value = readBuffer.texture;
 					this.copyMaterial.blending = NoBlending;
 					this.renderPass( renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer );
 
@@ -453,7 +453,7 @@ class SSRPass extends Pass {
 					if ( this.blur )
 						this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.blurRenderTarget2.texture;
 					else
-						this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.beautyRenderTarget.texture;
+						this.copyMaterial.uniforms[ 'tDiffuse' ].value = readBuffer.texture;
 					this.copyMaterial.blending = NoBlending;
 					this.renderPass( renderer, this.copyMaterial, this.prevRenderTarget );
 
@@ -467,7 +467,7 @@ class SSRPass extends Pass {
 
 			case SSRPass.OUTPUT.Beauty:
 
-				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.beautyRenderTarget.texture;
+				this.copyMaterial.uniforms[ 'tDiffuse' ].value = readBuffer.texture;
 				this.copyMaterial.blending = NoBlending;
 				this.renderPass( renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer );
 
@@ -619,7 +619,7 @@ class SSRPass extends Pass {
 
 		this.ssrMaterial.defines.MAX_STEP = Math.sqrt( width * width + height * height );
 		this.ssrMaterial.needsUpdate = true;
-		this.beautyRenderTarget.setSize( width, height );
+		// this.beautyRenderTarget.setSize( width, height );
 		this.prevRenderTarget.setSize( width, height );
 		this.ssrRenderTarget.setSize( width, height );
 		this.normalRenderTarget.setSize( width, height );
