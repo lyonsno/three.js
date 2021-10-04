@@ -26,6 +26,7 @@
 
 		import { GUI } from './jsm/libs/dat.gui.module.js';
 		import { EffectComposer } from './jsm/postprocessing/EffectComposer.js';
+		import { RenderPass } from './jsm/postprocessing/RenderPass.js';
 		import { SSRPass } from './jsm/postprocessing/SSRPass.js';
 		import { ShaderPass } from './jsm/postprocessing/ShaderPass.js';
 		import { GammaCorrectionShader } from './jsm/shaders/GammaCorrectionShader.js';
@@ -37,7 +38,8 @@
 			enableSSR: true,
 			autoRotate: true,
 			otherMeshes: true,
-			groundReflector: true,
+			groundReflector: false,
+			blur: false,
 		};
 		let composer;
 		let ssrPass;
@@ -130,18 +132,20 @@
 			otherMeshes.push( mesh );
 			selects.push( mesh );
 
-			geometry = new THREE.PlaneBufferGeometry( 1, 1 );
-			groundReflector = new ReflectorForSSRPass( geometry, {
-				clipBias: 0.0003,
-				textureWidth: window.innerWidth,
-				textureHeight: window.innerHeight,
-				color: 0x888888,
-				useDepthTexture: true,
-			} );
-			groundReflector.material.depthWrite = false;
-			groundReflector.rotation.x = - Math.PI / 2;
-			groundReflector.visible = false;
-			scene.add( groundReflector );
+			if(params.groundReflector){
+				geometry = new THREE.PlaneBufferGeometry( 1, 1 );
+				groundReflector = new ReflectorForSSRPass( geometry, {
+					clipBias: 0.0003,
+					textureWidth: window.innerWidth,
+					textureHeight: window.innerHeight,
+					color: 0x888888,
+					useDepthTexture: true,
+				} );
+				groundReflector.material.depthWrite = false;
+				groundReflector.rotation.x = - Math.PI / 2;
+				groundReflector.visible = false;
+				scene.add( groundReflector );
+			}
 
 			// renderer
 			renderer = new THREE.WebGLRenderer( { antialias: false } );
@@ -173,9 +177,13 @@
 				width: innerWidth,
 				height: innerHeight,
 				groundReflector: params.groundReflector ? groundReflector : null,
-				selects: params.groundReflector ? selects : null
+				// selects: params.groundReflector ? selects : null
+				selects,
 			} );
 
+			let renderPass = new RenderPass( scene, camera );
+
+			composer.addPass( renderPass );
 			composer.addPass( ssrPass );
 			composer.addPass( new ShaderPass( GammaCorrectionShader ) );
 
@@ -211,19 +219,19 @@
 			const folder = gui.addFolder( 'more settings' );
 			folder.add( ssrPass, 'fresnel' ).onChange( ()=>{
 
-				groundReflector.fresnel = ssrPass.fresnel;
+				if(params.groundReflector)	groundReflector.fresnel = ssrPass.fresnel;
 
 			} );
 			folder.add( ssrPass, 'distanceAttenuation' ).onChange( ()=>{
 
-				groundReflector.distanceAttenuation = ssrPass.distanceAttenuation;
+				if(params.groundReflector)	groundReflector.distanceAttenuation = ssrPass.distanceAttenuation;
 
 			} );
 			ssrPass.maxDistance = .1;
-			groundReflector.maxDistance = ssrPass.maxDistance;
+			if(params.groundReflector)	groundReflector.maxDistance = ssrPass.maxDistance;
 			folder.add( ssrPass, 'maxDistance' ).min( 0 ).max( .5 ).step( .001 ).onChange( ()=>{
 
-				groundReflector.maxDistance = ssrPass.maxDistance;
+				if(params.groundReflector)	groundReflector.maxDistance = ssrPass.maxDistance;
 
 			} );
 			folder.add( params, 'otherMeshes' ).onChange( () => {
@@ -253,12 +261,13 @@
 
 			} );
 			ssrPass.opacity = 1;
-			groundReflector.opacity = ssrPass.opacity;
+			if(params.groundReflector)	groundReflector.opacity = ssrPass.opacity;
 			folder.add( ssrPass, 'opacity' ).min( 0 ).max( 1 ).onChange( ()=>{
 
-				groundReflector.opacity = ssrPass.opacity;
+				if(params.groundReflector)	groundReflector.opacity = ssrPass.opacity;
 
 			} );
+			ssrPass.blur = params.blur;
 			folder.add( ssrPass, 'blur' );
 			// folder.open()
 			// gui.close()
