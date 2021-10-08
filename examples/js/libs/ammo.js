@@ -980,7 +980,7 @@ MC.prototype.CreatePatchUV=function(a,c,d,e,g,n,D,Y,ma,v){var J=this.a;dB();a&&"
 MC.prototype.CreateEllipsoid=function(a,c,d,e){var g=this.a;a&&"object"===typeof a&&(a=a.a);c&&"object"===typeof c&&(c=c.a);d&&"object"===typeof d&&(d=d.a);e&&"object"===typeof e&&(e=e.a);return k(IA(g,a,c,d,e),X)};
 MC.prototype.CreateFromTriMesh=function(a,c,d,e,g){var n=this.a;dB();a&&"object"===typeof a&&(a=a.a);"object"==typeof c&&(c=hB(c));if("object"==typeof d&&"object"===typeof d){var D=eB(d,Ma);fB(d,Ma,D);d=D}e&&"object"===typeof e&&(e=e.a);g&&"object"===typeof g&&(g=g.a);return k(JA(n,a,c,d,e,g),X)};
 MC.prototype.CreateFromConvexHull=function(a,c,d,e){var g=this.a;a&&"object"===typeof a&&(a=a.a);c&&"object"===typeof c&&(c=c.a);d&&"object"===typeof d&&(d=d.a);e&&"object"===typeof e&&(e=e.a);return k(KA(g,a,c,d,e),X)};MC.prototype.__destroy__=function(){LA(this.a)};
-(function(){function a(){b.PHY_FLOAT=MA();b.PHY_DOUBLE=NA();b.PHY_INTEGER=OA();b.PHY_SHORT=PA();b.PHY_FIXEDPOINT88=QA();b.PHY_UCHAR=RA();b.BT_CONSTRAINT_ERP=SA();b.BT_CONSTRAINT_STOP_ERP=TA();b.BT_CONSTRAINT_CFM=UA();b.BT_CONSTRAINT_STOP_CFM=VA()}Va?a():Ta.unshift(a)})();b.CONTACT_ADDED_CALLBACK_SIGNATURE="iiiiiiii";b.CONTACT_DESTROYED_CALLBACK_SIGNATURE="ii";b.CONTACT_PROCESSED_CALLBACK_SIGNATURE="iiii";b.INTERNAL_TICK_CALLBACK_SIGNATURE="vif";this.Ammo=b;
+(function(){function a(){b.PHY_FLOAT=MA();b.PHY_DOUBLE=NA();b.PHY_INTEGER=OA();b.PHY_SHORT=PA();b.PHY_FIXEDPOINT88=QA();b.PHY_UCHAR=RA();b.BT_CONSTRAINT_ERP=SA();b.BT_CONSTRAINT_STOP_ERP=TA();b.BT_CONSTRAINT_CFM=UA();b.BT_CONSTRAINT_STOP_CFM=VA()}Va?a():Ta.unshift(a)})();b.CONTACT_ADDED_CALLBACK_SIGNATURE="iiiiiiii";b.CONTACT_DESTROYED_CALLBACK_SIGNATURE="ii";b.CONTACT_PROCESSED_CALLBACK_SIGNATURE="iiii";b.INTERNAL_TICK_CALLBACK_SIGNATURE="vif";
 
 
   return Ammo.ready
@@ -994,3 +994,4 @@ if (typeof exports === 'object' && typeof module === 'object')
     else if (typeof exports === 'object')
       exports["Ammo"] = Ammo;
     
+export default Ammo;

@@ -25,6 +25,10 @@
 
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
 
+			import AmmoLib from './js/libs/ammo.js';
+
+			let Ammo;
+
 			// Heightfield parameters
 			const terrainWidthExtents = 100;
 			const terrainDepthExtents = 100;
@@ -58,9 +62,9 @@
 			let timeNextSpawn = time + objectTimePeriod;
 			const maxNumObjects = 30;
 
-			Ammo().then( function ( AmmoLib ) {
+			AmmoLib().then( function ( re ) {
 
-				Ammo = AmmoLib;
+				Ammo = re;
 
 				init();
 				animate();
