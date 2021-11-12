@@ -85,7 +85,6 @@
 				// Material
 
 				const vertexShader = /* glsl */`
-					in vec2 uv;
 					in vec3 position;
 
 					uniform mat4 modelMatrix;
@@ -95,10 +94,8 @@
 
 					out vec3 vOrigin;
 					out vec3 vDirection;
-					out vec2 vUv;
 
 					void main() {
-						vUv = uv;
 						vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 
 						vOrigin = cameraPos;
@@ -117,7 +114,6 @@
 
 					in vec3 vOrigin;
 					in vec3 vDirection;
-					in vec2 vUv;
 
 					out vec4 color;
 
@@ -174,8 +170,7 @@
 						bounds.x = max( bounds.x, 0.0 );
 
 						vec3 p = vOrigin + bounds.x * rayDir;
-						color.rgb = vec3(texture(map, vec3(vUv,0)).r); return;
-						color.rgb = vec3(texture(map, p+.5).r); return; // why need add .5? World center at 0 0 0, where uv is .5 .5 .5.
+						color.rgb = vec3(texture(map, p+.5).r); return; // why need add .5?
 						vec3 inc = 1.0 / abs( rayDir );
 						float delta = min( inc.x, min( inc.y, inc.z ) );
 						delta /= steps;
@@ -202,7 +197,7 @@
 					}
 				`;
 
-				const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+				const geometry = new THREE.BoxGeometry( 1, .5, 1 );
 				const material = new THREE.RawShaderMaterial( {
 					glslVersion: THREE.GLSL3,
 					uniforms: {
