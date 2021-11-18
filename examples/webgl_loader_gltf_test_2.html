@@ -59,8 +59,10 @@
 						const loader = new GLTFLoader()
 						// .setPath( 'models/gltf/DamagedHelmet/glTF/' );
 						// loader.load( 'DamagedHelmet.gltf', function ( gltf ) {
-						loader.load( "/3d_model/mixamo/paladin/storm/storm.gltf", function ( gltf ) {
+						// loader.load( "/3d_model/mixamo/paladin/storm/storm.gltf", function ( gltf ) {
+						loader.load( "/3d_model/mixamo/paladin/all_2/all.gltf", function ( gltf ) {
 							window.gltf = gltf
+							console.log(gltf)
 
 							gltf.scene.traverse( function ( child ) {
 
@@ -77,9 +79,14 @@
 							roughnessMipmapper.dispose();
 
 							mixer = new THREE.AnimationMixer(gltf.scene)
+
 							actionA = mixer.clipAction(gltf.animations[0])
 							// actionA.loop = THREE.LoopOnce
 							// actionA.clampWhenFinished = true
+							
+							actionB = mixer.clipAction(gltf.animations[1])
+							// actionB.loop = THREE.LoopOnce
+							// actionB.clampWhenFinished = true
 
 							animate(0)
 
