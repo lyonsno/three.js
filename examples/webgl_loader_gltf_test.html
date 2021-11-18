@@ -1,123 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>three.js webgl - glTF loader</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<link type="text/css" rel="stylesheet" href="main.css">
-	</head>
 
-	<body>
-		<div id="info">
-			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - GLTFLoader<br />
-			Battle Damaged Sci-fi Helmet by
-			<a href="https://sketchfab.com/theblueturtle_" target="_blank" rel="noopener">theblueturtle_</a><br />
-			<a href="https://hdrihaven.com/hdri/?h=royal_esplanade" target="_blank" rel="noopener">Royal Esplanade</a> by <a href="https://hdrihaven.com/" target="_blank" rel="noopener">HDRI Haven</a>
-		</div>
+<head>
+	<title>three.js webgl - glTF loader</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="main.css">
+</head>
 
-		<script type="module">
+<body>
+	<div id="info">
+		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - GLTFLoader<br />
+		Battle Damaged Sci-fi Helmet by
+		<a href="https://sketchfab.com/theblueturtle_" target="_blank" rel="noopener">theblueturtle_</a><br />
+		<a href="https://hdrihaven.com/hdri/?h=royal_esplanade" target="_blank" rel="noopener">Royal Esplanade</a> by <a href="https://hdrihaven.com/" target="_blank" rel="noopener">HDRI Haven</a>
+	</div>
 
-			import * as THREE from '../build/three.module.js';
+	<script type="module">
 
-			import { OrbitControls } from './jsm/controls/OrbitControls.js';
-			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-			import { RGBELoader } from './jsm/loaders/RGBELoader.js';
-			import { RoughnessMipmapper } from './jsm/utils/RoughnessMipmapper.js';
+		import * as THREE from '../build/three.module.js';
+		window.THREE = THREE
 
-			let camera, scene, renderer;
+		import { OrbitControls } from './jsm/controls/OrbitControls.js';
+		import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+		import { RGBELoader } from './jsm/loaders/RGBELoader.js';
+		import { RoughnessMipmapper } from './jsm/utils/RoughnessMipmapper.js';
 
-			init();
-			render();
+		let camera, scene, renderer;
+		let clock = new THREE.Clock()
 
-			function init() {
+		init();
 
-				const container = document.createElement( 'div' );
-				document.body.appendChild( container );
+		function init() {
 
-				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 20 );
-				camera.position.set( - 1.8, 0.6, 2.7 );
+			const container = document.createElement('div');
+			document.body.appendChild(container);
 
-				scene = new THREE.Scene();
+			camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 20);
+			camera.position.set(0, 10, 10);
 
-				new RGBELoader()
-					.setPath( 'textures/equirectangular/' )
-					.load( 'royal_esplanade_1k.hdr', function ( texture ) {
+			scene = new THREE.Scene();
 
-						texture.mapping = THREE.EquirectangularReflectionMapping;
+			new RGBELoader()
+				.setPath('textures/equirectangular/')
+				.load('royal_esplanade_1k.hdr', function (texture) {
 
-						scene.background = texture;
-						scene.environment = texture;
+					texture.mapping = THREE.EquirectangularReflectionMapping;
 
-						render();
+					scene.background = texture;
+					scene.environment = texture;
 
-						// model
+					// model
 
-						// use of RoughnessMipmapper is optional
-						const roughnessMipmapper = new RoughnessMipmapper( renderer );
+					// use of RoughnessMipmapper is optional
+					const roughnessMipmapper = new RoughnessMipmapper(renderer);
 
-						const loader = new GLTFLoader().setPath( '/_3d_model/blender/simbple_rig/' );
-						loader.load( 'simple_geometry.gltf', function ( gltf ) {
-							window.gltf=gltf
+					const loader = new GLTFLoader().setPath('/d/test/gltf/');
+					// loader.load( 'simple_geometry.gltf', function ( gltf ) {
+					// loader.load('simple_anim.gltf', function (gltf) {
+					// loader.load('simple_anim_3.gltf', function (gltf) {
+					// loader.load('simple_anim_two_mesh.gltf', function (gltf) {
+					// loader.load('simple_anim_two_mesh_my_handwrite_one_animation_move_two_mesh.gltf', function (gltf) {
+					// loader.load('simple_anim_two_mesh_my_handwrite_one_animation_move_two_mesh_reexport_from_blender.gltf', function (gltf) {
+					// loader.load('simple_anim_two_mesh_one_animation.gltf', function (gltf) {
+					// loader.load('one_mesh_multi_anim.gltf', function (gltf) {
+					// loader.load('one_mesh_multi_anim_2.gltf', function (gltf) {
+					loader.load('simple_rig.gltf', function (gltf) {
+						window.gltf = gltf
 
-							gltf.scene.traverse( function ( child ) {
+						window.mixer = new THREE.AnimationMixer(gltf.scene)
 
-								if ( child.isMesh ) {
+						window.actionA = mixer.clipAction(gltf.animations[0])
+						actionA.clampWhenFinished = true
+						// actionA.loop=THREE.LoopOnce
+						// actionA.play()
 
-									roughnessMipmapper.generateMipmaps( child.material );
+						// window.actionB = mixer.clipAction(gltf.animations[1])
+						// actionB.clampWhenFinished = true
+						// // actionB.loop=THREE.LoopOnce
+						// // actionB.play()
 
-								}
+						gltf.scene.traverse(function (child) {
 
-							} );
+							if (child.isMesh) {
 
-							scene.add( gltf.scene );
+								roughnessMipmapper.generateMipmaps(child.material);
 
-							roughnessMipmapper.dispose();
+							}
 
-							render();
+						});
 
-						} );
+						scene.add(gltf.scene);
 
-					} );
+						roughnessMipmapper.dispose();
 
-				renderer = new THREE.WebGLRenderer( { antialias: true } );
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				renderer.toneMapping = THREE.ACESFilmicToneMapping;
-				renderer.toneMappingExposure = 1;
-				renderer.outputEncoding = THREE.sRGBEncoding;
-				container.appendChild( renderer.domElement );
+						animate(0)
 
-				const controls = new OrbitControls( camera, renderer.domElement );
-				controls.addEventListener( 'change', render ); // use if there is no animation loop
-				controls.minDistance = 2;
-				controls.maxDistance = 10;
-				controls.target.set( 0, 0, - 0.2 );
-				controls.update();
+					});
 
-				window.addEventListener( 'resize', onWindowResize );
+				});
 
-			}
+			renderer = new THREE.WebGLRenderer({ antialias: true });
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.toneMapping = THREE.ACESFilmicToneMapping;
+			renderer.toneMappingExposure = 1;
+			renderer.outputEncoding = THREE.sRGBEncoding;
+			container.appendChild(renderer.domElement);
 
-			function onWindowResize() {
+			const controls = new OrbitControls(camera, renderer.domElement);
+			controls.minDistance = 2;
+			controls.maxDistance = 10;
+			controls.target.set(0, 0, - 0.2);
+			controls.update();
 
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
+			window.addEventListener('resize', onWindowResize);
 
-				renderer.setSize( window.innerWidth, window.innerHeight );
+		}
 
-				render();
+		function onWindowResize() {
 
-			}
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
 
-			//
+			renderer.setSize(window.innerWidth, window.innerHeight);
 
-			function render() {
+		}
 
-				renderer.render( scene, camera );
+		//
 
-			}
+		function animate(time) {
+			requestAnimationFrame(animate)
 
-		</script>
+			let dt = clock.getDelta()
+			mixer.update(dt)
 
-	</body>
+			render()
+		}
+
+		function render() {
+
+			renderer.render(scene, camera);
+
+		}
+
+	</script>
+
+</body>
+
 </html>
