@@ -43,6 +43,7 @@
 			import { ShaderPass } from './jsm/postprocessing/ShaderPass.js';
 			import { CopyShader } from './jsm/shaders/CopyShader.js';
 			import { FXAAShader } from './jsm/shaders/FXAAShader.js';
+			import { SSRPass } from './jsm/postprocessing/SSRPass.js';
 
 			let camera, scene, renderer, clock, group, container;
 
@@ -113,6 +114,13 @@
 				//
 
 				const renderPass = new RenderPass( scene, camera );
+				let ssrPass = new SSRPass( {
+					renderer,
+					scene,
+					camera,
+					width: innerWidth,
+					height: innerHeight,
+				} );
 
 				//
 
@@ -120,7 +128,7 @@
 				const copyPass = new ShaderPass( CopyShader );
 
 				composer1 = new EffectComposer( renderer );
-				composer1.addPass( renderPass );
+				composer1.addPass( ssrPass );
 				composer1.addPass( copyPass );
 
 				//
@@ -131,7 +139,7 @@
 				fxaaPass.material.uniforms[ 'resolution' ].value.y = 1 / ( container.offsetHeight * pixelRatio );
 
 				composer2 = new EffectComposer( renderer );
-				composer2.addPass( renderPass );
+				composer2.addPass( ssrPass );
 				composer2.addPass( fxaaPass );
 
 				//
