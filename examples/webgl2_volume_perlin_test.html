@@ -14,6 +14,7 @@
 
 		<script type="module">
 			import * as THREE from '../build/three.module.js';
+			window.THREE = THREE
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
 			import { ImprovedNoise } from './jsm/math/ImprovedNoise.js';
 
@@ -78,6 +79,7 @@
 				texture.minFilter = THREE.LinearFilter;
 				texture.magFilter = THREE.LinearFilter;
 				texture.unpackAlignment = 1;
+				window.texture = texture
 
 				// Material
 
@@ -118,6 +120,7 @@
 
 					uniform float threshold;
 					uniform float steps;
+					uniform float yBias;
 
 					vec2 hitBox( vec3 orig, vec3 dir ) {
 						const vec3 box_min = vec3( - 0.5 );
@@ -164,6 +167,7 @@
 						bounds.x = max( bounds.x, 0.0 );
 
 						vec3 p = vOrigin + bounds.x * rayDir;
+						p.y += yBias;
 						vec3 inc = 1.0 / abs( rayDir );
 						float delta = min( inc.x, min( inc.y, inc.z ) );
 						delta /= steps;
@@ -196,7 +200,8 @@
 						map: { value: texture },
 						cameraPos: { value: new THREE.Vector3() },
 						threshold: { value: 0.6 },
-						steps: { value: 200 }
+						steps: { value: 200 },
+						yBias: { value: 0 },
 					},
 					vertexShader,
 					fragmentShader,
@@ -208,18 +213,20 @@
 
 				//
 
-				const parameters = { threshold: 0.6, steps: 200 };
+				const parameters = { threshold: 0.6, steps: 200, yBias: 0 };
 
 				function update() {
 
 					material.uniforms.threshold.value = parameters.threshold;
 					material.uniforms.steps.value = parameters.steps;
+					material.uniforms.yBias.value = parameters.yBias;
 
 				}
 
 				const gui = new GUI();
 				gui.add( parameters, 'threshold', 0, 1, 0.01 ).onChange( update );
 				gui.add( parameters, 'steps', 0, 300, 1 ).onChange( update );
+				gui.add( parameters, 'yBias', -1, 1, .01 ).onChange( update );
 
 				window.addEventListener( 'resize', onWindowResize );
 
