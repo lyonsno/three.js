@@ -4,14 +4,14 @@ class Matrix4 {
 
 	constructor() {
 
-		this.elements = [
+		this.elements = new Float32Array([
 
 			1, 0, 0, 0,
 			0, 1, 0, 0,
 			0, 0, 1, 0,
 			0, 0, 0, 1
 
-		];
+		]);
 
 		if ( arguments.length > 0 ) {
 
