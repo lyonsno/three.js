@@ -5707,6 +5707,7 @@ class Matrix4 {
 	}
 
 	multiplyMatrices( a, b ) {
+		console.log('threejs gonnavis WebaverseR133D1')
 
 		const ae = a.elements;
 		const be = b.elements;
