@@ -4023,11 +4023,29 @@
 
 	class Matrix4 {
 		constructor() {
-			this.elements = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+			if (!window.glmwInited) {
+				this._elements = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+				if (!window.matrix4s) window.matrix4s = [];
+				window.matrix4s.push(this);
+			} else {
+				this._elementsPointer = mat4.create();
+			}
 
 			if (arguments.length > 0) {
 				console.error('THREE.Matrix4: the constructor no longer reads arguments. use .set() instead.');
 			}
+		}
+
+		get elements() {
+			if (!window.glmwInited) {
+				return this._elements;
+			} else {
+				return mat4.view(this._elementsPointer);
+			}
+		}
+
+		set elements(val) {
+			debugger;
 		}
 
 		set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44) {
@@ -4314,6 +4332,7 @@
 		}
 
 		multiplyMatrices(a, b) {
+			// mark
 			const ae = a.elements;
 			const be = b.elements;
 			const te = this.elements;
