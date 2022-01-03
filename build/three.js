@@ -4023,6 +4023,9 @@
 
 	class Matrix4 {
 		constructor() {
+			// NOTE: Prevent: TypeError: can't define property "_elementsPointer": object is not extensible
+			this._elementsPointer = undefined;
+
 			if (!window.glmwInited) {
 				this._elements = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 				if (!window.matrix4s) window.matrix4s = [];
