@@ -15,8 +15,7 @@ import {
 	UnsignedShortType,
 	WebGLRenderTarget,
 	HalfFloatType,
-	MeshStandardMaterial,
-	DoubleSide
+	MeshStandardMaterial
 } from '../../../build/three.module.js';
 import { Pass, FullScreenQuad } from './Pass.js';
 import { SSShadowShader } from '../shaders/SSShadowShader.js';
@@ -51,6 +50,7 @@ class SSShadowPass extends Pass {
 		this.tempColor = new Color();
 
 		this._selects = selects;
+
 		this.selective = Array.isArray( this._selects );
 		Object.defineProperty( this, 'selects', {
 			get() {
@@ -175,12 +175,10 @@ class SSShadowPass extends Pass {
 
 		this.recievesShadowsOnMaterial = new MeshBasicMaterial( {
 			color: 'white',
-			side: DoubleSide
 		} );
 
 		this.recievesShadowsOffMaterial = new MeshBasicMaterial( {
 			color: 'black',
-			side: DoubleSide
 		} );
 
 		// refractiveOn material
@@ -270,6 +268,8 @@ class SSShadowPass extends Pass {
 		// render normals
 
 		this.renderOverride( renderer, this.normalMaterial, this.normalRenderTarget, 0, 0 );
+
+		// render selected objects
 
 		if ( this.selective ) {
 
@@ -430,6 +430,11 @@ class SSShadowPass extends Pass {
 
 		this.scene.traverseVisible( child => {
 
+			if ( !child?.material?.visible ) {
+
+				return;
+
+			}
 			child._SSShadowPassBackupMaterial = child.material;
 			if ( this._selects.includes( child ) ) {
 
@@ -442,18 +447,22 @@ class SSShadowPass extends Pass {
 			}
 
 		} );
-		// this.backupCameraNear = this.camera.near;
-		// this.backupCameraFar = this.camera.far;
-		// this.camera.far = this.backupCameraFar * 100;
+
 		renderer.render( this.scene, this.camera );
+
 		this.scene.traverseVisible( child => {
+
+			if ( !child?.material?.visible ) {
+
+				return;
+
+			}
 
 			child.material = child._SSShadowPassBackupMaterial;
 
 		} );
 
 		// restore original state
-		// this.camera.far = this.backupCameraFar;
 		renderer.autoClear = originalAutoClear;
 		renderer.setClearColor( this.originalClearColor );
 		renderer.setClearAlpha( originalClearAlpha );
