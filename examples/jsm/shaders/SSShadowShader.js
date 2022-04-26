@@ -119,7 +119,7 @@ const SSShadowShader = {
 		void main(){
 			#ifdef SELECTIVE
 				float recievesShadows=texture2D(tRecievesShadows,vUv).r;
-				if(recievesShadows==0.) return;
+				if(recievesShadows!=1.) return;
 			#endif
 
 			// gl_FragColor=vec4(0,0,.5,1);return;

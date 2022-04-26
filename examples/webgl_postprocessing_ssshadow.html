@@ -86,6 +86,7 @@
 			plane.position.y = - 0.0001;
 			// plane.receiveShadow = true;
 			scene.add( plane );
+			selects.push(plane);
 			plane.name = 'plane';
 
 			// Lights
@@ -181,7 +182,7 @@
 				width: innerWidth,
 				height: innerHeight,
 				encoding: THREE.sRGBEncoding,
-				selects: selects
+				selects: selects,
 			} );
 
 			composer.addPass( ssshadowPass );
