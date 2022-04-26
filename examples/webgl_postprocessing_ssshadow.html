@@ -43,6 +43,7 @@
 		let controls;
 		let camera, scene, renderer;
 		const objects = [];
+		const selects = [];
 		const raycaster = new THREE.Raycaster();
 		const mouseDown = new THREE.Vector2();
 		const mouse = new THREE.Vector2();
@@ -116,6 +117,7 @@
 				mesh.name = 'bunny';
 				scene.add( mesh );
 				objects.push( mesh );
+				selects.push( mesh );
 
 				// Release decoder resources.
 				dracoLoader.dispose();
@@ -132,6 +134,7 @@
 			mesh.name = 'box';
 			scene.add( mesh );
 			objects.push( mesh );
+			selects.push( mesh );
 
 			geometry = new THREE.IcosahedronBufferGeometry( .025, 4 );
 			// material = new THREE.MeshStandardMaterial( { color: 'cyan' } );
@@ -141,6 +144,7 @@
 			mesh.name = 'sphere';
 			scene.add( mesh );
 			objects.push( mesh );
+			selects.push( mesh );
 
 			geometry = new THREE.ConeBufferGeometry( .025, .05, 64 );
 			// material = new THREE.MeshStandardMaterial( { color: 'yellow' } );
@@ -150,6 +154,7 @@
 			mesh.name = 'cone';
 			scene.add( mesh );
 			objects.push( mesh );
+			selects.push( mesh );
 
 			// renderer
 			renderer = new THREE.WebGLRenderer( { antialias: false } );
@@ -176,6 +181,7 @@
 				width: innerWidth,
 				height: innerHeight,
 				encoding: THREE.sRGBEncoding,
+				selects: selects
 			} );
 
 			composer.addPass( ssshadowPass );
@@ -231,6 +237,7 @@
 				'Beauty': SSShadowPass.OUTPUT.Beauty,
 				'Depth': SSShadowPass.OUTPUT.Depth,
 				'Normal': SSShadowPass.OUTPUT.Normal,
+				'Recieves Shadows': SSShadowPass.OUTPUT.RecievesShadows,
 			} ).onChange( function ( value ) {
 
 				ssshadowPass.output = parseInt( value );

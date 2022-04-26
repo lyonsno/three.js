@@ -15,7 +15,8 @@ import {
 	UnsignedShortType,
 	WebGLRenderTarget,
 	HalfFloatType,
-	MeshStandardMaterial
+	MeshStandardMaterial,
+	DoubleSide
 } from '../../../build/three.module.js';
 import { Pass, FullScreenQuad } from './Pass.js';
 import { SSShadowShader } from '../shaders/SSShadowShader.js';
@@ -24,7 +25,7 @@ import { CopyShader } from '../shaders/CopyShader.js';
 
 class SSShadowPass extends Pass {
 
-	constructor( { renderer, scene, camera, width, height, encoding, morphTargets = false } ) {
+	constructor( { renderer, scene, camera, width, height, selects, encoding, morphTargets = false } ) {
 
 		super();
 
@@ -48,6 +49,28 @@ class SSShadowPass extends Pass {
 		this.encoding = encoding;
 
 		this.tempColor = new Color();
+
+		this._selects = selects;
+		this.selective = Array.isArray( this._selects );
+		Object.defineProperty( this, 'selects', {
+			get() {
+
+				return this._selects;
+
+			},
+			set( val ) {
+
+				if (this._selects === val ) return;
+				this._selects = val;
+				if ( Array.isArray( val ) ) {
+					this.selective = true;
+					this.ssshadowMaterial.defines.SELECTIVE = true;
+					this.ssshadowMaterial.needsUpdate = true;
+
+				}
+
+			}
+		} );
 
 		this._infiniteThick = SSShadowShader.defines.INFINITE_THICK;
 		Object.defineProperty( this, 'infiniteThick', {
@@ -98,6 +121,13 @@ class SSShadowPass extends Pass {
 			format: RGBAFormat
 		} );
 
+		this.recievesShadowsRenderTarget = new WebGLRenderTarget( this.width, this.height, {
+			minFilter: NearestFilter,
+			magFilter: NearestFilter,
+			format: RGBAFormat,
+			type: HalfFloatType,
+		} );
+
 		// ssshadow render target
 
 		this.ssshadowRenderTarget = new WebGLRenderTarget( this.width, this.height, {
@@ -126,7 +156,9 @@ class SSShadowPass extends Pass {
 
 		this.ssshadowMaterial.uniforms[ 'tDiffuse' ].value = this.beautyRenderTarget.texture;
 		this.ssshadowMaterial.uniforms[ 'tNormal' ].value = this.normalRenderTarget.texture;
+		this.ssshadowMaterial.defines.SELECTIVE = this.selective;
 		this.ssshadowMaterial.needsUpdate = true;
+		this.ssshadowMaterial.uniforms[ 'tRecievesShadows' ].value = this.recievesShadowsRenderTarget.texture;
 		this.ssshadowMaterial.uniforms[ 'tRefractive' ].value = this.refractiveRenderTarget.texture;
 		this.ssshadowMaterial.uniforms[ 'tDepth' ].value = this.beautyRenderTarget.depthTexture;
 		this.ssshadowMaterial.uniforms[ 'cameraNear' ].value = this.camera.near;
@@ -140,6 +172,16 @@ class SSShadowPass extends Pass {
 
 		this.normalMaterial = new MeshNormalMaterial( { morphTargets } );
 		this.normalMaterial.blending = NoBlending;
+
+		this.recievesShadowsOnMaterial = new MeshBasicMaterial( {
+			color: 'white',
+			side: DoubleSide
+		} );
+
+		this.recievesShadowsOffMaterial = new MeshBasicMaterial( {
+			color: 'black',
+			side: DoubleSide
+		} );
 
 		// refractiveOn material
 
@@ -196,12 +238,15 @@ class SSShadowPass extends Pass {
 
 		this.beautyRenderTarget.dispose();
 		this.normalRenderTarget.dispose();
+		this.recievesShadowsRenderTarget.dispose();
 		this.refractiveRenderTarget.dispose();
 		this.ssshadowRenderTarget.dispose();
 
 		// dispose materials
 
 		this.normalMaterial.dispose();
+		this.recievesShadowsOnMaterial.dispose();
+		this.recievesShadowsOffMaterial.dispose();
 		this.refractiveOnMaterial.dispose();
 		this.refractiveOffMaterial.dispose();
 		this.copyMaterial.dispose();
@@ -225,6 +270,11 @@ class SSShadowPass extends Pass {
 		// render normals
 
 		this.renderOverride( renderer, this.normalMaterial, this.normalRenderTarget, 0, 0 );
+
+		if ( this.selective ) {
+
+			this.renderRecievesShadows( renderer, this.recievesShadowsOnMaterial, this.recievesShadowsRenderTarget, 0, 0);
+		}
 
 		// render SSShadow
 
@@ -277,6 +327,14 @@ class SSShadowPass extends Pass {
 			case SSShadowPass.OUTPUT.Normal:
 
 				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.normalRenderTarget.texture;
+				this.copyMaterial.blending = NoBlending;
+				this.renderPass( renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer );
+
+				break;
+
+			case SSShadowPass.OUTPUT.RecievesShadows:
+
+				this.copyMaterial.uniforms[ 'tDiffuse' ].value = this.recievesShadowsRenderTarget.texture;
 				this.copyMaterial.blending = NoBlending;
 				this.renderPass( renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer );
 
@@ -350,6 +408,58 @@ class SSShadowPass extends Pass {
 
 	}
 
+	renderRecievesShadows( renderer, overrideMaterial, renderTarget, clearColor, clearAlpha ) {
+
+		this.originalClearColor.copy( renderer.getClearColor( this.tempColor ) );
+		const originalClearAlpha = renderer.getClearAlpha( this.tempColor );
+		const originalAutoClear = renderer.autoClear;
+
+		renderer.setRenderTarget( renderTarget );
+		renderer.autoClear = false;
+
+		clearColor = overrideMaterial.clearColor || clearColor;
+		clearAlpha = overrideMaterial.clearAlpha || clearAlpha;
+
+		if ( ( clearColor != undefined ) && ( clearColor != null ) ) {
+
+			renderer.setClearColor( clearColor );
+			renderer.setClearAlpha( clearAlpha || 0.0 );
+			renderer.clear();
+
+		}
+
+		this.scene.traverseVisible( child => {
+
+			child._SSShadowPassBackupMaterial = child.material;
+			if ( this._selects.includes( child ) ) {
+
+				child.material = this.recievesShadowsOnMaterial;
+
+			} else {
+
+				child.material = this.recievesShadowsOffMaterial;
+
+			}
+
+		} );
+		// this.backupCameraNear = this.camera.near;
+		// this.backupCameraFar = this.camera.far;
+		// this.camera.far = this.backupCameraFar * 100;
+		renderer.render( this.scene, this.camera );
+		this.scene.traverseVisible( child => {
+
+			child.material = child._SSShadowPassBackupMaterial;
+
+		} );
+
+		// restore original state
+		// this.camera.far = this.backupCameraFar;
+		renderer.autoClear = originalAutoClear;
+		renderer.setClearColor( this.originalClearColor );
+		renderer.setClearAlpha( originalClearAlpha );
+
+	}
+
 	setSize( width, height ) {
 
 		this.width = width;
@@ -359,6 +469,7 @@ class SSShadowPass extends Pass {
 		this.ssshadowMaterial.needsUpdate = true;
 		this.beautyRenderTarget.setSize( width, height );
 		this.normalRenderTarget.setSize( width, height );
+		this.recievesShadowsRenderTarget.setSize( width, height );
 		this.ssshadowRenderTarget.setSize( width, height );
 		this.refractiveRenderTarget.setSize( width, height );
 
@@ -376,6 +487,7 @@ SSShadowPass.OUTPUT = {
 	'Beauty': 3,
 	'Depth': 4,
 	'Normal': 5,
+	'RecievesShadows': 6,
 	'Refractive': 7,
 };
 
