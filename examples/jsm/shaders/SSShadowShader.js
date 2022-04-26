@@ -17,6 +17,7 @@ const SSShadowShader = {
 		'tDiffuse': { value: null },
 		'tNormal': { value: null },
 		'tRefractive': { value: null },
+		'tRecievesShadows': { value: null },
 		'tDepth': { value: null },
 		'cameraNear': { value: null },
 		'cameraFar': { value: null },
@@ -58,6 +59,7 @@ const SSShadowShader = {
 		uniform sampler2D tNormal;
 		uniform sampler2D tRefractive;
 		uniform sampler2D tDiffuse;
+		uniform sampler2D tRecievesShadows;
 		uniform float cameraRange;
 		uniform vec2 resolution;
 		uniform float cameraNear;
@@ -115,6 +117,10 @@ const SSShadowShader = {
 			return xy;
 		}
 		void main(){
+			#ifdef SELECTIVE
+				float recievesShadows=texture2D(tRecievesShadows,vUv).r;
+				if(recievesShadows==0.) return;
+			#endif
 
 			// gl_FragColor=vec4(0,0,.5,1);return;
 
